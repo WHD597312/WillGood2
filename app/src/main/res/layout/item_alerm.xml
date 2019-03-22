@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:id="@+id/rl_alerm"
+    >
+
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:text="来点报警"
+            android:textSize="@dimen/sp_16"
+            android:textColor="#414141"
+            android:layout_centerVertical="true"
+            />
+
+        <TextView
+            android:id="@+id/tv_alerm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="来电报警"
+            android:textColor="#939393"
+            android:textSize="@dimen/sp_14"
+            android:layout_toLeftOf="@+id/img_open"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_10"
+            />
+
+        <ImageView
+            android:id="@+id/img_open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@mipmap/img_open"
+            android:scaleType="centerInside"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_15"
+            android:layout_marginBottom="@dimen/dp_15"
+            android:layout_marginTop="@dimen/dp_15"
+            />
+</RelativeLayout>

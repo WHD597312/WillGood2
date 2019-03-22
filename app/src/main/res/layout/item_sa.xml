@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/rl_item"
+    >
+
+    <RelativeLayout
+        android:id="@+id/rl_head"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_15"
+        android:layout_marginRight="@dimen/dp_15"
+        android:background="#ffffff"
+        >
+        <ImageView
+            android:id="@+id/img_sa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/img_sa"
+            android:scaleType="centerInside"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginLeft="@dimen/dp_9"
+            android:layout_marginRight="@dimen/dp_8"
+            android:layout_centerVertical="true"
+            />
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/img_sa"
+            android:text="烟雾报警器"
+            android:textSize="@dimen/sp_16"
+            android:gravity="center"
+            android:textColor="#303030"
+            android:layout_marginTop="@dimen/dp_20"
+            android:layout_marginBottom="@dimen/dp_20"
+            />
+
+        <TextView
+            android:id="@+id/tv_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/img_state"
+            android:text="异常"
+            android:textSize="@dimen/sp_16"
+            android:gravity="center"
+            android:textColor="#303030"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_20"
+            />
+
+        <ImageView
+            android:id="@+id/img_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:src="@mipmap/img_bad"
+            android:scaleType="center"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_22"
+            />
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_10"
+        android:background="#F7F7F7"
+        android:layout_below="@+id/rl_head"
+        android:layout_alignLeft="@+id/rl_head"
+        android:layout_alignRight="@+id/rl_head"
+        />
+</RelativeLayout>

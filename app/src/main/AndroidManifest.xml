@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.peihou.willgood2">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- 拍照权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Normal Permissions 不需要运行时注册 -->
+    <!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位 -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位 -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <!-- 不是SDK需要的权限，是示例中的后台唤醒定位需要的权限 -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- 需要运行时注册的权限 -->
+    <!-- 用于进行网络定位 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- 用于访问GPS定位 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- 用于提高GPS定位速度 -->
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application
+        android:name=".MyApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/logo"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/logo"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.peihou.willgood2.fileprovider2"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="OHipnYyGDDR7d1gRQ8jQLM3DXSb10AnY" />
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="67f78b6d4161e54109e1f1126b379b56" />
+
+        <service
+            android:name="com.baidu.location.f"
+            android:enabled="true"
+            android:process=":remote" />
+        <service android:name="com.amap.api.location.APSService" />
+        <!-- 替换原生极光推送接收器 -->
+        <receiver
+            android:name=".receiver.MyReceiver"
+            android:enabled="true"
+            android:exported="false"
+            tools:node="replace">
+            <intent-filter>
+                <action android:name="cn.jpush.android.intent.REGISTRATION" /> <!-- Required  用户注册SDK的intent -->
+                <action android:name="cn.jpush.android.intent.MESSAGE_RECEIVED" /> <!-- Required  用户接收SDK消息的intent -->
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_RECEIVED" /> <!-- Required  用户接收SDK通知栏信息的intent -->
+                <action android:name="cn.jpush.android.intent.NOTIFICATION_OPENED" /> <!-- Required  用户打开自定义通知栏的intent -->
+                <action android:name="cn.jpush.android.intent.CONNECTION" /> <!-- 接收网络变化 连接/断开 since 1.6.3 -->
+                <category android:name="com.peihou.willgood2" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".receiver.MQTTMessageReveiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="mqttmessage" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".service.MQService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name="com.tencent.bugly.beta.ui.BetaActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|locale"
+            android:theme="@android:style/Theme.Translucent" />
+        <activity android:name=".login.LoginActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".device.DeviceListActivity" />
+        <activity
+            android:name=".device.QRScannerActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".device.DeviceItemActivity"
+            android:label=""
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".device.menu.TimerTaskActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.AddTimeActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.LinkedControlActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.LinkedSetActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.LinkItemActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".device.menu.LinkedSwitchActivity" />
+        <activity
+            android:name=".device.menu.SwichCheckActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.AlermActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.AlermLogActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.MoniCheckActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.InterLockActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.JogSetActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.menu.PowerLostMomoryActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.ShareDeviceActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".device.DeviceRecordActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".device.ShareDeviceQRCodeActivity" />
+        <activity android:name=".location.LocationActivity" />
+        <activity android:name=".location.LocationSetActivity" />
+        <activity android:name=".login.ResetPswdActivity" />
+        <activity android:name=".device.DeviceInterLockActivity" />
+        <activity android:name=".device.menu.MoniLinkItemActivity" />
+        <activity android:name=".device.SearchDeviceActivity" />
+        <activity android:name=".RS485Activity"></activity>
+    </application>
+</manifest>

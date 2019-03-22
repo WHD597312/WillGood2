@@ -1,0 +1,14 @@
+<resources>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="app_name">迈科智联</string>
+    <string name="location">定位</string>
+    <string name="camer">请打开相机权限</string>
+    <string name="cancle">取消</string>
+    <string name="sure">确定</string>
+    <string name="confirm">确定</string>
+    <string name="ensure">确定</string>
+    <string name="ok">确定</string>
+    <string name="no">取消</string>
+    <string name="save">允许手机存储</string>
+</resources>

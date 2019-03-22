@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:background="@color/base_back"
+    >
+    <TextView
+        android:id="@+id/tv_way"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_16"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/dp_14"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:textColor="@color/white"
+        android:layout_below="@+id/rl_head"
+        android:text="报警方式"
+        android:paddingLeft="@dimen/dp_18"
+        />
+</RelativeLayout>

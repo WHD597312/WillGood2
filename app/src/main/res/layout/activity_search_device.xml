@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".device.SearchDeviceActivity"
+    android:background="@color/base_back"
+    >
+
+
+
+    <RelativeLayout
+        android:id="@+id/rl_head"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff">
+
+        <ImageView
+            android:id="@+id/img_back"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:scaleType="centerInside"
+            android:src="@mipmap/img_back" />
+
+        <EditText
+            android:layout_toRightOf="@+id/img_back"
+            android:id="@+id/et_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/img_back"
+            android:layout_alignBottom="@id/img_back"
+            android:gravity="center_vertical"
+            android:hint="请输入设备名称"
+            android:background="@null"
+            android:textSize="@dimen/sp_15"
+            android:paddingLeft="@dimen/dp_10"
+            />
+        <View
+            android:layout_below="@+id/et_search"
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:background="#e0e0e0"
+            />
+    </RelativeLayout>
+
+    <GridView
+        android:layout_below="@+id/rl_head"
+        android:id="@+id/grid_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dp_11"
+        android:layout_marginRight="@dimen/dp_11"
+        android:numColumns="3"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:horizontalSpacing="@dimen/dp_15"
+        android:listSelector="@android:color/transparent"
+        />
+</RelativeLayout>

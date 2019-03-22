@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path path="jiangjieyu/" name="files_path" />
+    <external-path name="camera_photos" path=""/>
+    <!--代表外部存储区域的根目录下的文件 Environment.getExternalStorageDirectory()/DCIM/camerademo目录-->
+    <external-path name="hm_DCIM" path="DCIM/camerademo" />
+    <!--代表外部存储区域的根目录下的文件 Environment.getExternalStorageDirectory()/Pictures/camerademo目录-->
+    <external-path name="hm_Pictures" path="Pictures/camerademo" />
+    <!--代表app 私有的存储区域 Context.getFilesDir()目录下的images目录 /data/user/0/com.hm.camerademo/files/images-->
+    <files-path name="hm_private_files" path="images" />
+    <!--代表app 私有的存储区域 Context.getCacheDir()目录下的images目录 /data/user/0/com.hm.camerademo/cache/images-->
+    <cache-path name="hm_private_cache" path="images" />
+    <!--代表app 外部存储区域根目录下的文件 Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)目录下的Pictures目录-->
+    <!--/storage/emulated/0/Android/data/com.hm.camerademo/files/Pictures-->
+    <external-path name="hm_external_files" path="Pictures" />
+    <!--代表app 外部存储区域根目录下的文件 Context.getExternalCacheDir目录下的images目录-->
+    <!--/storage/emulated/0/Android/data/com.hm.camerademo/cache/images-->
+    <external-cache-path name="hm_external_cache" path="" />
+    <!-- /storage/emulated/0/Download/${applicationId}/.beta/apk-->
+    <external-path name="beta_external_path" path="Download/"/>
+    <!--/storage/emulated/0/Android/data/${applicationId}/files/apk/-->
+    <external-path name="beta_external_files_path" path="Android/data/"/>
+
+    <root-path
+        name="ext_sd_files"
+        path="" />
+    <files-path
+        name="int_files"
+        path="." />
+    <external-path
+        name="ext_files"
+        path="" />
+    <cache-path
+        name="cache_files"
+        path="" />
+    <external-files-path
+        name="ext_int_files"
+        path="" />
+</paths>

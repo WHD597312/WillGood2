@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="@dimen/dp_65"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_fill5_wite"
+    >
+
+    <TextView
+        android:id="@+id/tv_add"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_50"
+        android:text="添加"
+        android:textColor="#333333"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/sp_16"
+        android:layout_alignLeft="@+id/view"
+        />
+    <View
+        android:id="@+id/view"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="@dimen/dp_1"
+        android:background="#CFCFCF"
+        android:layout_below="@+id/tv_add"
+        android:layout_marginLeft="@dimen/dp_15"
+        android:layout_marginRight="@dimen/dp_10"
+        />
+    <TextView
+        android:id="@+id/tv_shared"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_50"
+        android:text="已分享"
+        android:textColor="#333333"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/sp_16"
+        android:layout_alignLeft="@+id/view"
+        android:layout_below="@+id/view"
+        />
+</RelativeLayout>
