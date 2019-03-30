@@ -12,7 +12,6 @@ import java.io.Serializable;
 @Entity
 public class MoniLink implements Serializable {
 
-    static final long serialVersionUID = 42L;
 
 
     @Id(autoincrement = true)
@@ -25,12 +24,13 @@ public class MoniLink implements Serializable {
     private int preLine;//前8路
     private int lastLine;//后8路
     private int controlState;//控制状态
-    private int triType;//触发类型
+    private int triType;//触发类型 为单次触发，0为循环触发
     private int state;
     private int controlType;//联动控制
     private String deviceMac;
     private int mcuVersion;
     private String lines;
+    private int visitity;//显示数据 0不显示，1，显示
     @Transient
     private boolean open;
 
@@ -80,9 +80,9 @@ public class MoniLink implements Serializable {
         this.deviceMac = deviceMac;
     }
 
-    @Generated(hash = 1933440650)
+    @Generated(hash = 1226823812)
     public MoniLink(Long id, String name, int type, int num, int contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, int controlType, String deviceMac,
-            int mcuVersion, String lines) {
+            int mcuVersion, String lines, int visitity) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -98,6 +98,7 @@ public class MoniLink implements Serializable {
         this.deviceMac = deviceMac;
         this.mcuVersion = mcuVersion;
         this.lines = lines;
+        this.visitity = visitity;
     }
 
     public int getType() {
@@ -230,5 +231,13 @@ public class MoniLink implements Serializable {
 
     public void setLines(String lines) {
         this.lines = lines;
+    }
+
+    public int getVisitity() {
+        return this.visitity;
+    }
+
+    public void setVisitity(int visitity) {
+        this.visitity = visitity;
     }
 }

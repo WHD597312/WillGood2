@@ -66,7 +66,7 @@ public class LocationSetActivity extends BaseActivity {
     @Override
     public int bindLayout() {
         setSteepStatusBar(true);
-        return R.layout.activity_jog_set;
+        return R.layout.activity_location_set;
     }
     Map<String, Object> params = new HashMap<>();
 
@@ -84,7 +84,7 @@ public class LocationSetActivity extends BaseActivity {
     boolean checked=false;
     int choices=10;
     boolean success=false;
-    @OnClick({R.id.img_back,R.id.rl_bottom,R.id.btn_submit,R.id.cb,R.id.tv_1,R.id.cb2,R.id.tv_2,R.id.cb3,R.id.tv_3,R.id.cb4,R.id.tv_4,R.id.cb5,R.id.tv_5})
+    @OnClick({R.id.img_back,R.id.rl_bottom,R.id.btn_submit,R.id.linear_1,R.id.linear_2,R.id.linear_3,R.id.linear_4,R.id.linear_5})
     public void onClick(View v){
         switch (v.getId()){
             case R.id.img_back:
@@ -103,124 +103,78 @@ public class LocationSetActivity extends BaseActivity {
                     }
                 }
                 break;
-            case R.id.cb:
+            case R.id.linear_1:
                 checked=cb.isChecked();
                 if (checked){
+                    cb.setChecked(false);
                     choices=10;
+                }else {
+                    choices=10;
+                    cb.setChecked(true);
                     cb2.setChecked(false);
                     cb3.setChecked(false);
                     cb4.setChecked(false);
                     cb5.setChecked(false);
-                }else {
-                    choices=10;
                 }
                 break;
-            case R.id.tv_1:
-                checked=cb.isChecked();
+            case R.id.linear_2:
+                checked=cb2.isChecked();
                 if (checked){
-                    choices=10;
                     cb2.setChecked(false);
-                    cb3.setChecked(false);
-                    cb4.setChecked(false);
-                    cb5.setChecked(false);
-                }else {
+
                     choices=10;
-                }
-                break;
-            case R.id.cb2:
-                checked=cb2.isChecked();
-                if (checked){
-                    choices=20;
-                    cb.setChecked(false);
-                    cb3.setChecked(false);
-                    cb4.setChecked(false);
-                    cb5.setChecked(false);
                 }else {
-                    choices=10;
-                }
-                break;
-            case R.id.tv_2:
-                checked=cb2.isChecked();
-                if (checked){
                     cb.setChecked(false);
+                    cb2.setChecked(true);
                     cb3.setChecked(false);
                     cb4.setChecked(false);
                     cb5.setChecked(false);
                     choices=20;
-                }else {
-                    choices=10;
+
                 }
                 break;
-            case R.id.cb3:
+            case R.id.linear_3:
                 checked=cb3.isChecked();
                 if (checked){
-                    choices=30;
+                    choices=10;
+                    cb3.setChecked(false);
+                }else {
                     cb.setChecked(false);
                     cb2.setChecked(false);
+                    cb3.setChecked(true);
                     cb4.setChecked(false);
                     cb5.setChecked(false);
-                }else {
-                    choices=10;
-                }
-                break;
-            case R.id.tv_3:
-                checked=cb3.isChecked();
-                if (checked){
+
                     choices=30;
-                    cb.setChecked(false);
-                    cb2.setChecked(false);
-                    cb4.setChecked(false);
-                    cb5.setChecked(false);
-                }else {
-                    choices=10;
                 }
                 break;
-            case R.id.cb4:
+            case R.id.linear_4:
                 checked=cb4.isChecked();
                 if (checked){
-                    choices=60;
+                    cb4.setChecked(false);
+                    choices=10;
+
+                }else {
                     cb.setChecked(false);
                     cb2.setChecked(false);
                     cb3.setChecked(false);
+                    cb4.setChecked(true);
                     cb5.setChecked(false);
-                }else {
-                    choices=10;
-                }
-                break;
-            case R.id.tv_4:
-                checked=cb4.isChecked();
-                if (checked){
                     choices=60;
-                    cb.setChecked(false);
-                    cb2.setChecked(false);
-                    cb3.setChecked(false);
-                    cb5.setChecked(false);
-                }else {
-                    choices=10;
                 }
                 break;
-            case R.id.cb5:
+            case R.id.linear_5:
                 checked=cb5.isChecked();
                 if (checked){
-                    choices=120;
+                    choices=10;
+                    cb5.setChecked(false);
+                }else {
                     cb.setChecked(false);
                     cb2.setChecked(false);
                     cb3.setChecked(false);
                     cb4.setChecked(false);
-                }else {
-                    choices=10;
-                }
-                break;
-            case R.id.tv_5:
-                checked=cb5.isChecked();
-                if (checked){
+                    cb5.setChecked(true);
                     choices=120;
-                    cb.setChecked(false);
-                    cb2.setChecked(false);
-                    cb3.setChecked(false);
-                    cb4.setChecked(false);
-                }else {
-                    choices=10;
                 }
                 break;
         }
@@ -364,7 +318,8 @@ public class LocationSetActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

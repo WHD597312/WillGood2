@@ -10,11 +10,9 @@ import java.io.Serializable;
 @Entity
 public class Device implements Serializable {
 
-    static final long serialVersionUID = 42L;
-
-
-    @Id(autoincrement = false)
-    private Long deviceId;
+    @Id(autoincrement = true)
+    private Long id;
+    private long deviceId;
     private String deviceName;
     private String deviceOnlyMac;
     private String devicePassword;
@@ -71,10 +69,25 @@ public class Device implements Serializable {
     private double current;//电流
     private double votage;//电压
     private String re485;
-    private int voice=1;//1设置成功 0设置失败
+
+    public Device(String deviceName, String deviceOnlyMac, String devicePassword) {
+        this.deviceName = deviceName;
+        this.deviceOnlyMac = deviceOnlyMac;
+        this.devicePassword = devicePassword;
+    }
+
+    private int vlice2=1;
+    @Transient
+    private String lines;//提交给服务端的开关路线
 
 
+    public String getLines() {
+        return lines;
+    }
 
+    public void setLines(String lines) {
+        this.lines = lines;
+    }
 
     public Device(String name) {
         this.name = name;
@@ -112,10 +125,11 @@ public class Device implements Serializable {
     public Device() {
     }
 
-    @Generated(hash = 1831104911)
-    public Device(Long deviceId, String deviceName, String deviceOnlyMac, String devicePassword, int deviceSellerId, int deviceCreatorId, int deviceModel, int choice, String name, String imei, String share, int deviceAuthority_Alarm, int deviceAuthority_Map, int deviceAuthority_LineSwitch, int deviceAuthority_Analog, int deviceAuthority_Switch,
+    @Generated(hash = 1618144004)
+    public Device(Long id, long deviceId, String deviceName, String deviceOnlyMac, String devicePassword, int deviceSellerId, int deviceCreatorId, int deviceModel, int choice, String name, String imei, String share, int deviceAuthority_Alarm, int deviceAuthority_Map, int deviceAuthority_LineSwitch, int deviceAuthority_Analog, int deviceAuthority_Switch,
             int deviceAuthority_Poweroff, int deviceAuthority_Inching, int deviceAuthority_Timer, int deviceAuthority_Lock, int deviceAuthority_Linked, int mcuVersion, int deviceState, int prelines, int lastlines, int prelineswitch, int lastlineswitch, int prelinesjog, int lastlinesjog, boolean online, int plMemory, double lineJog, double line, double line2,
-            double line3, double line4, double line5, double line6, double line7, double line8, double line9, double line10, double line11, double line12, double line13, double line14, double line15, double line16, double temp, double hum, double current, double votage, String re485, int voice) {
+            double line3, double line4, double line5, double line6, double line7, double line8, double line9, double line10, double line11, double line12, double line13, double line14, double line15, double line16, double temp, double hum, double current, double votage, String re485, int vlice2) {
+        this.id = id;
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.deviceOnlyMac = deviceOnlyMac;
@@ -169,7 +183,7 @@ public class Device implements Serializable {
         this.current = current;
         this.votage = votage;
         this.re485 = re485;
-        this.voice = voice;
+        this.vlice2 = vlice2;
     }
 
     public boolean isOpen() {
@@ -617,13 +631,27 @@ public class Device implements Serializable {
         this.re485 = re485;
     }
 
-    public int getVoice() {
-        return this.voice;
+    public int getVlice2() {
+        return this.vlice2;
     }
 
-    public void setVoice(int voice) {
-        this.voice = voice;
+    public void setVlice2(int vlice2) {
+        this.vlice2 = vlice2;
     }
+
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long Id) {
+        this.id = Id;
+    }
+
+
 
 
 }

@@ -10,6 +10,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -91,6 +92,16 @@ public class SwichCheckActivity extends BaseActivity {
     public void initView(View view) {
         tv_title.setText("开关量检测");
         list_linked.setLayoutManager(new LinearLayoutManager(this));
+        if (list.size()!=8){
+            list.add(new SwtichState(0,"开关量1","",0));
+            list.add(new SwtichState(0,"开关量2","",0));
+            list.add(new SwtichState(0,"开关量3","",0));
+            list.add(new SwtichState(0,"开关量4","",0));
+            list.add(new SwtichState(0,"开关量5","",0));
+            list.add(new SwtichState(0,"开关量6","",0));
+            list.add(new SwtichState(0,"开关量7","",0));
+            list.add(new SwtichState(0,"开关量8","",0));
+        }
         adapter=new MyAdapter(this,list);
         list_linked.setAdapter(adapter);
 
@@ -98,15 +109,28 @@ public class SwichCheckActivity extends BaseActivity {
         receiver=new MessageReceiver();
         IntentFilter filter=new IntentFilter("SwichCheckActivity");
         registerReceiver(receiver,filter);
+        Intent service=new Intent(this,MQService.class);
+        bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
     }
 
     @OnClick({R.id.img_back})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
+                if (mqService!=null){
+                    mqService.updateSwitchCheck();
+                }
                 finish();
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mqService!=null){
+            mqService.updateSwitchCheck();
+        }
+        super.onBackPressed();
     }
 
     @Override
@@ -183,8 +207,12 @@ public class SwichCheckActivity extends BaseActivity {
         if (receiver!=null){
             unregisterReceiver(receiver);
         }
+        if (bind){
+            unbindService(connection);
+        }
     }
 
+    private boolean bind;
     MQService mqService;
     ServiceConnection connection=new ServiceConnection() {
         @Override
@@ -193,6 +221,8 @@ public class SwichCheckActivity extends BaseActivity {
             mqService=binder.getService();
             if (mqService!=null){
                 mqService.getData(topicName,0x55);
+                countTimer.start();
+
             }
         }
 
@@ -201,6 +231,60 @@ public class SwichCheckActivity extends BaseActivity {
 
         }
     };
+    CountTimer countTimer = new CountTimer(2000, 1000);
+    class CountTimer extends CountDownTimer {
+
+        /**
+         * @param millisInFuture    The number of millis in the future from the call
+         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+         *                          is called.
+         * @param countDownInterval The interval along the way to receive
+         *                          {@link #onTick(long)} callbacks.
+         */
+        public CountTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            popupmenuWindow3();
+        }
+
+        @Override
+        public void onFinish() {
+            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                popupWindow2.dismiss();
+            }
+        }
+    }
+    private PopupWindow popupWindow2;
+
+    public void popupmenuWindow3() {
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
+            return;
+        }
+        View view = View.inflate(this, R.layout.progress, null);
+        TextView tv_load = view.findViewById(R.id.tv_load);
+        tv_load.setTextColor(getResources().getColor(R.color.white));
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        //添加弹出、弹入的动画
+        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+        popupWindow2.setFocusable(false);
+        popupWindow2.setOutsideTouchable(false);
+        backgroundAlpha(0.6f);
+        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                backgroundAlpha(1.0f);
+            }
+        });
+//        ColorDrawable dw = new ColorDrawable(0x30000000);
+//        popupWindow.setBackgroundDrawable(dw);
+//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+        popupWindow2.showAtLocation(list_linked, Gravity.CENTER, 0, 0);
+        //添加按键事件监听
+    }
 
     MessageReceiver receiver;
     class MessageReceiver extends BroadcastReceiver{

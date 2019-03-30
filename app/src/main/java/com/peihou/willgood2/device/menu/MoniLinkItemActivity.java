@@ -139,7 +139,7 @@ public class MoniLinkItemActivity extends BaseActivity {
                 String action=intent.getAction();
                 if ("offline".equals(action)){
                     String macAddress=intent.getStringExtra("macAddress");
-                    if (macAddress.equals(deviceMac)) {
+                    if (intent.hasExtra("all") || macAddress.equals(deviceMac)) {
                         online=false;
                     }
                 }else {
@@ -151,7 +151,7 @@ public class MoniLinkItemActivity extends BaseActivity {
                             int[]moniLinkSwitch2=intent.getIntArrayExtra("moniLinkSwitch");
                             if (click==1){
                                 click=0;
-                                mqService.starSpeech("设置成功");
+                                mqService.starSpeech(deviceMac,"设置成功");
                             }
                             for (int i = 0; i <moniLinkSwitch2.length ; i++) {
                                 int x=moniLinkSwitch2[i];
@@ -177,17 +177,19 @@ public class MoniLinkItemActivity extends BaseActivity {
             MQService.LocalBinder binder= (MQService.LocalBinder) service;
             mqService=binder.getService();
             if (mqService!=null){
-                int[]x2=mqService.getMoniLinkSwitch(deviceMac);
-                if (x2!=null){
-                    x=x2;
-                    for (int i = 0; i <x.length ; i++) {
-                        int k=x[i];
-                        MoniLink moniLink=list.get(i);
-                        moniLink.setState(k);
-                        list.set(i,moniLink);
-                    }
-                    adapter.notifyDataSetChanged();
-                }
+                mqService.getData(topicName,0x3a);
+                countTimer.start();
+//                int[]x2=mqService.getMoniLinkSwitch(deviceMac);
+//                if (x2!=null){
+//                    x=x2;
+//                    for (int i = 0; i <x.length ; i++) {
+//                        int k=x[i];
+//                        MoniLink moniLink=list.get(i);
+//                        moniLink.setState(k);
+//                        list.set(i,moniLink);
+//                    }
+//                    adapter.notifyDataSetChanged();
+//                }
             }
         }
 
@@ -232,6 +234,8 @@ public class MoniLinkItemActivity extends BaseActivity {
                 @Override
                 public void onClick(View v) {
                     if (!online){
+                        mqService.getData(topicName,0x11);
+
                         ToastUtil.showShort(MoniLinkItemActivity.this,"设备已离线");
                         return;
                     }
@@ -311,7 +315,8 @@ public class MoniLinkItemActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

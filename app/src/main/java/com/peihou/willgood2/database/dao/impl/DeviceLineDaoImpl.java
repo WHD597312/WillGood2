@@ -39,6 +39,12 @@ public class DeviceLineDaoImpl {
     public void deleteDeviceLines(List<Line2> list){
         lineDao.deleteInTx(list);
     }
+    public void deleteDeviceLines(String deviceMac){
+        List<Line2> list=findDeviceLines(deviceMac);
+        if (list!=null &&!list.isEmpty()){
+            lineDao.deleteInTx(list);
+        }
+    }
 
     /**
      * 查询出互锁的线路
@@ -71,12 +77,15 @@ public class DeviceLineDaoImpl {
         return map;
     }
     public void update(List<Line2> list){
-
         lineDao.updateInTx(list);
     }
     public Map<String,String> findInterLockLine(String deviceMac){
         Map map=new HashMap();
-        WhereCondition whereCondition=lineDao.queryBuilder().and(Line2Dao.Properties.DeviceMac.eq(deviceMac),Line2Dao.Properties.Lock.eq(1));
+        WhereCondition whereCondition=lineDao.queryBuilder().and(
+                Line2Dao.Properties.DeviceMac.eq(deviceMac),
+                Line2Dao.Properties.Lock.eq(1),
+                Line2Dao.Properties.Visitity.eq(1)
+        );
         List<Line2> list=lineDao.queryBuilder().where(whereCondition).list();
         for (int i = 0; i <list.size() ; i++) {
             Line2 line2=list.get(i);

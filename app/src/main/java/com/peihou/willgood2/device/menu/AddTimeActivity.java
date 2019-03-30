@@ -85,12 +85,6 @@ public class AddTimeActivity extends BaseActivity {
     @BindView(R.id.tv_7)
     TextView tv_7;//周日
 
-    List<String> years = new ArrayList<>();
-    List<String> months = new ArrayList<>();
-    List<String> days = new ArrayList<>();
-    List<String> hours = new ArrayList<>();//小时集合
-    List<String> mins = new ArrayList<>();//分钟集合
-    List<String> seconds = new ArrayList<>();//秒集合
     @BindView(R.id.tv_timer_set)
     TextView tv_timer_set;
     @BindView(R.id.tv_timer_value)
@@ -102,6 +96,8 @@ public class AddTimeActivity extends BaseActivity {
     private DeviceLineDaoImpl deviceLineDao;
     TimerTaskDaoImpl timerTaskDao;
 
+    String[] hours=new String[24];
+    String[] mins=new String[60];
     @Override
     public void initParms(Bundle parms) {
         deviceId = parms.getLong("deviceId");
@@ -143,8 +139,23 @@ public class AddTimeActivity extends BaseActivity {
         day = calendar.get(Calendar.DAY_OF_MONTH);
         hour = calendar.get(Calendar.HOUR_OF_DAY);
         min = calendar.get(Calendar.MINUTE);
-        String timer = year + "-" + month + "-" + day + "  " + hour + ":" + min;
-        tv_timer_value.setText(timer);
+        String time = "";
+        String ss = "" + month;
+        if (month < 10) {
+            ss = "0" + month;
+        }
+        String sss = "" + min;
+        String ss1=hour+"";
+        if (hour<10){
+            ss1="0"+hour;
+        }
+
+        if (min < 10) {
+            sss = "0" + min;
+        }
+        time = year + "-" + ss + "-" + day + " " + ss1 + ":" + sss;
+
+        tv_timer_value.setText(time);
         tv_1.setTag(0);
         tv_2.setTag(0);
         tv_3.setTag(0);
@@ -219,11 +230,11 @@ public class AddTimeActivity extends BaseActivity {
 
                     preLine = TenTwoUtil.changeToTen2(preLines);
                     lastLine = TenTwoUtil.changeToTen2(lastLines);
-                    if (preLine == 0 && lastLine == 0) {
+                    if (preLine+lastLine == 0) {
                         ToastUtil.showShort(this, "请选择线路");
                         break;
                     }
-                    timerTask = new TimerTask(deviceMac, 0x11, year, month, day, hour, min, open, preLine, lastLine,1);
+                    timerTask = new TimerTask(deviceMac, 0x11, year, month, day, hour, min, open, preLine, lastLine, 1);
                 } else if (only == 1) {
                     sb.setLength(0);
                     int[] preLines = new int[8];
@@ -255,11 +266,11 @@ public class AddTimeActivity extends BaseActivity {
                         ToastUtil.showShort(this, "请选择星期");
                         break;
                     }
-                    if (preLine == 0 && lastLine == 0) {
+                    if (preLine+lastLine == 0) {
                         ToastUtil.showShort(this, "请选择线路");
                         break;
                     }
-                    timerTask=new TimerTask(deviceMac,0x22,week,hour,min,open,preLine,lastLine,1);
+                    timerTask = new TimerTask(deviceMac, 0x22, week, hour, min, open, preLine, lastLine, 1);
                 }
                 Intent intent = new Intent();
                 intent.putExtra("timerTask", timerTask);
@@ -385,11 +396,11 @@ public class AddTimeActivity extends BaseActivity {
         if (open == 1) {
             btnControlOpen.setTextColor(getResources().getColor(R.color.base_back));
             btnControlOpen.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            btnControlClose.setTextColor(getResources().getColor(R.color.white));
-            btnControlClose.setBackgroundColor(0);
+            btnControlClose.setTextColor(getResources().getColor(R.color.gray2));
+            btnControlClose.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         } else if (open == 0) {
-            btnControlOpen.setTextColor(getResources().getColor(R.color.white));
-            btnControlOpen.setBackgroundColor(0);
+            btnControlOpen.setTextColor(getResources().getColor(R.color.gray2));
+            btnControlOpen.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btnControlClose.setTextColor(getResources().getColor(R.color.base_back));
             btnControlClose.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
@@ -399,13 +410,45 @@ public class AddTimeActivity extends BaseActivity {
         if (only == 0) {
             tv_timer_single.setTextColor(getResources().getColor(R.color.base_back));
             tv_timer_single.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            tv_timer_loop.setTextColor(getResources().getColor(R.color.white));
-            tv_timer_loop.setBackgroundColor(0);
+            tv_timer_loop.setTextColor(getResources().getColor(R.color.gray2));
+            tv_timer_loop.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         } else if (only == 1) {
-            tv_timer_single.setTextColor(getResources().getColor(R.color.white));
-            tv_timer_single.setBackgroundColor(0);
+            tv_timer_single.setTextColor(getResources().getColor(R.color.gray2));
+            tv_timer_single.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             tv_timer_loop.setTextColor(getResources().getColor(R.color.base_back));
             tv_timer_loop.setBackground(getResources().getDrawable(R.drawable.shape_once));
+        }
+        if (only == 0) {
+            String time = "";
+            String ss = "" + month;
+            if (month < 10) {
+                ss = "0" + month;
+            }
+            String sss = "" + min;
+            String ss1=hour+"";
+
+            if (hour<10){
+                ss1="0"+hour;
+            }
+
+            if (min < 10) {
+                sss = "0" + min;
+            }
+            time = year + "-" + ss + "-" + day + " " + ss1 + ":" + sss;
+
+            tv_timer_value.setText(time);
+        }else {
+            String time = "";
+            String sss = "" + min;
+            String ss=hour+"";
+            if (hour<10){
+                ss="0"+hour;
+            }
+            if (min < 10) {
+                sss = "0" + min;
+            }
+            time=ss+":"+sss;
+            tv_timer_value.setText(time);
         }
     }
 
@@ -427,11 +470,15 @@ public class AddTimeActivity extends BaseActivity {
 
         popupWindow.showAtLocation(btnControlOpen, Gravity.BOTTOM | Gravity.CENTER, 0, 0);
 
+
         TextView btn_cancel = view.findViewById(R.id.btn_cancel);
         TextView btn_ensure = view.findViewById(R.id.btn_ensure);
         datePicker = view.findViewById(R.id.datePicker);
         datePicker.setDividerColor(Color.WHITE);
         datePicker.setPickerMargin(1);
+        TextView tv_year=view.findViewById(R.id.tv_year);
+        TextView tv_month=view.findViewById(R.id.tv_month);
+        TextView tv_day=view.findViewById(R.id.tv_day);
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR));
@@ -442,18 +489,74 @@ public class AddTimeActivity extends BaseActivity {
         day = calendar.get(Calendar.DAY_OF_MONTH);
         hour = calendar.get(Calendar.HOUR_OF_DAY);
         min = calendar.get(Calendar.MINUTE);
-        datePicker.setMaxDate(calendar.getTimeInMillis());
-        datePicker.setDate(year + "-" + month + "-" + day);
+        if (only==0){
+            datePicker.setVisibility(View.VISIBLE);
+            tv_year.setVisibility(View.VISIBLE);
+            tv_month.setVisibility(View.VISIBLE);
+            tv_day.setVisibility(View.VISIBLE);
+            calendar.set(Calendar.YEAR, year + 50);
+            datePicker.setMaxDate(calendar.getTimeInMillis());
+            datePicker.setDate(year + "-" + month + "-" + day);
+        }else {
+            datePicker.setVisibility(View.GONE);
+            tv_year.setVisibility(View.GONE);
+            tv_month.setVisibility(View.GONE);
+            tv_day.setVisibility(View.GONE);
+        }
+
+
+
         timerHour = view.findViewById(R.id.timerHour);
+//        timerHour.setDisplayedValues(hours);
+
         setNumberPickerDivider(timerHour);
-        timerHour.setMaxValue(59);
+        timerHour.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        timerHour.setMaxValue(23);
         timerHour.setMinValue(0);
         timerHour.setValue(hour);
+
         timerMin = view.findViewById(R.id.timerMin);
+
         setNumberPickerDivider(timerMin);
+        timerMin.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+
+//        timerMin.setDisplayedValues(mins);
         timerMin.setMaxValue(59);
         timerMin.setMinValue(0);
         timerMin.setValue(min);
+        if (only == 0) {
+            String time = "";
+            String ss = "" + month;
+            if (month < 10) {
+                ss = "0" + month;
+            }
+            String sss = "" + min;
+            String ss1=hour+"";
+
+            if (hour<10){
+                ss1="0"+hour;
+            }
+
+            if (min < 10) {
+                sss = "0" + min;
+            }
+            time = year + "-" + ss + "-" + day + " " + ss1 + ":" + sss;
+
+            tv_timer_value.setText(time);
+        }else {
+            String time = "";
+            String sss = "" + min;
+            String ss=hour+"";
+            if (hour<10){
+                ss="0"+hour;
+            }
+            if (min < 10) {
+                sss = "0" + min;
+            }
+            time=ss+":"+sss;
+            tv_timer_value.setText(time);
+        }
+
 
 
         backgroundAlpha(0.6f);
@@ -481,10 +584,36 @@ public class AddTimeActivity extends BaseActivity {
                         hour = timerHour.getValue();
                         min = timerMin.getValue();
                         if (only == 0) {
-                            String time = year + "-" + month + "-" + day + " " + hour + ":" + min;
+                            String time = "";
+                            String ss = "" + month;
+                            if (month < 10) {
+                                ss = "0" + month;
+                            }
+                            String sss = "" + min;
+                            String ss1=hour+"";
+
+                            if (hour<10){
+                                ss1="0"+hour;
+                            }
+
+                            if (min < 10) {
+                                sss = "0" + min;
+                            }
+                            time = year + "-" + ss + "-" + day + " " + ss1 + ":" + sss;
+
                             tv_timer_value.setText(time);
                         } else {
-                            tv_timer_value.setText(hour + ":" + min);
+                            String time = "";
+                            String sss = "" + min;
+                            String ss=hour+"";
+                            if (hour<10){
+                                ss="0"+hour;
+                            }
+                            if (min < 10) {
+                                sss = "0" + min;
+                            }
+                            time=ss+":"+sss;
+                            tv_timer_value.setText(time);
                         }
                         Log.i("DateTime", "-->" + hour + "," + min);
                         popupWindow.dismiss();
@@ -575,7 +704,7 @@ public class AddTimeActivity extends BaseActivity {
                 viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_once));
                 viewHolder.tv_line.setTextColor(getResources().getColor(R.color.base_back));
             } else {
-                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_once));
+                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
                 viewHolder.tv_line.setTextColor(getResources().getColor(R.color.gray2));
             }
 

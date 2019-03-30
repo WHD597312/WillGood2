@@ -27,6 +27,7 @@ public class Line2 {
     private int timerChecked;//线路有定时任务
     private int lock;//线路的互锁1 1为两个线路互锁 0为不互锁
     private String interLock;//两个线路的所有 格式为deviceLineNum1&deviceLineNum2
+    private int visitity;//显示数据 0不显示，1，显示,
 
 
     public Line2(boolean onClick, String name, int seconds, boolean open, int deviceLineNum, long deviceId,String deviceMac) {
@@ -59,9 +60,9 @@ public class Line2 {
         this.click2 = click2;
     }
 
-    @Generated(hash = 1488164858)
+    @Generated(hash = 1074787947)
     public Line2(Long id, int click, String deviceMac, String name, double seconds, boolean open, int deviceLineNum, long deviceId,
-            boolean online, boolean jog, long timerId, int timerChecked, int lock, String interLock) {
+            boolean online, boolean jog, long timerId, int timerChecked, int lock, String interLock, int visitity) {
         this.id = id;
         this.click = click;
         this.deviceMac = deviceMac;
@@ -76,6 +77,7 @@ public class Line2 {
         this.timerChecked = timerChecked;
         this.lock = lock;
         this.interLock = interLock;
+        this.visitity = visitity;
     }
 
     public boolean isOpen() {
@@ -202,6 +204,14 @@ public class Line2 {
 
     public void setClick(int click) {
         this.click = click;
+    }
+
+    public int getVisitity() {
+        return this.visitity;
+    }
+
+    public void setVisitity(int visitity) {
+        this.visitity = visitity;
     }
 
 }

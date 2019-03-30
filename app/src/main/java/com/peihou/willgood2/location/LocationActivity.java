@@ -2,12 +2,18 @@ package com.peihou.willgood2.location;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -53,7 +59,9 @@ import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.pojo.DeviceTrajectory;
 import com.peihou.willgood2.pojo.Position;
+import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.BdMapUtils;
+import com.peihou.willgood2.utils.ToastUtil;
 import com.peihou.willgood2.utils.Utils;
 import com.peihou.willgood2.utils.WeakRefHandler;
 import com.peihou.willgood2.utils.http.BaseWeakAsyncTask;
@@ -110,6 +118,7 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
 
     BaiduMap mMap;
 
+    String topicName;
     @Override
     public void initView(View view) {
         permissionGrantedSuccess();
@@ -122,14 +131,44 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
         mapView.showScaleControl(false);
         // 隐藏缩放控件
         mapView.showZoomControls(false);
+        Log.i("deviceId","-->"+deviceId);
         params.put("deviceId",deviceId);
+        topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
+
         handler.sendEmptyMessageDelayed(1,1000);
+        receiver=new MessageReceiver();
+        IntentFilter filter=new IntentFilter("LocationActivity");
+        registerReceiver(receiver,filter);
+        Intent service=new Intent(this,MQService.class);
+        bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
+
     }
 
     Handler.Callback callback=new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            new DeviceTrajectoryAsync(LocationActivity.this).execute(params);
+            if (msg.what==1){
+                new DeviceTrajectoryAsync(LocationActivity.this).execute(params);
+            }else if (msg.what==1001){
+                String s= (String) msg.obj;
+                String[] ss=s.split("&");
+                String ss1=ss[0];
+                String ss2=ss[1];
+                double latitude=Double.parseDouble(ss1);
+                double longitude=Double.parseDouble(ss2);
+                //构建Marker图标
+                LatLng latLng=new LatLng(latitude, longitude);
+                BitmapDescriptor startBitmap = BitmapDescriptorFactory
+                        .fromResource(R.mipmap.image_location);
+                //构建MarkerOption，用于在地图上添加Marker
+                OverlayOptions startOption = new MarkerOptions()
+                        .position(latLng)
+                        .icon(startBitmap);
+                //在地图上添加Marker，并显示
+                mMap.addOverlay(startOption);
+                MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(latLng);
+                mMap.setMapStatus(mapStatusUpdate2);
+            }
             return true;
         }
     };
@@ -145,13 +184,28 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
                 finish();
                 break;
             case R.id.img_position:
-                if (!deviceTrajectories.isEmpty()) {
-                    int center = deviceTrajectories.size() / 2;
-                    DeviceTrajectory deviceTrajectory = deviceTrajectories.get(center);
-                    double deviceTrajectoryLatitude = deviceTrajectory.getDeviceTrajectoryLatitude();
-                    double deviceTrajectoryLongitude = deviceTrajectory.getDeviceTrajectoryLongitude();
-                    MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(new LatLng(deviceTrajectoryLatitude, deviceTrajectoryLongitude));
+                if (popupWindow2!=null && popupWindow2.isShowing()){
+                    ToastUtil.showShort(this,"请稍后");
+                    break;
+                }
+                if (mqService!=null){
+                    mqService.getData(topicName,0x77);
+                    countTimer.start();
+                }
+                if (lastLatitude!=0 && lastLongitude!=0) {
+                    LatLng latLng=new LatLng(lastLatitude, lastLongitude);
+                    BitmapDescriptor startBitmap = BitmapDescriptorFactory
+                            .fromResource(R.mipmap.image_location);
+                    //构建MarkerOption，用于在地图上添加Marker
+                    OverlayOptions startOption = new MarkerOptions()
+                            .position(latLng)
+                            .icon(startBitmap);
+                    //在地图上添加Marker，并显示
+                    mMap.addOverlay(startOption);
+
+                    MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(latLng);
                     mMap.setMapStatus(mapStatusUpdate2);
+
                 }
 
                 break;
@@ -168,6 +222,62 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
 
         }
     }
+    private PopupWindow popupWindow2;
+    public void popupmenuWindow3() {
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
+            return;
+        }
+        View view = View.inflate(this, R.layout.progress, null);
+        TextView tv_load = view.findViewById(R.id.tv_load);
+        tv_load.setTextColor(getResources().getColor(R.color.white));
+        if (popupWindow2==null){
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        }
+        //添加弹出、弹入的动画
+        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+        popupWindow2.setFocusable(false);
+        popupWindow2.setOutsideTouchable(false);
+        backgroundAlpha(0.6f);
+        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                backgroundAlpha(1.0f);
+            }
+        });
+//        ColorDrawable dw = new ColorDrawable(0x30000000);
+//        popupWindow.setBackgroundDrawable(dw);
+//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+        popupWindow2.showAtLocation(img_back, Gravity.CENTER, 0, 0);
+        //添加按键事件监听
+    }
+    CountTimer countTimer = new CountTimer(2000, 1000);
+    class CountTimer extends CountDownTimer {
+
+        /**
+         * @param millisInFuture    The number of millis in the future from the call
+         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+         *                          is called.
+         * @param countDownInterval The interval along the way to receive
+         *                          {@link #onTick(long)} callbacks.
+         */
+        public CountTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            popupmenuWindow3();
+        }
+
+        @Override
+        public void onFinish() {
+            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                popupWindow2.dismiss();
+            }
+        }
+    }
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -178,7 +288,15 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
                 DeviceTrajectory deviceTrajectory = deviceTrajectories.get(center);
                 double deviceTrajectoryLatitude = deviceTrajectory.getDeviceTrajectoryLatitude();
                 double deviceTrajectoryLongitude = deviceTrajectory.getDeviceTrajectoryLongitude();
-
+                LatLng latLng=new LatLng(deviceTrajectoryLatitude, deviceTrajectoryLongitude);
+                BitmapDescriptor startBitmap = BitmapDescriptorFactory
+                        .fromResource(R.mipmap.image_location);
+                //构建MarkerOption，用于在地图上添加Marker
+                OverlayOptions startOption = new MarkerOptions()
+                        .position(latLng)
+                        .icon(startBitmap);
+                //在地图上添加Marker，并显示
+                mMap.addOverlay(startOption);
                 MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(new LatLng(deviceTrajectoryLatitude, deviceTrajectoryLongitude));
                 mMap.setMapStatus(mapStatusUpdate2);
                 deviceTrajectories.clear();
@@ -192,11 +310,8 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
 
     @Override
     protected void onResume() {
-        mapView.onResume();
         super.onResume();
-
-
-
+        mapView.onResume();
 
         if (popupWindow != null && popupWindow.isShowing()) {
             if (!positions.isEmpty()) {
@@ -215,7 +330,50 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
         }
     }
 
+    private boolean bind=false;
 
+    MQService mqService;
+    ServiceConnection connection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MQService.LocalBinder binder= (MQService.LocalBinder) service;
+            mqService=binder.getService();
+            if (mqService!=null){
+                mqService.getData(topicName,0x77);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+    double lastLatitude;
+    double lastLongitude;
+    MessageReceiver receiver;
+    public static boolean running=false;
+    class MessageReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String macAddress=intent.getStringExtra("macAddress");
+            try {
+                if (macAddress.equals(deviceMac)){
+                    double latitude=intent.getDoubleExtra("latitude",0);
+                    double longitude=intent.getDoubleExtra("longitude",0);
+                    lastLatitude=latitude;
+                    lastLongitude=longitude;
+                    String s=latitude+"&"+longitude;
+                    Message msg=handler.obtainMessage();
+                    msg.what=1001;
+                    msg.obj=s;
+                    handler.sendMessage(msg);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     class DeviceTrajectoryAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer,LocationActivity> {
 
         public DeviceTrajectoryAsync(LocationActivity activity) {
@@ -285,15 +443,15 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
 
             if (integer == 100) {
                 if (!deviceTrajectories.isEmpty()) {
-                    int center = deviceTrajectories.size() / 2;
+                    int center = deviceTrajectories.size()-1;
                     DeviceTrajectory deviceTrajectory = deviceTrajectories.get(center);
                     double deviceTrajectoryLatitude = deviceTrajectory.getDeviceTrajectoryLatitude();
                     double deviceTrajectoryLongitude = deviceTrajectory.getDeviceTrajectoryLongitude();
 
-                    MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(new LatLng(deviceTrajectoryLatitude, deviceTrajectoryLongitude));
+                    LatLng latLng=new LatLng(deviceTrajectoryLatitude, deviceTrajectoryLongitude);
+                    MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(latLng);
                     mMap.setMapStatus(mapStatusUpdate2);
                 }
-
                 if (posints.size() >= 3) {
                     //设置折线的属性
                     for (int j = 0; j <posints.size() ; j++) {
@@ -444,15 +602,33 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        running=true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        running=false;
+    }
+
+    @Override
     protected void onPause() {
         mapView.onResume();
         super.onPause();
-
     }
 
     @Override
     protected void onDestroy() {
         mapView.onDestroy();
+        if (receiver!=null){
+            unregisterReceiver(receiver);
+        }
+        if (bind){
+            unbindService(connection);
+        }
+        handler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 

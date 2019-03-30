@@ -100,12 +100,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/white"
                 />
             <NumberPicker
                 android:id="@+id/timerMin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="@color/white"
+
                 />
         </LinearLayout>
 

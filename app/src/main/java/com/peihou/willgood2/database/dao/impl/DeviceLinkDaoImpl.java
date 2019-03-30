@@ -102,27 +102,31 @@ public class DeviceLinkDaoImpl {
      * @return
      */
     public List<Linked>findLinkeds(String deviceMac,int type){
-        WhereCondition whereCondition=linkedDao.queryBuilder().and(LinkedDao.Properties.DeviceMac.eq(deviceMac),LinkedDao.Properties.Type.eq(type));
+        WhereCondition whereCondition=linkedDao.queryBuilder().and(
+                LinkedDao.Properties.DeviceMac.eq(deviceMac),
+                LinkedDao.Properties.Type.eq(type),LinkedDao.
+                        Properties.Visitity.eq(1));
         return linkedDao.queryBuilder().where(whereCondition).list();
     }
 
     /**
      * 查询开关量联动
      * @param deviceMac
-     * @param type
      * @param triState
      * @param preline
      * @param lastline
      * @param triType
      * @return
      */
-    public Linked findLinked(String deviceMac,int type,int triState,int preline,int lastline,int triType){
+    public Linked findLinked(String deviceMac,int triState,int preline,int lastline,int triType,int switchLine){
         WhereCondition whereCondition=linkedDao.queryBuilder().and(
                 LinkedDao.Properties.DeviceMac.eq(deviceMac),
-                LinkedDao.Properties.Type.eq(type),
+                LinkedDao.Properties.Type.eq(2),
+                LinkedDao.Properties.SwitchLine.eq(switchLine),
                 LinkedDao.Properties.TriState.eq(triState),
                 LinkedDao.Properties.PreLines.eq(preline),LinkedDao.Properties.PreLines.eq(preline),
                 LinkedDao.Properties.LastLines.eq(lastline),LinkedDao.Properties.TriType.eq(triType));
+
         return linkedDao.queryBuilder().where(whereCondition).unique();
     }
     /**
@@ -134,6 +138,12 @@ public class DeviceLinkDaoImpl {
         WhereCondition whereCondition=linkedDao.queryBuilder().and(LinkedDao.Properties.DeviceMac.eq(deviceMac),LinkedDao.Properties.Type.eq(type));
         List<Linked> list=linkedDao.queryBuilder().where(whereCondition).list();
         linkedDao.deleteInTx(list);
+    }
+    public void deleteLinekeds(String deviceMac){
+        List<Linked> list=linkedDao.queryBuilder().where(LinkedDao.Properties.DeviceMac.eq(deviceMac)).list();
+        if (list!=null && !list.isEmpty()){
+            linkedDao.deleteInTx(list);
+        }
     }
 
     /**

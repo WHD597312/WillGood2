@@ -11,15 +11,18 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -72,12 +75,13 @@ public class AlermActivity extends BaseActivity {
     int mcuVersion;
     public static boolean running = false;
     boolean online;
+
     @Override
     public void initParms(Bundle parms) {
         deviceId = parms.getLong("deviceId");
         deviceMac = parms.getString("deviceMac");
         mcuVersion = parms.getInt("mcuVersion");
-        online=parms.getBoolean("online");
+        online = parms.getBoolean("online");
 
     }
 
@@ -92,9 +96,8 @@ public class AlermActivity extends BaseActivity {
     @Override
     public void initView(View view) {
 
-
-        preferences=getSharedPreferences("userInfo",Context.MODE_PRIVATE);
-        userId=preferences.getInt("userId",0);
+        preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        userId = preferences.getInt("userId", 0);
         deviceAlermDao = new DeviceAlermDaoImpl(getApplicationContext());
         list_alerm.setLayoutManager(new LinearLayoutManager(this));
         list = deviceAlermDao.findDeviceAlerms(deviceId);
@@ -102,8 +105,8 @@ public class AlermActivity extends BaseActivity {
 
         for (int i = 2; i < list.size() - 1; i++) {
             Alerm alerm = list.get(i);
-            int state=alerm.getState();
-            x[i]=state;
+            int state = alerm.getState();
+            x[i] = state;
             once = alerm.getDeviceAlarmBroadcast();
             notify = alerm.getDeviceAlarmFlag();
             double value = alerm.getValue();
@@ -124,16 +127,16 @@ public class AlermActivity extends BaseActivity {
             Alerm alerm = list.get(7);
             int state2 = alerm.getState2();
             data[16] = state2;
-            Alerm alerm1=list.get(0);
-            Alerm alerm2=list.get(1);
-            int state=alerm1.getState();
-            int state3=alerm2.getState();
-            x[0]=state;
-            x[1]=state3;
+            Alerm alerm1 = list.get(0);
+            Alerm alerm2 = list.get(1);
+            int state = alerm1.getState();
+            int state3 = alerm2.getState();
+            x[0] = state;
+            x[1] = state3;
         }
-        data[0]=TenTwoUtil.changeToTen(x);
+        data[0] = TenTwoUtil.changeToTen(x);
 
-        topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
+        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         adapter = new MyAdapter(this, list);
         list_alerm.setAdapter(adapter);
@@ -158,8 +161,14 @@ public class AlermActivity extends BaseActivity {
         running = false;
     }
 
-    class UpdateAlermAsync extends BaseWeakAsyncTask<Map<String,Object>,Void,Integer,AlermActivity>{
+    class UpdateAlermAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, AlermActivity> {
 
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
 
         public UpdateAlermAsync(AlermActivity alermActivity) {
             super(alermActivity);
@@ -170,7 +179,11 @@ public class AlermActivity extends BaseActivity {
             int code = 0;
             try {
                 Map<String, Object> params = maps[0];
-
+                int position = -1;
+                if (params.containsKey("position")) {
+                    position = (int) params.get("position");
+                    params.remove("positopn");
+                }
                 String url = HttpUtils.ipAddress + "device/changeAlarmName";
                 String result = HttpUtils.requestPost(url, params);
                 if (TextUtils.isEmpty(result)) {
@@ -186,26 +199,27 @@ public class AlermActivity extends BaseActivity {
                             alerm.setContent(alarmName);
                             list.set(updatePosition - 4, alerm);
                         }
+                        once=-1;
                         if (params.containsKey("deviceAlarmBroadcast")) {
                             once = (int) params.get("deviceAlarmBroadcast");
                             for (Alerm alerm : list) {
                                 alerm.setDeviceAlarmBroadcast(once);
                                 deviceAlermDao.update(alerm);
-                                if (mqService!=null){
+                                if (mqService != null) {
                                     deviceAlermDao.update(alerm);
                                 }
                             }
                         }
-                        if (params.containsKey("deviceAlarmFlag")){
-                            notify= (int) params.get("deviceAlarmFlag");
+                        if (params.containsKey("deviceAlarmFlag")) {
+                            notify=-1;
+                            notify = (int) params.get("deviceAlarmFlag");
                             for (Alerm alerm : list) {
                                 alerm.setDeviceAlarmFlag(notify);
                                 deviceAlermDao.update(alerm);
-                                if (mqService!=null){
+                                if (mqService != null) {
                                     deviceAlermDao.update(alerm);
                                 }
                             }
-
                         }
                     }
                 }
@@ -243,6 +257,62 @@ public class AlermActivity extends BaseActivity {
             }
         }
     }
+    CountTimer countTimer = new CountTimer(2000, 1000);
+
+    class CountTimer extends CountDownTimer {
+
+        /**
+         * @param millisInFuture    The number of millis in the future from the call
+         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+         *                          is called.
+         * @param countDownInterval The interval along the way to receive
+         *                          {@link #onTick(long)} callbacks.
+         */
+        public CountTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            popupmenuWindow3();
+        }
+
+        @Override
+        public void onFinish() {
+            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                popupWindow2.dismiss();
+            }
+        }
+    }
+    private PopupWindow popupWindow2;
+
+    public void popupmenuWindow3() {
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
+            return;
+        }
+        View view = View.inflate(this, R.layout.progress, null);
+        TextView tv_load = view.findViewById(R.id.tv_load);
+        tv_load.setTextColor(getResources().getColor(R.color.white));
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        //添加弹出、弹入的动画
+        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+        popupWindow2.setFocusable(false);
+        popupWindow2.setOutsideTouchable(false);
+        backgroundAlpha(0.6f);
+        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                backgroundAlpha(1.0f);
+            }
+        });
+//        ColorDrawable dw = new ColorDrawable(0x30000000);
+//        popupWindow.setBackgroundDrawable(dw);
+//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+        popupWindow2.showAtLocation(list_alerm, Gravity.CENTER, 0, 0);
+        //添加按键事件监听
+    }
+
 //    class UpdateAlermAeync extends AsyncTask<Map<String, Object>, Void, Integer> {
 //
 //        @Override
@@ -322,9 +392,9 @@ public class AlermActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.img_log:
-                Intent intent=new Intent(this,AlermLogActivity.class);
-                intent.putExtra("deviceMac",deviceMac);
-                intent.putExtra("userId",userId);
+                Intent intent = new Intent(this, AlermLogActivity.class);
+                intent.putExtra("deviceMac", deviceMac);
+                intent.putExtra("userId", userId);
                 startActivity(intent);
                 break;
         }
@@ -352,19 +422,19 @@ public class AlermActivity extends BaseActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                String action=intent.getAction();
+                String action = intent.getAction();
                 String macAddress = intent.getStringExtra("macAddress");
-                if ("offline".equals(action)){
-                    if (macAddress.equals(deviceMac)) {
-                        online=false;
+                if ("offline".equals(action)) {
+                    if (intent.hasExtra("all") || macAddress.equals(deviceMac)) {
+                        online = false;
                     }
-                }else {
+                } else {
                     List<Alerm> alerms = (List<Alerm>) intent.getSerializableExtra("alerms");
                     if (macAddress.equals(deviceMac) && alerms.size() == 8) {
-                        boolean online2=intent.getBooleanExtra("online",false);
-                        online=online2;
-                        if (click==1){
-                            mqService.starSpeech("控制成功");
+                        boolean online2 = intent.getBooleanExtra("online", false);
+                        online = online2;
+                        if (click == 1) {
+                            mqService.starSpeech(macAddress,"控制成功");
                         }
                         for (int i = 0; i < alerms.size(); i++) {
                             list.set(i, alerms.get(i));
@@ -386,6 +456,7 @@ public class AlermActivity extends BaseActivity {
             MQService.LocalBinder binder = (MQService.LocalBinder) service;
             mqService = binder.getService();
             mqService.getData(topicName, 0x66);
+            countTimer.start();
         }
 
         @Override
@@ -395,7 +466,8 @@ public class AlermActivity extends BaseActivity {
     };
 
 
-    int click=0;
+    int click = 0;
+
     @Override
     public void doBusiness(Context mContext) {
 
@@ -472,6 +544,7 @@ public class AlermActivity extends BaseActivity {
                         params.clear();
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmBroadcast", once);
+                        params.put("position", position);
                         new UpdateAlermAsync(AlermActivity.this).execute(params);
 
                     }
@@ -486,8 +559,9 @@ public class AlermActivity extends BaseActivity {
                         params.clear();
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmBroadcast", once);
+                        params.put("position", position);
                         try {
-                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -503,8 +577,10 @@ public class AlermActivity extends BaseActivity {
                         params.clear();
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmBroadcast", once);
+                        params.put("position", position);
+
                         try {
-                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -527,8 +603,9 @@ public class AlermActivity extends BaseActivity {
                         params.clear();
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmFlag", notify);
+                        params.put("position", position);
                         try {
-                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         } catch (ExecutionException e) {
@@ -545,8 +622,7 @@ public class AlermActivity extends BaseActivity {
                 }
 
             } else if (position > 3) {
-
-                final Alerm alerm = list.get(position - 4);
+                final Alerm alerm = list.get(position-4);
                 String name = alerm.getName();
                 String content = alerm.getContent();
                 int state = alerm.getState();
@@ -565,16 +641,17 @@ public class AlermActivity extends BaseActivity {
                 holder.img_open.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!online){
-                            ToastUtil.showShort(AlermActivity.this,"设备已离线");
+                        if (!online) {
+                            mqService.getData(topicName, 0x11);
+                            ToastUtil.showShort(AlermActivity.this, "设备已离线");
                             return;
                         }
                         if (alerm.getState() == 1) {
-                            x[7-(position - 4)] = 0;
-                            alerm.setState(0);
+                            x[7 - (position - 4)] = 0;
+//                            alerm.setState(0);
                         } else {
-                            alerm.setState(1);
-                            x[7-(position - 4)] = 1;
+//                            alerm.setState(1);
+                            x[7 - (position - 4)] = 1;
                         }
                         int k = TenTwoUtil.changeToTen(x);
                         data[0] = k;
@@ -587,14 +664,14 @@ public class AlermActivity extends BaseActivity {
                         data[1] = alermValue / 256;
                         data[2] = alermValue % 256;
 
-
                         if (mqService != null) {
                             boolean success = mqService.sendAlerm(topicName, mcuVersion, data);
-                            click=1;
-                            if (success) {
-                                list.set(position - 4, alerm);
-                                notifyDataSetChanged();
-                            }
+                            click = 1;
+                            countTimer.start();
+//                            if (success) {
+//                                list.set(position - 4, alerm);
+//                                notifyDataSetChanged();
+//                            }
                         }
                     }
                 });
@@ -660,7 +737,7 @@ public class AlermActivity extends BaseActivity {
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmNum", updatePosition - 3);
                         params.put("alarmName", content);
-                        new UpdateAlermAsync(AlermActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                        new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -746,6 +823,8 @@ public class AlermActivity extends BaseActivity {
                                 data[3] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            countTimer.start();
+
                         } else {
                             ToastUtil.showShort(AlermActivity.this, "不在该报警范围之内!");
                             return;
@@ -763,6 +842,7 @@ public class AlermActivity extends BaseActivity {
                                 data[6] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            countTimer.start();
 
                         } else {
                             ToastUtil.showShort(AlermActivity.this, "不在该报警范围之内!");
@@ -781,6 +861,8 @@ public class AlermActivity extends BaseActivity {
                                 data[9] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            countTimer.start();
+
                         } else {
                             ToastUtil.showShort(AlermActivity.this, "不在该报警范围之内!");
                             return;
@@ -798,6 +880,8 @@ public class AlermActivity extends BaseActivity {
                                 data[12] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            countTimer.start();
+
                         } else {
                             ToastUtil.showShort(AlermActivity.this, "不在该报警范围之内!");
                             return;
@@ -815,6 +899,8 @@ public class AlermActivity extends BaseActivity {
                                 data[15] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            countTimer.start();
+
                         } else {
                             ToastUtil.showShort(AlermActivity.this, "不在该报警范围之内!");
                             return;
@@ -824,7 +910,7 @@ public class AlermActivity extends BaseActivity {
                     params.put("deviceId", deviceId);
                     params.put("deviceAlarmNum", updatePosition - 3);
                     params.put("alarmName", content);
-                    new UpdateAlermAsync(AlermActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                    new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -890,7 +976,7 @@ public class AlermActivity extends BaseActivity {
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmNum", updatePosition - 3);
                         params.put("alarmName", content);
-                        new UpdateAlermAsync(AlermActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                        new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

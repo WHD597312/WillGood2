@@ -43,6 +43,8 @@ public class TimerTaskDao extends AbstractDao<TimerTask, Long> {
         public final static Property ControlState = new Property(16, int.class, "controlState", false, "CONTROL_STATE");
         public final static Property State = new Property(17, int.class, "state", false, "STATE");
         public final static Property Timers = new Property(18, int.class, "timers", false, "TIMERS");
+        public final static Property Seconds = new Property(19, long.class, "seconds", false, "SECONDS");
+        public final static Property Visitity = new Property(20, int.class, "visitity", false, "VISITITY");
     }
 
 
@@ -76,7 +78,9 @@ public class TimerTaskDao extends AbstractDao<TimerTask, Long> {
                 "\"LASTLINES\" INTEGER NOT NULL ," + // 15: lastlines
                 "\"CONTROL_STATE\" INTEGER NOT NULL ," + // 16: controlState
                 "\"STATE\" INTEGER NOT NULL ," + // 17: state
-                "\"TIMERS\" INTEGER NOT NULL );"); // 18: timers
+                "\"TIMERS\" INTEGER NOT NULL ," + // 18: timers
+                "\"SECONDS\" INTEGER NOT NULL ," + // 19: seconds
+                "\"VISITITY\" INTEGER NOT NULL );"); // 20: visitity
     }
 
     /** Drops the underlying database table. */
@@ -123,6 +127,8 @@ public class TimerTaskDao extends AbstractDao<TimerTask, Long> {
         stmt.bindLong(17, entity.getControlState());
         stmt.bindLong(18, entity.getState());
         stmt.bindLong(19, entity.getTimers());
+        stmt.bindLong(20, entity.getSeconds());
+        stmt.bindLong(21, entity.getVisitity());
     }
 
     @Override
@@ -163,6 +169,8 @@ public class TimerTaskDao extends AbstractDao<TimerTask, Long> {
         stmt.bindLong(17, entity.getControlState());
         stmt.bindLong(18, entity.getState());
         stmt.bindLong(19, entity.getTimers());
+        stmt.bindLong(20, entity.getSeconds());
+        stmt.bindLong(21, entity.getVisitity());
     }
 
     @Override
@@ -191,7 +199,9 @@ public class TimerTaskDao extends AbstractDao<TimerTask, Long> {
             cursor.getInt(offset + 15), // lastlines
             cursor.getInt(offset + 16), // controlState
             cursor.getInt(offset + 17), // state
-            cursor.getInt(offset + 18) // timers
+            cursor.getInt(offset + 18), // timers
+            cursor.getLong(offset + 19), // seconds
+            cursor.getInt(offset + 20) // visitity
         );
         return entity;
     }
@@ -217,6 +227,8 @@ public class TimerTaskDao extends AbstractDao<TimerTask, Long> {
         entity.setControlState(cursor.getInt(offset + 16));
         entity.setState(cursor.getInt(offset + 17));
         entity.setTimers(cursor.getInt(offset + 18));
+        entity.setSeconds(cursor.getLong(offset + 19));
+        entity.setVisitity(cursor.getInt(offset + 20));
      }
     
     @Override

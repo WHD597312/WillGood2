@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -14,7 +15,10 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -96,7 +100,6 @@ public class TimerTaskActivity extends BaseActivity {
         list_timer.setAdapter(adapter);
     }
 
-
     @Override
     public void doBusiness(Context mContext) {
 
@@ -105,6 +108,12 @@ public class TimerTaskActivity extends BaseActivity {
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
+                if (mqService!=null){
+                    if (!timerTasks.isEmpty()){
+                        List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
+                        mqService.updateTimerTasks(timerTasks2);
+                    }
+                }
                 finish();
                 break;
             case R.id.img_add:
@@ -114,6 +123,26 @@ public class TimerTaskActivity extends BaseActivity {
                 startActivityForResult(intent,1001);
                 break;
         }
+    }
+
+    private List<TimerTask> updateTimerTasks(List<TimerTask> timerTasks){
+        for (int i = 0; i < timerTasks.size(); i++) {
+            TimerTask timerTask=timerTasks.get(i);
+            timerTask.setVisitity(0);
+            timerTasks.set(i,timerTask);
+        }
+        return timerTasks;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mqService!=null){
+            if (!timerTasks.isEmpty()){
+                List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
+                mqService.updateTimerTasks(timerTasks2);
+            }
+        }
+        super.onBackPressed();
     }
 
     @Override
@@ -195,7 +224,7 @@ public class TimerTaskActivity extends BaseActivity {
                 String action=intent.getAction();
                 if ("offline".equals(action)){
                     String macAddress=intent.getStringExtra("macAddress");
-                    if (macAddress.equals(deviceMac))
+                    if (intent.hasExtra("all") ||macAddress.equals(deviceMac))
                         online=false;
                 }else {
                     String macAddress=intent.getStringExtra("macAddress");
@@ -208,9 +237,9 @@ public class TimerTaskActivity extends BaseActivity {
                                 if (mqService!=null){
                                     returnData=0;
                                     if (operate==1){
-                                        mqService.starSpeech("删除成功");
+                                        mqService.starSpeech(deviceMac,"删除成功");
                                     }else {
-                                        mqService.starSpeech("设置成功");
+                                        mqService.starSpeech(deviceMac,"设置成功");
                                     }
                                 }
                             }
@@ -235,6 +264,7 @@ public class TimerTaskActivity extends BaseActivity {
             mqService=binder.getService();
             if (mqService!=null) {
                 mqService.getData(topicName,0x22);
+                countTimer.start();
             }
         }
 
@@ -289,7 +319,18 @@ public class TimerTaskActivity extends BaseActivity {
                 String name=timerTask.getName();
                 int hour=timerTask.getHour();
                 int min=timerTask.getMin();
-                holder.tv_name.setText(name);
+                String switchState="";
+                if (controlState==1){
+                    switchState="开启";
+                }else {
+                    switchState="关闭";
+                }
+                String s2=switchState+" "+name;
+
+//                SpannableStringBuilder style=new SpannableStringBuilder(s2);
+//                style.setSpan(new ForegroundColorSpan(Color.parseColor("#09c585")),0,2,Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                holder.tv_name.setText(s2);
                 Log.i("TimerTask","-->"+isOpen);
                 if (state==1){
                     holder.img_open.setImageResource(R.mipmap.img_open);
@@ -422,7 +463,8 @@ public class TimerTaskActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

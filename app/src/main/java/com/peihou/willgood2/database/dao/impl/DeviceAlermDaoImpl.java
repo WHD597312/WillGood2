@@ -45,6 +45,12 @@ public class DeviceAlermDaoImpl {
         List<Alerm> list=findDeviceAlerms(deviceId);
         alermDao.deleteInTx(list);
     }
+    public void deleteDeviceAlerms(String deviceMac){
+        List<Alerm> list=findDeviceAlerms(deviceMac);
+        if (list!=null && !list.isEmpty())
+            alermDao.deleteInTx(list);
+    }
+
     public void deleteAll(){
         alermDao.deleteAll();
     }
@@ -59,4 +65,8 @@ public class DeviceAlermDaoImpl {
     public List<Alerm> findDeviceAlerms(long deviceId){
         return alermDao.queryBuilder().where(AlermDao.Properties.DeviceId.eq(deviceId)).orderAsc(AlermDao.Properties.Type).list();
     }
+    public List<Alerm> findDeviceAlerms(String deviceMac){
+        return alermDao.queryBuilder().where(AlermDao.Properties.DeviceMac.eq(deviceMac)).orderAsc(AlermDao.Properties.Type).list();
+    }
+
 }

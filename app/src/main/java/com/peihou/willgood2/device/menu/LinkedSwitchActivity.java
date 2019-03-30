@@ -54,6 +54,10 @@ public class LinkedSwitchActivity extends BaseActivity {
     long deviceId;//设备Id
     String deviceMac;//设备的mac地址
     private String topicName;
+    private List<String> switchLines=new ArrayList<>();
+    private List<Integer> switchLinesCheck=new ArrayList<>();
+    @BindView(R.id.grid_switch) GridView grid_switch;
+    private SwitchAdapter switchAdapter;
 
     @Override
     public void initParms(Bundle parms) {
@@ -98,6 +102,31 @@ public class LinkedSwitchActivity extends BaseActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+        for (int i = 1; i <=8; i++) {
+            switchLines.add("开关量"+i);
+            switchLinesCheck.add(0);
+        }
+        switchAdapter=new SwitchAdapter(switchLines,this);
+        grid_switch.setAdapter(switchAdapter);
+        grid_switch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int check=switchLinesCheck.get(position);
+                if (check==0){
+                    switchLinesCheck.set(position,1);
+                    for (int i = 0; i <switchLinesCheck.size() ; i++) {
+                        if (position==i)
+                            continue;
+                        else {
+                            switchLinesCheck.set(i,0);
+                        }
+                    }
+                }else {
+                    switchLinesCheck.set(position,0);
+                }
+                switchAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -115,6 +144,19 @@ public class LinkedSwitchActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.img_ensure:
+                int check=0;
+                for (int i = 0; i <switchLinesCheck.size() ; i++) {
+                    if (switchLinesCheck.get(i)==1){
+                        check=i+1;
+                        break;
+                    }
+                    continue;
+                }
+                if (check==0){
+                    ToastUtil.showShort(this,"请选择开关量");
+                    break;
+                }
+
                 sb.setLength(0);
                 List<Linked> linkeds=deviceLinkDao.findLinkeds(deviceMac,type);
                 if (linkeds!=null && !linkeds.isEmpty()){
@@ -147,9 +189,18 @@ public class LinkedSwitchActivity extends BaseActivity {
                         }
                     }
                 }
+
                 preLines=TenTwoUtil.changeToTen2(pre);
                 lastLines=TenTwoUtil.changeToTen2(last);
+                if (preLines+lastLines == 0) {
+                    ToastUtil.showShort(this, "请选择线路");
+                    break;
+                }
+
+                touch=touch==1?0:1;
+
                 Linked linked=new  Linked(deviceMac, 2, s, condition,open,1, preLines, lastLines, touch);
+                linked.setSwitchLine(check);
                 Intent intent=new Intent();
                 intent.putExtra("linked",linked);
                 setResult(1000,intent);
@@ -223,17 +274,17 @@ public class LinkedSwitchActivity extends BaseActivity {
         }
     };
     int touch=0;//为0是单次触发，1为多次触发
-    private void setTouchMode(){
-        if (touch==0){
-            btn_loop.setTextColor(getResources().getColor(R.color.white));
-            btn_loop.setBackgroundColor(0);
+    private void setTouchMode() {
+        if (touch == 0) {
             btn_once.setTextColor(getResources().getColor(R.color.base_back));
-            btn_once.setBackground(getResources().getDrawable(R.drawable.shape_once));
-        }else if (touch==1){
+            btn_once.setBackground(getResources().getDrawable(R.drawable.shape_loop));
+            btn_loop.setTextColor(getResources().getColor(R.color.gray2));
+            btn_loop.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
+        } else if (touch == 1) {
+            btn_once.setTextColor(getResources().getColor(R.color.gray2));
+            btn_once.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btn_loop.setTextColor(getResources().getColor(R.color.base_back));
             btn_loop.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            btn_once.setTextColor(getResources().getColor(R.color.white));
-            btn_once.setBackgroundColor(0);
         }
     }
     int condition=1;//条件 0为闭合，1为断开
@@ -241,11 +292,11 @@ public class LinkedSwitchActivity extends BaseActivity {
         if (condition==1){
             btn_switch_close.setTextColor(getResources().getColor(R.color.base_back));
             btn_switch_close.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            btn_switch_open.setTextColor(getResources().getColor(R.color.white));
-            btn_switch_open.setBackgroundColor(0);
+            btn_switch_open.setTextColor(getResources().getColor(R.color.gray2));
+            btn_switch_open.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         }else if (condition==0){
-            btn_switch_close.setTextColor(getResources().getColor(R.color.white));
-            btn_switch_close.setBackgroundColor(0);
+            btn_switch_close.setTextColor(getResources().getColor(R.color.gray2));
+            btn_switch_close.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btn_switch_open.setTextColor(getResources().getColor(R.color.base_back));
             btn_switch_open.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
@@ -255,11 +306,11 @@ public class LinkedSwitchActivity extends BaseActivity {
         if (open==1){
             btn_open.setTextColor(getResources().getColor(R.color.base_back));
             btn_open.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            btn_close.setTextColor(getResources().getColor(R.color.white));
-            btn_close.setBackgroundColor(0);
+            btn_close.setTextColor(getResources().getColor(R.color.gray2));
+            btn_close.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         }else if (open==0){
-            btn_open.setTextColor(getResources().getColor(R.color.white));
-            btn_open.setBackgroundColor(0);
+            btn_open.setTextColor(getResources().getColor(R.color.gray2));
+            btn_open.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btn_close.setTextColor(getResources().getColor(R.color.base_back));
             btn_close.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
@@ -293,7 +344,7 @@ public class LinkedSwitchActivity extends BaseActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder viewHolder=null;
             if (convertView==null){
-                convertView=View.inflate(context,R.layout.item_line2,null);
+                convertView=View.inflate(context,R.layout.item_line,null);
                 viewHolder=new ViewHolder(convertView);
                 convertView.setTag(viewHolder);
             }else {
@@ -308,7 +359,7 @@ public class LinkedSwitchActivity extends BaseActivity {
                 viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_once));
             }else {
                 viewHolder.tv_line.setTextColor(getResources().getColor(R.color.gray2));
-                viewHolder.tv_line.setBackgroundColor(0);
+                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             }
             return convertView;
         }
@@ -318,6 +369,55 @@ public class LinkedSwitchActivity extends BaseActivity {
         TextView tv_line;
         public ViewHolder(View itemView){
             ButterKnife.bind(this ,itemView);
+        }
+    }
+    class SwitchAdapter extends BaseAdapter{
+
+        private List<String> list;
+        private Context context;
+
+        public SwitchAdapter(List<String> list, Context context) {
+            this.list = list;
+            this.context = context;
+        }
+
+        @Override
+        public int getCount() {
+            return list.size();
+        }
+
+        @Override
+        public String getItem(int position) {
+            return list.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder=null;
+            if (convertView==null){
+                convertView=View.inflate(context,R.layout.item_line,null);
+                viewHolder=new ViewHolder(convertView);
+                convertView.setTag(viewHolder);
+            }else {
+                viewHolder= (ViewHolder) convertView.getTag();
+            }
+            String s=getItem(position);
+            viewHolder.tv_line.setText(s);
+            int check=switchLinesCheck.get(position);
+            if (check==1){
+                viewHolder.tv_line.setTextColor(getResources().getColor(R.color.base_back));
+                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_once));
+            }else {
+                viewHolder.tv_line.setTextColor(getResources().getColor(R.color.gray2));
+                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
+            }
+
+            return convertView;
         }
     }
 }

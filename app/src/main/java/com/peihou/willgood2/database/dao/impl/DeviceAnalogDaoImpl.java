@@ -117,6 +117,13 @@ public class DeviceAnalogDaoImpl {
     }
 
     /**
+     * 批量更新设备模拟量
+     * @param lists
+     */
+    public void updateDeviceAnalogs(List<Table> lists){
+        tableDao.updateInTx(lists);
+    }
+    /**
      * 查询设备模拟量
      * @param deviceId
      * @return

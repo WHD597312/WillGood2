@@ -24,6 +24,9 @@ public class MQTTMessageReveiver extends BroadcastReceiver {
 
         if (!mobNetInfo.isConnected() && !wifiNetInfo.isConnected()) {
             ToastUtil.showShort(context, "网络不可用");
+            Intent noNet=new Intent("offline");
+            noNet.putExtra("all","all");
+            context.sendBroadcast(noNet);
             //改变背景或者 处理网络的全局变量
         } else if (mobNetInfo.isConnected() || wifiNetInfo.isConnected()) {
             Intent mqttIntent = new Intent(context, MQService.class);

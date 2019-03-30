@@ -34,9 +34,13 @@ public class Table implements Serializable {
         this.deviceId=deviceId;
     }
 
+    @Generated(hash = 752389689)
+    public Table() {
+    }
+
     @Generated(hash = 1784495848)
-    public Table(Long id, long deviceId, String deviceMac, int i, String name, double data,
-            double factor, double result, String unit) {
+    public Table(Long id, long deviceId, String deviceMac, int i, String name, double data, double factor, double result,
+            String unit) {
         this.id = id;
         this.deviceId = deviceId;
         this.deviceMac = deviceMac;
@@ -46,10 +50,6 @@ public class Table implements Serializable {
         this.factor = factor;
         this.result = result;
         this.unit = unit;
-    }
-
-    @Generated(hash = 752389689)
-    public Table() {
     }
 
     public int getI() {

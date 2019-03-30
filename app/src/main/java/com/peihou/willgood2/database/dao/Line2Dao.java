@@ -38,6 +38,7 @@ public class Line2Dao extends AbstractDao<Line2, Long> {
         public final static Property TimerChecked = new Property(11, int.class, "timerChecked", false, "TIMER_CHECKED");
         public final static Property Lock = new Property(12, int.class, "lock", false, "LOCK");
         public final static Property InterLock = new Property(13, String.class, "interLock", false, "INTER_LOCK");
+        public final static Property Visitity = new Property(14, int.class, "visitity", false, "VISITITY");
     }
 
 
@@ -66,7 +67,8 @@ public class Line2Dao extends AbstractDao<Line2, Long> {
                 "\"TIMER_ID\" INTEGER NOT NULL ," + // 10: timerId
                 "\"TIMER_CHECKED\" INTEGER NOT NULL ," + // 11: timerChecked
                 "\"LOCK\" INTEGER NOT NULL ," + // 12: lock
-                "\"INTER_LOCK\" TEXT);"); // 13: interLock
+                "\"INTER_LOCK\" TEXT," + // 13: interLock
+                "\"VISITITY\" INTEGER NOT NULL );"); // 14: visitity
     }
 
     /** Drops the underlying database table. */
@@ -108,6 +110,7 @@ public class Line2Dao extends AbstractDao<Line2, Long> {
         if (interLock != null) {
             stmt.bindString(14, interLock);
         }
+        stmt.bindLong(15, entity.getVisitity());
     }
 
     @Override
@@ -143,6 +146,7 @@ public class Line2Dao extends AbstractDao<Line2, Long> {
         if (interLock != null) {
             stmt.bindString(14, interLock);
         }
+        stmt.bindLong(15, entity.getVisitity());
     }
 
     @Override
@@ -166,7 +170,8 @@ public class Line2Dao extends AbstractDao<Line2, Long> {
             cursor.getLong(offset + 10), // timerId
             cursor.getInt(offset + 11), // timerChecked
             cursor.getInt(offset + 12), // lock
-            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13) // interLock
+            cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13), // interLock
+            cursor.getInt(offset + 14) // visitity
         );
         return entity;
     }
@@ -187,6 +192,7 @@ public class Line2Dao extends AbstractDao<Line2, Long> {
         entity.setTimerChecked(cursor.getInt(offset + 11));
         entity.setLock(cursor.getInt(offset + 12));
         entity.setInterLock(cursor.isNull(offset + 13) ? null : cursor.getString(offset + 13));
+        entity.setVisitity(cursor.getInt(offset + 14));
      }
     
     @Override

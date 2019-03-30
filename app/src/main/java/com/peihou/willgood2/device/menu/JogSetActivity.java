@@ -22,9 +22,10 @@ import android.widget.CheckBox;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.peihou.willgood2.BaseActivity;
 import
- com.peihou.willgood2.R;
+        com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.JogDialog;
 import com.peihou.willgood2.device.DeviceItemActivity;
 import com.peihou.willgood2.service.MQService;
@@ -41,30 +42,42 @@ import butterknife.OnClick;
 public class JogSetActivity extends BaseActivity {
 
 
-    @BindView(R.id.cb) CheckBox cb;
-    @BindView(R.id.tv_1) TextView tv_1;
-    @BindView(R.id.cb2) CheckBox cb2;
-    @BindView(R.id.tv_2) TextView tv_2;
-    @BindView(R.id.cb3) CheckBox cb3;
-    @BindView(R.id.tv_3) TextView tv_3;
-    @BindView(R.id.cb4) CheckBox cb4;
-    @BindView(R.id.tv_4) TextView tv_4;
-    @BindView(R.id.cb5) CheckBox cb5;
-    @BindView(R.id.tv_5) TextView tv_5;
-    @BindView(R.id.tv_jog_value) TextView tv_jog_value;
+    @BindView(R.id.cb)
+    CheckBox cb;
+    @BindView(R.id.tv_1)
+    TextView tv_1;
+    @BindView(R.id.cb2)
+    CheckBox cb2;
+    @BindView(R.id.tv_2)
+    TextView tv_2;
+    @BindView(R.id.cb3)
+    CheckBox cb3;
+    @BindView(R.id.tv_3)
+    TextView tv_3;
+    @BindView(R.id.cb4)
+    CheckBox cb4;
+    @BindView(R.id.tv_4)
+    TextView tv_4;
+    @BindView(R.id.cb5)
+    CheckBox cb5;
+    @BindView(R.id.tv_5)
+    TextView tv_5;
+    @BindView(R.id.tv_jog_value)
+    TextView tv_jog_value;
 
     private String deviceMac;
     int mcuVersion;
     String topicName;
-    double choices=1;//设定的点动秒，默认1s
+    double choices = 1;//设定的点动秒，默认1s
     boolean online;
 
+    int init=0;
     @Override
     public void initParms(Bundle parms) {
-        deviceMac=parms.getString("deviceMac");
-        mcuVersion=parms.getInt("mcuVersion");
-        choices=parms.getDouble("jog");
-        online=parms.getBoolean("online");
+        deviceMac = parms.getString("deviceMac");
+        mcuVersion = parms.getInt("mcuVersion");
+        choices = parms.getDouble("jog");
+        online = parms.getBoolean("online");
     }
 
     @Override
@@ -75,21 +88,58 @@ public class JogSetActivity extends BaseActivity {
 
     @Override
     public void initView(View view) {
-        topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
+        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
-        Intent service=new Intent(this,MQService.class);
-        bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
-        IntentFilter filter=new IntentFilter("JogSetActivity");
+        Intent service = new Intent(this, MQService.class);
+        bind = bindService(service, connection, Context.BIND_AUTO_CREATE);
+        IntentFilter filter = new IntentFilter("JogSetActivity");
         filter.addAction("offline");
-        receiver=new MessageReceiver();
-        tv_jog_value.setText(choices+"");
-        registerReceiver(receiver,filter);
+        receiver = new MessageReceiver();
+        registerReceiver(receiver, filter);
+        setChoices(choices);
     }
-    boolean checked=false;
-    int click=0;
-    @OnClick({R.id.img_back,R.id.rl_bottom,R.id.btn_submit,R.id.cb,R.id.tv_1,R.id.cb2,R.id.tv_2,R.id.cb3,R.id.tv_3,R.id.cb4,R.id.tv_4,R.id.cb5,R.id.tv_5})
-    public void onClick(View v){
-        switch (v.getId()){
+
+    private void setChoices(double choices){
+        if (choices == 1) {
+            cb.setChecked(true);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
+        } else if (choices == 2) {
+            cb.setChecked(false);
+            cb2.setChecked(true);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
+        } else if (choices == 3) {
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(true);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
+        }else if (choices==5){
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(true);
+            cb5.setChecked(false);
+        }else if (choices==10){
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(true);
+        }
+        tv_jog_value.setText(choices + "");
+
+    }
+    boolean checked = false;
+    int click = 0;
+
+    @OnClick({R.id.img_back, R.id.rl_bottom, R.id.btn_submit, R.id.linear_1, R.id.linear_2, R.id.linear_3, R.id.linear_4, R.id.linear_5})
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.img_back:
                 finish();
                 break;
@@ -97,150 +147,107 @@ public class JogSetActivity extends BaseActivity {
                 changeDialog();
                 break;
             case R.id.btn_submit:
-                if (!online){
-                    ToastUtil.showShort(this,"设备已离线");
+                if (!online) {
+                    mqService.getData(topicName,0x11);
+                    ToastUtil.showShort(this, "设备已离线");
                     break;
                 }
 
-                if (popupWindow2!=null && popupWindow2.isShowing()){
-                    ToastUtil.showShort(this,"请稍后...");
+                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                    ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
                 BigDecimal b = new BigDecimal(choices);
                 choices = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                if (mqService!=null){
-                    int jog= (int) (choices*10);
-                    boolean success=mqService.sendJog(topicName,mcuVersion,jog);
-                    click=1;
+                if (mqService != null) {
+                    int jog = (int) (choices * 10);
+                    boolean success = mqService.sendJog(topicName, mcuVersion, jog);
+                    click = 1;
                     countTimer.start();
                 }
                 break;
-            case R.id.cb:
+            case R.id.linear_1:
                 checked=cb.isChecked();
                 if (checked){
+                    cb.setChecked(false);
                     choices=1;
+                }else {
+                    choices=1;
+                    cb.setChecked(true);
                     cb2.setChecked(false);
                     cb3.setChecked(false);
                     cb4.setChecked(false);
                     cb5.setChecked(false);
-                }else {
-                    choices=1;
+                    tv_jog_value.setText(choices + "");
+
                 }
                 break;
-            case R.id.tv_1:
-                checked=cb.isChecked();
+            case R.id.linear_2:
+                checked=cb2.isChecked();
                 if (checked){
-                    choices=1;
                     cb2.setChecked(false);
-                    cb3.setChecked(false);
-                    cb4.setChecked(false);
-                    cb5.setChecked(false);
-                }else {
+
                     choices=1;
-                }
-                break;
-            case R.id.cb2:
-                checked=cb2.isChecked();
-                if (checked){
-                    choices=2;
-                    cb.setChecked(false);
-                    cb3.setChecked(false);
-                    cb4.setChecked(false);
-                    cb5.setChecked(false);
                 }else {
-                    choices=1;
-                }
-                break;
-            case R.id.tv_2:
-                checked=cb2.isChecked();
-                if (checked){
                     cb.setChecked(false);
+                    cb2.setChecked(true);
                     cb3.setChecked(false);
                     cb4.setChecked(false);
                     cb5.setChecked(false);
                     choices=2;
-                }else {
-                    choices=1;
+                    tv_jog_value.setText(choices + "");
+
                 }
                 break;
-            case R.id.cb3:
+            case R.id.linear_3:
                 checked=cb3.isChecked();
                 if (checked){
-                    choices=3;
+                    choices=1;
+                    cb3.setChecked(false);
+                }else {
                     cb.setChecked(false);
                     cb2.setChecked(false);
+                    cb3.setChecked(true);
                     cb4.setChecked(false);
                     cb5.setChecked(false);
-                }else {
-                    choices=1;
-                }
-                tv_jog_value.setText(choices+"");
-                break;
-            case R.id.tv_3:
-                checked=cb3.isChecked();
-                if (checked){
+
                     choices=3;
-                    cb.setChecked(false);
-                    cb2.setChecked(false);
-                    cb4.setChecked(false);
-                    cb5.setChecked(false);
-                }else {
-                    choices=1;
+                    tv_jog_value.setText(choices + "");
+
                 }
-                tv_jog_value.setText(choices+"");
                 break;
-            case R.id.cb4:
+            case R.id.linear_4:
                 checked=cb4.isChecked();
                 if (checked){
-                    choices=5;
+                    cb4.setChecked(false);
+                    choices=1;
+
+                }else {
                     cb.setChecked(false);
                     cb2.setChecked(false);
                     cb3.setChecked(false);
+                    cb4.setChecked(true);
                     cb5.setChecked(false);
-                }else {
-                    choices=1;
-                }
-                tv_jog_value.setText(choices+"");
-                break;
-            case R.id.tv_4:
-                checked=cb4.isChecked();
-                if (checked){
                     choices=5;
-                    cb.setChecked(false);
-                    cb2.setChecked(false);
-                    cb3.setChecked(false);
-                    cb5.setChecked(false);
-                }else {
-                    choices=1;
+                    tv_jog_value.setText(choices + "");
                 }
-                tv_jog_value.setText(choices+"");
                 break;
-            case R.id.cb5:
+            case R.id.linear_5:
                 checked=cb5.isChecked();
                 if (checked){
                     choices=10;
+                    cb5.setChecked(false);
+                }else {
                     cb.setChecked(false);
                     cb2.setChecked(false);
                     cb3.setChecked(false);
                     cb4.setChecked(false);
-                }else {
-                    choices=1;
-                }
-                tv_jog_value.setText(choices+"");
-                break;
-            case R.id.tv_5:
-                checked=cb5.isChecked();
-                if (checked){
+                    cb5.setChecked(true);
                     choices=10;
-                    cb.setChecked(false);
-                    cb2.setChecked(false);
-                    cb3.setChecked(false);
-                    cb4.setChecked(false);
-                }else {
-                    choices=1;
+                    tv_jog_value.setText(choices + "");
+
                 }
-                tv_jog_value.setText(choices+"");
-                break;
+
 
         }
     }
@@ -248,28 +255,30 @@ public class JogSetActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (bind){
+        if (bind) {
             unbindService(connection);
         }
-        if (receiver!=null){
+        if (receiver != null) {
             unregisterReceiver(receiver);
         }
         handler.removeCallbacksAndMessages(null);
     }
-    public static boolean running=false;
+
+    public static boolean running = false;
 
     @Override
     protected void onStart() {
         super.onStart();
-        running=true;
+        running = true;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        running=false;
+        running = false;
     }
-    CountTimer countTimer=new CountTimer(2000,1000);
+
+    CountTimer countTimer = new CountTimer(2000, 1000);
 
     class CountTimer extends CountDownTimer {
 
@@ -291,11 +300,12 @@ public class JogSetActivity extends BaseActivity {
 
         @Override
         public void onFinish() {
-            if (popupWindow2!=null && popupWindow2.isShowing()){
+            if (popupWindow2 != null && popupWindow2.isShowing()) {
                 popupWindow2.dismiss();
             }
         }
     }
+
     private PopupWindow popupWindow2;
 
     public void popupmenuWindow3() {
@@ -303,9 +313,10 @@ public class JogSetActivity extends BaseActivity {
             return;
         }
         View view = View.inflate(this, R.layout.progress, null);
-        TextView tv_load=view.findViewById(R.id.tv_load);
+        TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);
@@ -324,15 +335,15 @@ public class JogSetActivity extends BaseActivity {
         //添加按键事件监听
     }
 
-    boolean bind=false;
+    boolean bind = false;
     MQService mqService;
-    ServiceConnection connection=new ServiceConnection() {
+    ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MQService.LocalBinder binder= (MQService.LocalBinder) service;
-            mqService=binder.getService();
-            if (mqService!=null){
-                mqService.getData(topicName,0x44);
+            MQService.LocalBinder binder = (MQService.LocalBinder) service;
+            mqService = binder.getService();
+            if (mqService != null) {
+                mqService.getData(topicName, 0x44);
             }
         }
 
@@ -345,7 +356,7 @@ public class JogSetActivity extends BaseActivity {
 
     MessageReceiver receiver;
 
-    class MessageReceiver extends BroadcastReceiver{
+    class MessageReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -359,20 +370,23 @@ public class JogSetActivity extends BaseActivity {
                 } else {
                     if (macAddress.equals(deviceMac)) {
                         double lineJog = intent.getDoubleExtra("lineJog", 0);
-                        boolean online2=intent.getBooleanExtra("online",false);
-                        online=online2;
-                        choices = lineJog;
-                        tv_jog_value.setText(lineJog + "");
-                        if (click == 1) {
-                            if (popupWindow2 != null && popupWindow2.isShowing()){
-                                popupWindow2.dismiss();
+                        if (intent.hasExtra("lineJog")){
+                            choices = lineJog;
+                            if (click == 1) {
+                                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                                    popupWindow2.dismiss();
+                                    Message msg = handler.obtainMessage();
+                                    msg.what = 1;
+                                    msg.obj = lineJog;
+                                    click = 0;
+                                    handler.sendMessage(msg);
+                                }else {
+                                    setChoices(choices);
+                                }
                             }
-                            Message msg=handler.obtainMessage();
-                            msg.what=1;
-                            msg.obj=lineJog;
-                            click=0;
-                            handler.sendMessage(msg);
                         }
+                        boolean online2 = intent.getBooleanExtra("online", false);
+                        online = online2;
                     }
                 }
             } catch (Exception e) {
@@ -380,16 +394,17 @@ public class JogSetActivity extends BaseActivity {
             }
         }
     }
-    Handler.Callback callback=new Handler.Callback() {
+
+    Handler.Callback callback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            if (msg.what==1){
-                if (mqService!=null){
-                    mqService.starSpeech("控制成功");
-                    Intent intent=new Intent();
-                    double lineJog= (double) msg.obj;
-                    intent.putExtra("jog",lineJog);
-                    setResult(7000,intent);
+            if (msg.what == 1) {
+                if (mqService != null) {
+                    mqService.starSpeech(deviceMac,"控制成功");
+                    Intent intent = new Intent();
+                    double lineJog = (double) msg.obj;
+                    intent.putExtra("jog", lineJog);
+                    setResult(7000, intent);
                     finish();
                 }
             }
@@ -400,12 +415,13 @@ public class JogSetActivity extends BaseActivity {
 
     //自定义点动时间
     JogDialog dialog;
-    private void changeDialog(){
-        if (dialog!=null && dialog.isShowing()){
+
+    private void changeDialog() {
+        if (dialog != null && dialog.isShowing()) {
             return;
         }
-        dialog=new JogDialog(this);
-        dialog.setContent(choices+"");
+        dialog = new JogDialog(this);
+        dialog.setContent(choices + "");
         dialog.setCanceledOnTouchOutside(false);
         backgroundAlpha(0.4f);
         dialog.setOnNegativeClickListener(new JogDialog.OnNegativeClickListener() {
@@ -421,19 +437,21 @@ public class JogSetActivity extends BaseActivity {
                 if (TextUtils.isEmpty(content)) {
                     ToastUtil.show(JogSetActivity.this, "编辑内容不能为空", Toast.LENGTH_SHORT);
                 } else {
-                    boolean isNumber=Utils.isNumeric(content);
-                    if (isNumber){
-                        double jog=Double.parseDouble(content);
-                        if (jog<0.5){
+                    boolean isNumber = Utils.isNumeric(content);
+                    if (isNumber) {
+                        double jog = Double.parseDouble(content);
+                        if (jog < 0.5) {
                             ToastUtil.show(JogSetActivity.this, "点动时间最小为0.5s", Toast.LENGTH_SHORT);
-                        }else if (jog>1000){
+                        } else if (jog > 1000) {
                             ToastUtil.show(JogSetActivity.this, "点动时间最大为999s", Toast.LENGTH_SHORT);
-                        }else {
+                        } else {
                             dialog.dismiss();
-                            choices=jog; ToastUtil.show(JogSetActivity.this, "设置成功，请提交", Toast.LENGTH_SHORT);
+                            choices = jog;
+                            tv_jog_value.setText(choices+"");
+                            ToastUtil.show(JogSetActivity.this, "设置成功，请提交", Toast.LENGTH_SHORT);
                         }
-                    }else {
-                        ToastUtil.showShort(JogSetActivity.this,"内容不是数字");
+                    } else {
+                        ToastUtil.showShort(JogSetActivity.this, "内容不是数字");
                     }
                 }
             }
@@ -446,12 +464,14 @@ public class JogSetActivity extends BaseActivity {
         });
         dialog.show();
     }
+
     //设置蒙版
     private void backgroundAlpha(float f) {
         WindowManager.LayoutParams lp = getWindow().getAttributes();
         lp.alpha = f;
         getWindow().setAttributes(lp);
     }
+
     @Override
     public void doBusiness(Context mContext) {
 

@@ -80,11 +80,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white">
-
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_lines"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/dp_160"
+                    android:layout_height="@dimen/dp_150"
                     android:layout_marginLeft="@dimen/dp_15"
                     android:layout_marginTop="@dimen/dp_10"
                     android:orientation="horizontal"
@@ -104,8 +103,8 @@
 
                 <ImageView
                     android:id="@+id/img_all_close2"
-                    android:layout_width="@dimen/dp_85"
-                    android:layout_height="@dimen/dp_85"
+                    android:layout_width="@dimen/dp_80"
+                    android:layout_height="@dimen/dp_80"
                     android:layout_marginLeft="@dimen/dp_28"
                     android:layout_marginTop="@dimen/dp_15"
                     android:scaleType="centerCrop"
@@ -127,8 +126,8 @@
 
                 <ImageView
                     android:id="@+id/img_all_open2"
-                    android:layout_width="@dimen/dp_85"
-                    android:layout_height="@dimen/dp_85"
+                    android:layout_width="@dimen/dp_80"
+                    android:layout_height="@dimen/dp_80"
                     android:layout_alignTop="@+id/img_all_close2"
                     android:layout_centerHorizontal="true"
                     android:scaleType="centerCrop"
@@ -150,8 +149,8 @@
 
                 <ImageView
                     android:id="@+id/img_all_jog2"
-                    android:layout_width="@dimen/dp_85"
-                    android:layout_height="@dimen/dp_85"
+                    android:layout_width="@dimen/dp_80"
+                    android:layout_height="@dimen/dp_80"
                     android:layout_alignTop="@+id/img_all_close2"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="@dimen/dp_28"
@@ -198,7 +197,9 @@
                         android:layout_alignBottom="@+id/img_switch2"
                         android:layout_marginTop="@dimen/dp_35"
                         android:gravity="center"
-                        android:text="关" />
+                        android:text="开"
+                        android:textSize="@dimen/sp_16"
+                        />
 
                     <RelativeLayout
                         android:id="@+id/rl_bottom3"
@@ -250,7 +251,7 @@
             <TextView
                 android:id="@+id/tv_state2"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_35"
+                android:layout_height="@dimen/dp_30"
                 android:layout_alignParentBottom="true"
                 android:gravity="center"
                 android:text="0A/0V/0W"

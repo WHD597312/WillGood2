@@ -20,7 +20,6 @@ import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.device.DeviceListActivity;
-import com.peihou.willgood2.location.LocationActivity;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.pojo.UserInfo;
 import com.peihou.willgood2.utils.Mobile;
@@ -82,10 +81,12 @@ public class LoginActivity extends BaseActivity {
                     sharedPreferences.edit().remove("password").commit();
                     password="";
                 }else if (exit==0){
-                    params.clear();
-                    params.put("phone",phone);
-                    params.put("password",password);
-                    new LoginAsync(LoginActivity.this).execute(params);
+                    int userId=sharedPreferences.getInt("userId",0);
+                    Intent intent=new Intent(LoginActivity.this,DeviceListActivity.class);
+                    intent.putExtra("login",1);
+                    intent.putExtra("userId",userId);
+                    startActivity(intent);
+//                    new LoginAsync(LoginActivity.this).execute(params);
 //                    startActivity(DeviceListActivity.class);
                 }
             }catch (Exception e){
@@ -300,7 +301,11 @@ public class LoginActivity extends BaseActivity {
                             int userId=sharedPreferences.getInt("userId",0);
                             params.clear();
                             params.put("userId",userId);
-                            new LoadDeviceListAsync(LoginActivity.this).execute(params);
+                            Intent intent=new Intent(LoginActivity.this,DeviceListActivity.class);
+                            intent.putExtra("login",1);
+                            intent.putExtra("userId",userId);
+                            startActivity(intent);
+//                            new LoadDeviceListAsync(LoginActivity.this).execute(params);
                         }
                     }catch (Exception e){
                         e.printStackTrace();

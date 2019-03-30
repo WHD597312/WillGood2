@@ -70,6 +70,8 @@ public class ChangeDialog extends Dialog {
             et_name.setBackgroundColor(Color.parseColor("#f5f5f5"));
             if (inputType==2){
                 et_name.setInputType(InputType.TYPE_CLASS_NUMBER);
+            }else if (inputType==3){
+                et_name.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
             }
         }else if (mode==1){
             et_name.setTextSize(20);

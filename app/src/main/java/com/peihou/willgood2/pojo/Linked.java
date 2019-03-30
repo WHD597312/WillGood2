@@ -10,7 +10,6 @@ import java.io.Serializable;
 @Entity
 public class Linked implements Serializable {
 
-    static final long serialVersionUID = 42L;
 
 
     @Id(autoincrement = true)
@@ -28,7 +27,8 @@ public class Linked implements Serializable {
     private int triType;//触发类型 0为单次触发，1为循环触发
     private int state;//联动的状态 0关闭，1打开，2删除
     private int analog;//模拟量 0,1,2,3,4,5,6,7 0-3为电流1-4,   4-7为电压1-4
-
+    private int switchLine;//开关量线路
+    private int visitity;//数据是否显示 0不显示1，不显示
 
     /**
      *
@@ -92,9 +92,9 @@ public class Linked implements Serializable {
 
 
 
-    @Generated(hash = 1555540742)
+    @Generated(hash = 1928273482)
     public Linked(Long id, String deviceMac, int mcuVersion, int type, String lines, String name, int condition, int triState, int conditionState, int preLines,
-            int lastLines, int triType, int state, int analog) {
+            int lastLines, int triType, int state, int analog, int switchLine, int visitity) {
         this.id = id;
         this.deviceMac = deviceMac;
         this.mcuVersion = mcuVersion;
@@ -109,9 +109,9 @@ public class Linked implements Serializable {
         this.triType = triType;
         this.state = state;
         this.analog = analog;
+        this.switchLine = switchLine;
+        this.visitity = visitity;
     }
-
-
 
     public int getType() {
         return type;
@@ -247,6 +247,22 @@ public class Linked implements Serializable {
 
     public void setTriState(int triState) {
         this.triState = triState;
+    }
+
+    public int getSwitchLine() {
+        return this.switchLine;
+    }
+
+    public void setSwitchLine(int switchLine) {
+        this.switchLine = switchLine;
+    }
+
+    public int getVisitity() {
+        return this.visitity;
+    }
+
+    public void setVisitity(int visitity) {
+        this.visitity = visitity;
     }
 
 

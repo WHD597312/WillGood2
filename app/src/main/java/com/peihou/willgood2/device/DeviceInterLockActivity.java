@@ -8,11 +8,15 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,9 +34,14 @@ import com.peihou.willgood2.pojo.Line2;
 import com.peihou.willgood2.pojo.Lock;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.TenTwoUtil;
+import com.peihou.willgood2.utils.ToastUtil;
+import com.peihou.willgood2.utils.WeakRefHandler;
 import com.peihou.willgood2.utils.decoding.Intents;
+import com.peihou.willgood2.utils.http.BaseWeakAsyncTask;
+import com.peihou.willgood2.utils.http.HttpUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,12 +61,15 @@ public class DeviceInterLockActivity extends BaseActivity {
     private DeviceLineDaoImpl deviceLineDao;//设备线路表的操纵对象
     private Device device;//设备
     private DeviceDaoImpl deviceDao;//设备表的操作对象
-    int voice;
+
+    private int userId;
+    private boolean online;
     @Override
     public void initParms(Bundle parms) {
         deviceId=parms.getLong("deviceId");
         deviceMac=parms.getString("deviceMac");
-        voice=parms.getInt("voice");
+        online=parms.getBoolean("online");
+        userId=parms.getInt("userId");
     }
 
     @Override
@@ -72,7 +84,7 @@ public class DeviceInterLockActivity extends BaseActivity {
         deviceLineDao=new DeviceLineDaoImpl(getApplicationContext());
         device=deviceDao.findDeviceById(deviceId);
         List<Line2> lockLineList=deviceLineDao.findDeviceLines(deviceId);
-        Map<String,String> map=deviceLineDao.findInterLockLine(deviceId);
+        Map<String,String> map=deviceLineDao.findInterLockLine(deviceMac);
         topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         for(Map.Entry<String,String> entry:map.entrySet()){
@@ -107,16 +119,19 @@ public class DeviceInterLockActivity extends BaseActivity {
 
         receiver=new MessageReceiver();
         IntentFilter filter=new IntentFilter("DeviceInterLockActivity");
+        filter.addAction("offline");
         registerReceiver(receiver,filter);
     }
     @OnClick({R.id.img_back})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
+                updates();
                 finish();
                 break;
         }
     }
+
     public static boolean running=false;
 
     @Override
@@ -131,6 +146,26 @@ public class DeviceInterLockActivity extends BaseActivity {
         running=false;
     }
 
+    @Override
+    public void onBackPressed() {
+        updates();
+        super.onBackPressed();
+    }
+
+    private void updates(){
+        List<Line2> list=deviceLineDao.findDeviceLines(deviceMac);
+        for (int i = 0; i <list.size() ; i++) {
+            Line2 line2=list.get(i);
+            line2.setVisitity(0);
+            list.set(i,line2);
+        }
+        if (mqService!=null && !list.isEmpty()){
+            mqService.updateLines(list);
+        }
+    }
+
+    int num1=0;
+    int num2=0;
     int click=0;
     @Override
     public void doBusiness(Context mContext) {
@@ -180,6 +215,11 @@ public class DeviceInterLockActivity extends BaseActivity {
             holder.tv_positive.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (!online){
+                        mqService.getData(topicName,0x11);
+                        ToastUtil.showShort(DeviceInterLockActivity.this,"设备已离线");
+                        return;
+                    }
                     int deviceLineNum=interLock.getDeviceLineNum();
                     int deviceLineNum2=interLock.getDeviceLineNum2();
                     int prelineSwitch=device.getPrelineswitch();
@@ -188,13 +228,20 @@ public class DeviceInterLockActivity extends BaseActivity {
                     int[] lastLineSwitch=TenTwoUtil.changeToTwo(lastlineSwitch);
                     if (deviceLineNum<=8){
                         preLineSwitch[deviceLineNum-1]=1;
+                        num1=deviceLineNum;
                     }else if (deviceLineNum>8){
                         lastLineSwitch[deviceLineNum-9]=1;
+                        num1=deviceLineNum;
+
                     }
                     if (deviceLineNum2<=8){
                         preLineSwitch[deviceLineNum2-1]=0;
+                        num2=deviceLineNum2;
+
                     }else if (deviceLineNum2>8){
                         lastLineSwitch[deviceLineNum2-9]=0;
+                        num2=deviceLineNum2;
+
                     }
 
                     prelineSwitch=TenTwoUtil.changeToTen2(preLineSwitch);
@@ -204,8 +251,7 @@ public class DeviceInterLockActivity extends BaseActivity {
                     if (mqService!=null){
                         boolean success=mqService.sendBasic(topicName,device);
                         countTimer.start();
-                        if (voice==1)
-                            click=1;
+                        click=1;
                         if (success){
 
 //                            interLock.setOperate(1);
@@ -226,13 +272,17 @@ public class DeviceInterLockActivity extends BaseActivity {
                     int[] lastLineSwitch=TenTwoUtil.changeToTwo(lastlineSwitch);
                     if (deviceLineNum<=8){
                         preLineSwitch[deviceLineNum-1]=0;
+
                     }else if (deviceLineNum>8){
                         lastLineSwitch[deviceLineNum-9]=0;
+
                     }
                     if (deviceLineNum2<8){
                         preLineSwitch[deviceLineNum2-1]=0;
+
                     }else if (deviceLineNum2>=8){
                         lastLineSwitch[deviceLineNum2-9]=0;
+
                     }
 
                     prelineSwitch=TenTwoUtil.changeToTen2(preLineSwitch);
@@ -263,13 +313,20 @@ public class DeviceInterLockActivity extends BaseActivity {
                     int[] lastLineSwitch=TenTwoUtil.changeToTwo(lastlineSwitch);
                     if (deviceLineNum<=8){
                         preLineSwitch[deviceLineNum-1]=0;
+                        num2=deviceLineNum;
+
                     }else if (deviceLineNum>8){
                         lastLineSwitch[deviceLineNum-9]=0;
+                        num2=deviceLineNum;
+
                     }
                     if (deviceLineNum2<=8){
                         preLineSwitch[deviceLineNum2-1]=1;
+                        num1=deviceLineNum2;
+
                     }else if (deviceLineNum2>8){
                         lastLineSwitch[deviceLineNum2-9]=1;
+                        num1=deviceLineNum2;
                     }
 
                     prelineSwitch=TenTwoUtil.changeToTen2(preLineSwitch);
@@ -279,7 +336,6 @@ public class DeviceInterLockActivity extends BaseActivity {
                     if (mqService!=null){
                         boolean success=mqService.sendBasic(topicName,device);
                         countTimer.start();
-
                         click=1;
 //                        if (success){
 //                            interLock.setOperate(2);
@@ -321,8 +377,49 @@ public class DeviceInterLockActivity extends BaseActivity {
         if (receiver!=null){
             unregisterReceiver(receiver);
         }
+        handler.removeCallbacksAndMessages(null);
     }
 
+    class AddOperationLogAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, DeviceInterLockActivity> {
+
+        public AddOperationLogAsync(DeviceInterLockActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected Integer doInBackground(DeviceInterLockActivity activity, Map<String, Object>... maps) {
+            try {
+                Map<String, Object> params = maps[0];
+                int open= (int) params.get("open");
+                int close= (int) params.get("close");
+                params.clear();
+                params.put("deviceMac", deviceMac);
+                params.put("deviceControll", 1);
+                params.put("deviceLogType", 1);
+                params.put("deviceLine",open+"");
+                params.put("userId", userId);
+                String url = HttpUtils.ipAddress + "data/addOperationLog";
+                String result = HttpUtils.requestPost(url, params);
+
+
+                params.put("deviceControll", 2);
+                params.put("deviceLine",close+"");
+                String result2 = HttpUtils.requestPost(url, params);
+                Log.i("AddOperationLogAsync", "-->" + result);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(DeviceInterLockActivity activity, Integer integer) {
+
+        }
+    }
+
+    StringBuffer sb=new StringBuffer();
+    StringBuffer sb2=new StringBuffer();
     MessageReceiver receiver;
     class MessageReceiver extends BroadcastReceiver{
 
@@ -330,47 +427,75 @@ public class DeviceInterLockActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
             try {
                 String macAddress=intent.getStringExtra("macAddress");
-                if (macAddress.equals(deviceMac)){
-                    if (mqService!=null){
-                        List<Line2> lockLineList=mqService.getDeviceLines(deviceMac);
-                        Map<String,String> map=mqService.getDeviceInterLock(deviceMac);
-                        list.clear();
-                        if (click==1){
-                            mqService.starSpeech("控制成功");
-                            click=0;
-                        }
-                        for(Map.Entry<String,String> entry:map.entrySet()){
-                            String key=entry.getKey();
-                            String [] s=key.split("&");
-                            int deviceLineNum=Integer.parseInt(s[0]);
-                            int deviceLineNum2=Integer.parseInt(s[1]);
-                            Line2 line=lockLineList.get(deviceLineNum-1);
-                            Line2 line2=lockLineList.get(deviceLineNum2-1);
-                            String name=line.getName();
-                            String name2=line2.getName();
-                            boolean open1=line.getOpen();
-                            boolean open2=line2.getOpen();
-                            int state=open1?1:0;
-                            int state2=open2?1:0;
-                            int operate=0;//互锁线路的正，停，反 0停，1正，2反
-                            if (state==1 && state2==0)
-                                operate=1;
-                            else if (state==0 && state2==1){
-                                operate=2;
-                            }else if (state==0 && state2==0){
-                                operate=0;
+                String action=intent.getAction();
+                if ("offline".equals(action)){
+                    if (intent.hasExtra("all") || deviceMac.equals(macAddress))
+                    online=false;
+                }else {
+                    if (macAddress.equals(deviceMac)){
+                        online=true;
+                        if (mqService!=null){
+                            List<Line2> lockLineList=mqService.getDeviceLines(deviceMac);
+                            Map<String,String> map=mqService.getDeviceInterLock(deviceMac);
+                            list.clear();
+                            if (click==1){
+                                handler.sendEmptyMessage(0);
+                                mqService.starSpeech(macAddress,"控制成功");
+                                click=0;
                             }
-                            list.add( new InterLock(name,name2,deviceLineNum,deviceLineNum2,operate));
+                            sb.setLength(0);
+                            sb2.setLength(0);
+                            for(Map.Entry<String,String> entry:map.entrySet()){
+                                String key=entry.getKey();
+                                String [] s=key.split("&");
+                                int deviceLineNum=Integer.parseInt(s[0]);
+                                int deviceLineNum2=Integer.parseInt(s[1]);
+                                Line2 line=lockLineList.get(deviceLineNum-1);
+                                Line2 line2=lockLineList.get(deviceLineNum2-1);
+                                String name=line.getName();
+                                String name2=line2.getName();
+                                boolean open1=line.getOpen();
+                                boolean open2=line2.getOpen();
+                                int state=open1?1:0;
+                                int state2=open2?1:0;
+                                int operate=0;//互锁线路的正，停，反 0停，1正，2反
+                                if (state==1 && state2==0) {
+                                    operate = 1;
+                                }
+                                else if (state==0 && state2==1){
+                                    operate=2;
+                                }else if (state==0 && state2==0){
+                                    operate=0;
+                                }
+                                list.add( new InterLock(name,name2,deviceLineNum,deviceLineNum2,operate));
+                            }
+                            adapter.notifyDataSetChanged();
                         }
-                        adapter.notifyDataSetChanged();
-                    }
 
+                    }
                 }
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+    Map<String,Object> operateLog=new HashMap<>();
+    Handler.Callback mCallback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+                operateLog.clear();
+                if (num1!=0 && num2!=0){
+                    operateLog.put("open",num1);
+                    operateLog.put("close",num2);
+                    num1=0;
+                    num2=0;
+                    new AddOperationLogAsync(DeviceInterLockActivity.this).execute(operateLog);
+            }
+
+            return true;
+        }
+    };
+    Handler handler = new WeakRefHandler(mCallback);
     private boolean bind=false;
     MQService mqService;
     ServiceConnection connection=new ServiceConnection() {
@@ -380,6 +505,7 @@ public class DeviceInterLockActivity extends BaseActivity {
             mqService=binder.getService();
             if (mqService!=null){
                 mqService.getData(topicName,0x46);
+                countTimer.start();
             }
         }
 
@@ -424,7 +550,8 @@ public class DeviceInterLockActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

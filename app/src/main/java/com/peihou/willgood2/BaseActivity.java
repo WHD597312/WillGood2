@@ -21,7 +21,6 @@ import com.peihou.willgood2.utils.LogUtil;
 import com.peihou.willgood2.utils.SharedPreferencesHelper;
 import com.peihou.willgood2.utils.StatusBarUtil;
 import com.peihou.willgood2.utils.ToastUtil;
-import com.tencent.bugly.beta.Beta;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -39,7 +38,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     private boolean isDebug;
     private String APP_NAME;
     protected final String TAG = this.getClass().getSimpleName();
-    SharedPreferencesHelper sharedPreferencesHelper;
     Unbinder unbinder;
     MyApplication application;
     @Override
@@ -48,18 +46,15 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         application = (MyApplication) getApplication();
         application.addActivity(this);
-        sharedPreferencesHelper=new SharedPreferencesHelper(this,"my");
-        isDebug = application.isDebug;
-        APP_NAME = application.APP_NAME;
 
-        $Log(TAG + "-->onCreate()");
+        Log.i("BaseActivity","-->"+"onCreate");
         if (getSupportActionBar() != null){
             getSupportActionBar().hide();
         }
         try {
             Bundle bundle = getIntent().getExtras();
             if(bundle!=null)
-            initParms(bundle);
+                initParms(bundle);
             mContextView = LayoutInflater.from(this)
                     .inflate(bindLayout(), null);
 //            if (mAllowFullScreen) {
@@ -139,9 +134,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed() {
+        Log.i("sssss","-->onBackPressed2");
         super.onBackPressed();
-        if (application!=null)
+
+        if (application!=null){
+            Log.i("sssss","-->onBackPressed");
             application.removeActivity(this);
+        }
     }
 
     /**
@@ -295,80 +294,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         this.isAllowScreenRoate = isAllowScreenRoate;
     }
 
-    /**
-     * [日志输出]
-     *
-     * @param msg
-     */
-    protected void $Log(String msg) {
-        if (isDebug) {
-            Log.d(APP_NAME, msg);
-        }
-    }
-
-    /**
-     * [防止快速点击]
-     *
-     * @return
-     */
-    private boolean fastClick() {
-        long lastClick = 0;
-        if (System.currentTimeMillis() - lastClick <= 1000) {
-            return false;
-        }
-        lastClick = System.currentTimeMillis();
-        return true;
-    }
-
-    public int getType() {
-        int userId= (int) sharedPreferencesHelper.getSharedPreference("type",0);
-        return userId ;
-    }
 
 
-    public int getUid() {
-        int userId= (int) sharedPreferencesHelper.getSharedPreference("id",0);
-        return userId ;
-    }
-
-    public String getName() {
-        String name= (String) sharedPreferencesHelper.getSharedPreference("name","");
-        return name ;
-    }
-
-    public String getNumber() {
-        String number= (String) sharedPreferencesHelper.getSharedPreference("number","");
-        return number ;
-    }
-
-
-    public String getLivingAddress() {
-        String livingAddress= (String) sharedPreferencesHelper.getSharedPreference("livingAddress","");
-        return livingAddress ;
-    }
-
-    public int getLoginType() {
-
-        int loginType= (int) sharedPreferencesHelper.getSharedPreference("loginType",0);
-        return loginType ;
-    }
-
-    public int getTradeId() {
-        int tradeId= (int) sharedPreferencesHelper.getSharedPreference("tradeId",0);
-        return tradeId ;
-    }
-
-    public String getPassword() {
-        String password= (String) sharedPreferencesHelper.getSharedPreference("password","");
-        return password ;
-    }
-
-    public void toast(String text) {
-        ToastUtil.showLong(this,text);
-    }
-
-    public void toast(int resId) {
-        ToastUtil.showShort(this,String.valueOf(resId));
-    }
 
 }

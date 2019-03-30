@@ -147,6 +147,10 @@ public class LinkedSetActivity extends BaseActivity {
         slide_bar.setTypeface(Typeface.DEFAULT_BOLD);
 //        slide_bar.setValue(40);
 //        slide_bar.setLineRight(40);
+        if (type==0){
+            slide_bar.setLineLeft(-128);
+            slide_bar.setLineRight(99);
+        }
         slide_bar.setIndicatorTextDecimalFormat("0");
         slide_bar.setTickMarkTextColor(getResources().getColor(R.color.white));
 
@@ -201,50 +205,36 @@ public class LinkedSetActivity extends BaseActivity {
                         String name = line2.getName();
                         if (deviceLineNum < 8) {
                             if (line2.isOnClick()) {
-                                pre[deviceLineNum] = 1;
+                                pre[7 - deviceLineNum] = 1;
                                 sb.append(name + ",");
                             } else {
-                                pre[deviceLineNum] = 0;
+                                pre[7 - deviceLineNum] = 0;
                             }
                         } else if (deviceLineNum >= 8) {
                             if (line2.isOnClick()) {
-                                last[(deviceLineNum - 8)] = 1;
+                                last[7 - (deviceLineNum - 8)] = 1;
                                 sb.append(name + ",");
                             } else {
-                                last[(deviceLineNum - 8)] = 0;
+                                last[7 - (deviceLineNum - 8)] = 0;
                             }
                         }
-
-                        preLines = TenTwoUtil.changeToTen2(pre);
-                        lastLines = TenTwoUtil.changeToTen2(last);
-                        if (preLines == 0 && preLines == 0) {
-                            ToastUtil.showShort(this, "请选择线路");
-                            break;
-                        }
-                        MoniLink moniLink = new MoniLink(moniType, analog, value, condition, preLines, lastLines, controlState, touch, 1, deviceMac, 0);
-                        Intent intent = new Intent();
-                        intent.putExtra("moniLink", moniLink);
-                        setResult(1001, intent);
-                        finish();
                     }
+                    preLines = TenTwoUtil.changeToTen2(pre);
+                    lastLines = TenTwoUtil.changeToTen2(last);
+                    Log.i("lines","-->"+preLines+","+lastLines);
+
+                    if (preLines+lastLines == 0) {
+                        ToastUtil.showShort(this, "请选择线路");
+                        break;
+                    }
+                    touch=touch==1?0:1;
+                    MoniLink moniLink = new MoniLink(moniType, analog, value, condition, preLines, lastLines, controlState, touch, 1, deviceMac, 0);
+                    Intent intent = new Intent();
+                    intent.putExtra("moniLink", moniLink);
+                    setResult(1001, intent);
+                    finish();
                 } else {
                     Linked linked2 = null;
-                    sb.setLength(0);
-                    List<Linked> linkeds = deviceLinkDao.findLinkeds(deviceMac, type);
-                    if (linkeds != null && !linkeds.isEmpty()) {
-                        int size = linkeds.size();
-                        if (type == 5) {
-
-                        } else {
-                            s = s + size;
-                        }
-                    } else if (linkeds == null || linkeds.isEmpty()) {
-                        if (type == 5) {
-
-                        } else {
-                            s = s + 1;
-                        }
-                    }
                     for (int i = 0; i < lines.size(); i++) {
                         Line2 line2 = lines.get(i);
                         int deviceLineNum = line2.getDeviceLineNum() - 1;
@@ -267,22 +257,13 @@ public class LinkedSetActivity extends BaseActivity {
                     }
                     preLines = TenTwoUtil.changeToTen(pre);
                     lastLines = TenTwoUtil.changeToTen(last);
-                    if (preLines == 0 && preLines == 0) {
+                    Log.i("lines","-->"+preLines+","+lastLines);
+                    if (preLines+lastLines == 0) {
                         ToastUtil.showShort(this, "请选择线路");
                         break;
                     }
-
-                    Linked linked = new Linked(deviceMac, type, s, value, condition, controlState, 1, preLines, lastLines, touch);
-                    String lines = sb.toString() + "";
-                    if (!TextUtils.isEmpty(lines)) {
-                        char ch = lines.charAt(lines.length() - 1);
-                        if (',' == ch) {
-                            lines = lines.substring(0, lines.length() - 1);
-                        }
-                    } else {
-                        lines = "";
-                    }
-                    linked.setLines(lines);
+                    touch=touch==1?0:1;
+                    Linked linked = new Linked(deviceMac, type, "", value, condition, controlState, 1, preLines, lastLines, touch);
                     Intent intent = new Intent();
                     intent.putExtra("linked", linked);
                     setResult(1000, intent);
@@ -360,11 +341,11 @@ public class LinkedSetActivity extends BaseActivity {
         if (touch == 0) {
             btn_once.setTextColor(getResources().getColor(R.color.base_back));
             btn_once.setBackground(getResources().getDrawable(R.drawable.shape_loop));
-            btn_loop.setTextColor(getResources().getColor(R.color.white));
-            btn_loop.setBackgroundColor(0);
+            btn_loop.setTextColor(getResources().getColor(R.color.gray2));
+            btn_loop.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         } else if (touch == 1) {
-            btn_once.setTextColor(getResources().getColor(R.color.white));
-            btn_once.setBackgroundColor(0);
+            btn_once.setTextColor(getResources().getColor(R.color.gray2));
+            btn_once.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btn_loop.setTextColor(getResources().getColor(R.color.base_back));
             btn_loop.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
@@ -374,11 +355,11 @@ public class LinkedSetActivity extends BaseActivity {
         if (condition == 0) {
             btn_low.setTextColor(getResources().getColor(R.color.base_back));
             btn_low.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            btn_high.setTextColor(getResources().getColor(R.color.white));
-            btn_high.setBackgroundColor(0);
+            btn_high.setTextColor(getResources().getColor(R.color.gray2));
+            btn_high.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         } else if (condition == 1) {
-            btn_low.setTextColor(getResources().getColor(R.color.white));
-            btn_low.setBackgroundColor(0);
+            btn_low.setTextColor(getResources().getColor(R.color.gray2));
+            btn_low.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btn_high.setTextColor(getResources().getColor(R.color.base_back));
             btn_high.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
@@ -390,11 +371,11 @@ public class LinkedSetActivity extends BaseActivity {
         if (controlState == 1) {
             btn_open.setTextColor(getResources().getColor(R.color.base_back));
             btn_open.setBackground(getResources().getDrawable(R.drawable.shape_once));
-            btn_close.setTextColor(getResources().getColor(R.color.white));
-            btn_close.setBackgroundColor(0);
+            btn_close.setTextColor(getResources().getColor(R.color.gray2));
+            btn_close.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
         } else if (controlState == 0) {
-            btn_open.setTextColor(getResources().getColor(R.color.white));
-            btn_open.setBackgroundColor(0);
+            btn_open.setTextColor(getResources().getColor(R.color.gray2));
+            btn_open.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             btn_close.setTextColor(getResources().getColor(R.color.base_back));
             btn_close.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
@@ -429,7 +410,7 @@ public class LinkedSetActivity extends BaseActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder viewHolder = null;
             if (convertView == null) {
-                convertView = View.inflate(context, R.layout.item_line2, null);
+                convertView = View.inflate(context, R.layout.item_line, null);
                 viewHolder = new ViewHolder(convertView);
                 convertView.setTag(viewHolder);
             } else {
@@ -446,7 +427,7 @@ public class LinkedSetActivity extends BaseActivity {
 
             } else {
                 viewHolder.tv_line.setTextColor(getResources().getColor(R.color.gray2));
-                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_once));
+                viewHolder.tv_line.setBackground(getResources().getDrawable(R.drawable.shape_gray3));
             }
             return convertView;
         }

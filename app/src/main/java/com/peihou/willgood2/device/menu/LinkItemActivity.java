@@ -113,6 +113,19 @@ public class LinkItemActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_back:
+                if (mqService!=null){
+                    if (type==5){
+                        if (!moniLinks.isEmpty()){
+                            List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
+                            mqService.updateMoniLinks(moniLinkList);
+                        }
+                    }else {
+                        if (!list.isEmpty()){
+                            List<Linked> linkeds=updateLinkeds(list);
+                            mqService.updateLinkeds(linkeds);
+                        }
+                    }
+                }
                 finish();
                 break;
             case R.id.img_add:
@@ -123,14 +136,23 @@ public class LinkItemActivity extends BaseActivity {
                     intent.putExtra("deviceId", deviceId);
                     startActivityForResult(intent, 1000);
                 } else {
-                    Intent intent = new Intent(LinkItemActivity.this, LinkedSetActivity.class);
-                    intent.putExtra("type", type);
-                    intent.putExtra("deviceMac", deviceMac);
-                    intent.putExtra("deviceId", deviceId);
-                    if (type == 5) {
-                        intent.putExtra("analog", analog);
+                    if (type==0){
+                        Intent intent = new Intent(LinkItemActivity.this, TempLinkedSetActivity.class);
+                        intent.putExtra("type", type);
+                        intent.putExtra("deviceMac", deviceMac);
+                        intent.putExtra("deviceId", deviceId);
+                        startActivityForResult(intent, 1001);
+                    }else {
+                        Intent intent = new Intent(LinkItemActivity.this, LinkedSetActivity.class);
+                        intent.putExtra("type", type);
+                        intent.putExtra("deviceMac", deviceMac);
+                        intent.putExtra("deviceId", deviceId);
+                        if (type == 5) {
+                            intent.putExtra("analog", analog);
+                        }
+                        startActivityForResult(intent, 1001);
+
                     }
-                    startActivityForResult(intent, 1001);
                 }
                 break;
         }
@@ -176,6 +198,40 @@ public class LinkItemActivity extends BaseActivity {
     public static boolean running = false;
 
     @Override
+    public void onBackPressed() {
+        if (mqService!=null){
+            if (type==5){
+                if (!moniLinks.isEmpty()){
+                    List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
+                    mqService.updateMoniLinks(moniLinkList);
+                }
+            }else {
+                if (!list.isEmpty()){
+                    List<Linked> linkeds=updateLinkeds(list);
+                    mqService.updateLinkeds(linkeds);
+                }
+            }
+        }
+        super.onBackPressed();
+    }
+    private List<Linked> updateLinkeds(List<Linked> linkeds){
+        for (int i = 0; i <linkeds.size() ; i++) {
+            Linked linked=linkeds.get(i);
+            linked.setVisitity(0);
+            linkeds.set(i,linked);
+        }
+        return linkeds;
+    }
+
+    private List<MoniLink> updateMoniLink(List<MoniLink> moniLinks){
+        for (int i = 0; i <moniLinks.size() ; i++) {
+            MoniLink moniLink=moniLinks.get(i);
+            moniLink.setVisitity(0);
+            moniLinks.set(i,moniLink);
+        }
+        return moniLinks;
+    }
+    @Override
     protected void onStart() {
         super.onStart();
         running = true;
@@ -209,6 +265,7 @@ public class LinkItemActivity extends BaseActivity {
                     funCode = 0x39;
                 }
                 mqService.getData(topicName, funCode);
+                countTimer.start();
             }
         }
 
@@ -228,7 +285,7 @@ public class LinkItemActivity extends BaseActivity {
                 String action=intent.getAction();
                 if ("offline".equals(action)){
                     String macAddress = intent.getStringExtra("macAddress");
-                    if (macAddress.equals(deviceMac)) {
+                    if (intent.hasExtra("all") || macAddress.equals(deviceMac)) {
                         online=false;
                     }
                 }else {
@@ -241,9 +298,9 @@ public class LinkItemActivity extends BaseActivity {
                     if (macAddress.equals(deviceMac) && linkType == type) {
                         int operate = intent.getIntExtra("operate", 0);
                         if (operate == 1) {
-                            mqService.starSpeech("删除成功");
+                            mqService.starSpeech(deviceMac,"删除成功");
                         } else {
-                            mqService.starSpeech("设置成功");
+                            mqService.starSpeech(deviceMac,"设置成功");
                         }
                         if (intent.hasExtra("linkTypeNum") && intent.hasExtra("moniType")) {
                             int moniType2 = intent.getIntExtra("moniType", -1);
@@ -421,6 +478,8 @@ public class LinkItemActivity extends BaseActivity {
                 @Override
                 public void onClick(View v) {
                     if (!online){
+                        mqService.getData(topicName,0x11);
+
                         ToastUtil.showShort(LinkItemActivity.this,"设备已离线");
                         return;
                     }
@@ -570,7 +629,6 @@ public class LinkItemActivity extends BaseActivity {
                     funCode = 0x38;
                 }
                 returnData = 1;
-                mqService.getData(topicName, funCode);
                 Linked linked = (Linked) data.getSerializableExtra("linked");
                 if (linked != null) {
                     mqService.sendLinkedSet(topicName, linked);
@@ -632,7 +690,8 @@ public class LinkItemActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

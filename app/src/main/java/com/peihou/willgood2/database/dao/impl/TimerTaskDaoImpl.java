@@ -27,6 +27,14 @@ public class TimerTaskDaoImpl {
         session=master.newSession();
         taskDao=session.getTimerTaskDao();
     }
+
+    /**
+     * 批量更新定时
+     * @param timerTasks
+     */
+    public void updateTimers(List<TimerTask> timerTasks){
+        taskDao.updateInTx(timerTasks);
+    }
     public void insert(TimerTask timerTask){
         taskDao.insert(timerTask);
     }
@@ -40,7 +48,13 @@ public class TimerTaskDaoImpl {
         return taskDao.queryBuilder().where(TimerTaskDao.Properties.DeviceId.eq(deviceId)).list();
     }
     public List<TimerTask> findDeviceTimeTask(String deviceMac){
-        return taskDao.queryBuilder().where(TimerTaskDao.Properties.DeviceMac.eq(deviceMac)).list();
+        WhereCondition whereCondition=taskDao.queryBuilder().and(TimerTaskDao.Properties.DeviceMac.eq(deviceMac),TimerTaskDao.Properties.Visitity.eq(1));
+        return taskDao.queryBuilder().where(whereCondition).list();
+    }
+    public void deleteTimers(String deviceMac){
+        List<TimerTask> timerTasks=findDeviceTimeTask(deviceMac);
+        if (timerTasks!=null &&!timerTasks.isEmpty())
+            taskDao.deleteInTx(timerTasks);
     }
 
     /**
@@ -75,6 +89,27 @@ public class TimerTaskDaoImpl {
                 TimerTaskDao.Properties.Day.eq(day),TimerTaskDao.Properties.Hour.eq(hour),TimerTaskDao.Properties.Min.eq(min),
                 TimerTaskDao.Properties.Prelines.eq(prelines),TimerTaskDao.Properties.Lastlines.eq(lastlines));
         return taskDao.queryBuilder().where(whereCondition).unique();
+    }
+
+    /**
+     * 找出单次定时中比当前时间小的定时
+     * @param deviceMac
+     * @param seconds
+     * @return
+     */
+    public List<TimerTask> findPreTimers(String deviceMac,long seconds){
+        WhereCondition whereCondition=taskDao.queryBuilder().and(
+                TimerTaskDao.Properties.DeviceMac.eq(deviceMac),TimerTaskDao.Properties.Choice.eq(0x11),
+                TimerTaskDao.Properties.Seconds.le(seconds));
+        return taskDao.queryBuilder().where(whereCondition).list();
+    }
+
+    /**
+     * 批量删除定时
+     * @param timerTasks
+     */
+    public void deleteTimers(List<TimerTask> timerTasks){
+        taskDao.deleteInTx(timerTasks);
     }
     public void deleteAll(){
         taskDao.deleteAll();

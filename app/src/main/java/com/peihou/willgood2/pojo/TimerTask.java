@@ -32,6 +32,8 @@ public class TimerTask implements Serializable {
     private int controlState;//定时控制状态
     private int state;//定时状态0为关闭 1打开，2删除
     private int timers;
+    private long seconds;
+    private int visitity;//数据是否显示 0不显示1，不显示
 
 
     public TimerTask(String deviceMac, int choice, int week,int hour, int min,int controlState,int prelines,int lastlines,int state) {
@@ -78,11 +80,9 @@ public class TimerTask implements Serializable {
     public TimerTask() {
     }
 
-    @Generated(hash = 1358181292)
-    public TimerTask(Long id, long deviceId, boolean open, String deviceMac,
-            String name, String timer, int mcuVersion, int choice, int year,
-            int month, int day, int week, int hour, int min, int prelines,
-            int lastlines, int controlState, int state, int timers) {
+    @Generated(hash = 1413399793)
+    public TimerTask(Long id, long deviceId, boolean open, String deviceMac, String name, String timer, int mcuVersion, int choice, int year, int month, int day,
+            int week, int hour, int min, int prelines, int lastlines, int controlState, int state, int timers, long seconds, int visitity) {
         this.id = id;
         this.deviceId = deviceId;
         this.open = open;
@@ -102,9 +102,9 @@ public class TimerTask implements Serializable {
         this.controlState = controlState;
         this.state = state;
         this.timers = timers;
+        this.seconds = seconds;
+        this.visitity = visitity;
     }
-
-
 
     public int getTimers() {
         return timers;
@@ -271,5 +271,21 @@ public class TimerTask implements Serializable {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+    public long getSeconds() {
+        return this.seconds;
+    }
+
+    public void setSeconds(long seconds) {
+        this.seconds = seconds;
+    }
+
+    public int getVisitity() {
+        return this.visitity;
+    }
+
+    public void setVisitity(int visitity) {
+        this.visitity = visitity;
     }
 }

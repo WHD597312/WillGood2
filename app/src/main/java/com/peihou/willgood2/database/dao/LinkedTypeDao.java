@@ -29,7 +29,6 @@ public class LinkedTypeDao extends AbstractDao<LinkedType, Long> {
         public final static Property Type = new Property(2, int.class, "type", false, "TYPE");
         public final static Property Name = new Property(3, String.class, "name", false, "NAME");
         public final static Property McuVersion = new Property(4, int.class, "mcuVersion", false, "MCU_VERSION");
-        public final static Property State = new Property(5, int.class, "state", false, "STATE");
     }
 
 
@@ -49,8 +48,7 @@ public class LinkedTypeDao extends AbstractDao<LinkedType, Long> {
                 "\"MAC_ADDRESS\" TEXT," + // 1: macAddress
                 "\"TYPE\" INTEGER NOT NULL ," + // 2: type
                 "\"NAME\" TEXT," + // 3: name
-                "\"MCU_VERSION\" INTEGER NOT NULL ," + // 4: mcuVersion
-                "\"STATE\" INTEGER NOT NULL );"); // 5: state
+                "\"MCU_VERSION\" INTEGER NOT NULL );"); // 4: mcuVersion
     }
 
     /** Drops the underlying database table. */
@@ -79,7 +77,6 @@ public class LinkedTypeDao extends AbstractDao<LinkedType, Long> {
             stmt.bindString(4, name);
         }
         stmt.bindLong(5, entity.getMcuVersion());
-        stmt.bindLong(6, entity.getState());
     }
 
     @Override
@@ -102,7 +99,6 @@ public class LinkedTypeDao extends AbstractDao<LinkedType, Long> {
             stmt.bindString(4, name);
         }
         stmt.bindLong(5, entity.getMcuVersion());
-        stmt.bindLong(6, entity.getState());
     }
 
     @Override
@@ -117,8 +113,7 @@ public class LinkedTypeDao extends AbstractDao<LinkedType, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // macAddress
             cursor.getInt(offset + 2), // type
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // name
-            cursor.getInt(offset + 4), // mcuVersion
-            cursor.getInt(offset + 5) // state
+            cursor.getInt(offset + 4) // mcuVersion
         );
         return entity;
     }
@@ -130,7 +125,6 @@ public class LinkedTypeDao extends AbstractDao<LinkedType, Long> {
         entity.setType(cursor.getInt(offset + 2));
         entity.setName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setMcuVersion(cursor.getInt(offset + 4));
-        entity.setState(cursor.getInt(offset + 5));
      }
     
     @Override

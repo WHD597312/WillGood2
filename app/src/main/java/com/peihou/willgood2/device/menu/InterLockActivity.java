@@ -154,11 +154,29 @@ public class InterLockActivity extends BaseActivity {
         registerReceiver(receiver,filter);
     }
 
+    @Override
+    public void onBackPressed() {
+        updates();
+        super.onBackPressed();
+    }
+
+    private void updates(){
+        List<Line2> list=deviceLineDao.findDeviceLines(deviceMac);
+        for (int i = 0; i <list.size() ; i++) {
+            Line2 line2=list.get(i);
+            line2.setVisitity(0);
+            list.set(i,line2);
+        }
+        if (mqService!=null && !list.isEmpty()){
+            mqService.updateLines(list);
+        }
+    }
     int click=0;
     @OnClick({R.id.img_back, R.id.btn_lock})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_back:
+                updates();
                 finish();
                 break;
             case R.id.btn_lock:
@@ -208,6 +226,7 @@ public class InterLockActivity extends BaseActivity {
             mqService = binder.getService();
             if (mqService!=null){
                 mqService.getData(topicName,0x46);
+                countTimer.start();
             }
         }
 
@@ -243,7 +262,7 @@ public class InterLockActivity extends BaseActivity {
                 String action = intent.getAction();
 
                 if ("offline".equals(action)) {
-                    if (macAddress.equals(deviceMac)) {
+                    if (intent.hasExtra("all") || macAddress.equals(deviceMac)) {
                         online = false;
                     }
                 }else {
@@ -534,7 +553,8 @@ public class InterLockActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

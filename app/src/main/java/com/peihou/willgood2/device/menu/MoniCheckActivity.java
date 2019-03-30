@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,12 +18,15 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -136,7 +140,7 @@ public class MoniCheckActivity extends BaseActivity {
         dialog=new ChangeDialog(this);
         dialog.setCanceledOnTouchOutside(false);
         if (num==1){
-            dialog.setInputType(2);
+            dialog.setInputType(3);
         }else {
             dialog.setInputType(0);
         }
@@ -176,17 +180,20 @@ public class MoniCheckActivity extends BaseActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                     }else if (col==2){
                         if (Utils.isNumeric(content)){
-                            dialog.dismiss();
                             double data=Double.parseDouble(content);
-                            BigDecimal b = new BigDecimal(data);
-                            data = b.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            table.setFactor(data);
-                            deviceAnalogDao.update(table);
-                            tables.set(row,table);
-                            adapter.notifyDataSetChanged();
+                            if (data>=0.01 && data<=100){
+                                dialog.dismiss();
+                                BigDecimal b = new BigDecimal(data);
+                                data = b.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
+                                table.setFactor(data);
+                                deviceAnalogDao.update(table);
+                                tables.set(row,table);
+                                adapter.notifyDataSetChanged();
+                            }else {
+                                ToastUtil.showShort(MoniCheckActivity.this,"系数范围为0.01到100");
+                            }
                         }else {
                             ToastUtil.showShort(MoniCheckActivity.this,"不合法的数字");
                         }
@@ -302,21 +309,18 @@ public class MoniCheckActivity extends BaseActivity {
             double factor=table.getFactor();
             double result=data*factor;
             String unit=table.getUnit();
-            BigDecimal b = new BigDecimal(data);
-            data = b.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
+            String ss=String.format("%.2f",data);
+            Log.i("BigDecimal","-->"+ss);
             viewHolder.tv_col.setText(name);
-            String s=data+" "+unit;
-            BigDecimal b1= new BigDecimal(factor);
-            factor = b1.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
+            String s=String.format("%.2f",data)+" "+unit;
 
-            BigDecimal b2 = new BigDecimal(result);
-            result = b2.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
+
 
             SpannableStringBuilder style=new SpannableStringBuilder(s);
             style.setSpan(new ForegroundColorSpan(Color.parseColor("#898989")),s.indexOf(" "),s.length(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             viewHolder.tv_col2.setText(style);
-            viewHolder.tv_col3.setText(""+factor);
-            viewHolder.tv_col4.setText(""+result);
+            viewHolder.tv_col3.setText(String.format("%.2f",factor)+"");
+            viewHolder.tv_col4.setText(String.format("%.2f",result)+"");
             viewHolder.tv_col5.setText(unit);
             View.OnClickListener onClickListener=new View.OnClickListener() {
                 @Override
@@ -360,6 +364,7 @@ public class MoniCheckActivity extends BaseActivity {
             mqService=binder.getService();
             if (mqService!=null){
                 mqService.getData(topicName,0x88);
+                countTimer.start();
             }
         }
 
@@ -368,6 +373,60 @@ public class MoniCheckActivity extends BaseActivity {
 
         }
     };
+    CountTimer countTimer=new CountTimer(2000,1000);
+    class CountTimer extends CountDownTimer {
+
+        /**
+         * @param millisInFuture    The number of millis in the future from the call
+         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+         *                          is called.
+         * @param countDownInterval The interval along the way to receive
+         *                          {@link #onTick(long)} callbacks.
+         */
+        public CountTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            popupmenuWindow3();
+        }
+
+        @Override
+        public void onFinish() {
+            if (popupWindow2!=null && popupWindow2.isShowing()){
+                popupWindow2.dismiss();
+            }
+        }
+    }
+    private PopupWindow popupWindow2;
+    public void popupmenuWindow3() {
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
+            return;
+        }
+        View view = View.inflate(this, R.layout.progress, null);
+        TextView tv_load=view.findViewById(R.id.tv_load);
+        tv_load.setTextColor(getResources().getColor(R.color.white));
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        //添加弹出、弹入的动画
+        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+        popupWindow2.setFocusable(false);
+        popupWindow2.setOutsideTouchable(false);
+        backgroundAlpha(0.6f);
+        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                backgroundAlpha(1.0f);
+            }
+        });
+//        ColorDrawable dw = new ColorDrawable(0x30000000);
+//        popupWindow.setBackgroundDrawable(dw);
+//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+        popupWindow2.showAtLocation(table, Gravity.CENTER, 0, 0);
+        //添加按键事件监听
+    }
+
     class MessageReceiver extends BroadcastReceiver{
 
         @Override

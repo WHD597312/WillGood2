@@ -35,6 +35,9 @@ public class DeviceMoniLinkDaoDaoImpl {
         deviceMoniLinkDao.insert(moniLink);
     }
 
+    public void updateMoniLinks(List<MoniLink> moniLinks){
+        deviceMoniLinkDao.updateInTx(moniLinks);
+    }
     /**
      * 插入模拟量联动
      * @param moniLink
@@ -57,7 +60,9 @@ public class DeviceMoniLinkDaoDaoImpl {
      */
     public void deletes(String deviceMac){
         List moniLinks=deviceMoniLinkDao.queryBuilder().where(MoniLinkDao.Properties.DeviceMac.eq(deviceMac)).list();
-        deviceMoniLinkDao.deleteInTx(moniLinks);
+        if (moniLinks!=null && !moniLinks.isEmpty()){
+            deviceMoniLinkDao.deleteInTx(moniLinks);
+        }
     }
     /**
      * 查询唯一的模拟量联动
@@ -91,8 +96,12 @@ public class DeviceMoniLinkDaoDaoImpl {
      * @return
      */
     public List<MoniLink> findMoniLinks(String deviceMac,int type,int num){
-        WhereCondition whereCondition=deviceMoniLinkDao.queryBuilder().and(MoniLinkDao.Properties.DeviceMac.eq(deviceMac),
-                MoniLinkDao.Properties.Type.eq(type),MoniLinkDao.Properties.Num.eq(num));
+        WhereCondition whereCondition=deviceMoniLinkDao.queryBuilder().and(
+                MoniLinkDao.Properties.DeviceMac.eq(deviceMac),
+                MoniLinkDao.Properties.Type.eq(type),
+                MoniLinkDao.Properties.Num.eq(num),
+                MoniLinkDao.Properties.Visitity.eq(1)
+        );
         return deviceMoniLinkDao.queryBuilder().where(whereCondition).list();
     }
 

@@ -134,7 +134,7 @@ public class ShareDeviceActivity extends BaseActivity {
             case R.id.btn_share:
                 //shared/deviceId=0/deviceTimer=1/deviceLinked=0/deviceSwitch=0/deviceAlarm=0/deviceMap=0/deviceControl=0/deviceAnalog=0
 //                            shared/deviceId=2/deviceTimer=1/deviceLinked=1/deviceSwitch=1/deviceAlarm=1/deviceMap=1/deviceControl=1/deviceAnalog=1/deviceMac=8655330313814
-                String share="shared/deviceId="+deviceId+"/deviceTimer="+timer+"/deviceLinked="+linked+"/deviceSwitch="+switchCheck+"/deviceAlarm="+alerm+"/deviceMap="+location+"/deviceControl="+moniCheck+"/deviceAnalog="+interLock+"/deviceMac="+deviceMac;
+                String share="shared/deviceId="+deviceId+"/deviceTimer="+timer+"/deviceLinked="+linked+"/deviceSwitch="+switchCheck+"/deviceAlarm="+alerm+"/deviceMap="+location+"/deviceControl="+moniCheck+"/deviceAnalog="+interLock+"/deviceMac="+deviceMac+"/deviceName="+name;
                 Intent intent=new Intent(this,ShareDeviceQRCodeActivity.class);
                 intent.putExtra("share",share);
                 intent.putExtra("name",name);

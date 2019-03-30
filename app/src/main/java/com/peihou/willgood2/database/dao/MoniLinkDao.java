@@ -39,6 +39,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         public final static Property DeviceMac = new Property(12, String.class, "deviceMac", false, "DEVICE_MAC");
         public final static Property McuVersion = new Property(13, int.class, "mcuVersion", false, "MCU_VERSION");
         public final static Property Lines = new Property(14, String.class, "lines", false, "LINES");
+        public final static Property Visitity = new Property(15, int.class, "visitity", false, "VISITITY");
     }
 
 
@@ -68,7 +69,8 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
                 "\"CONTROL_TYPE\" INTEGER NOT NULL ," + // 11: controlType
                 "\"DEVICE_MAC\" TEXT," + // 12: deviceMac
                 "\"MCU_VERSION\" INTEGER NOT NULL ," + // 13: mcuVersion
-                "\"LINES\" TEXT);"); // 14: lines
+                "\"LINES\" TEXT," + // 14: lines
+                "\"VISITITY\" INTEGER NOT NULL );"); // 15: visitity
     }
 
     /** Drops the underlying database table. */
@@ -111,6 +113,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         if (lines != null) {
             stmt.bindString(15, lines);
         }
+        stmt.bindLong(16, entity.getVisitity());
     }
 
     @Override
@@ -147,6 +150,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         if (lines != null) {
             stmt.bindString(15, lines);
         }
+        stmt.bindLong(16, entity.getVisitity());
     }
 
     @Override
@@ -171,7 +175,8 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
             cursor.getInt(offset + 11), // controlType
             cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12), // deviceMac
             cursor.getInt(offset + 13), // mcuVersion
-            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14) // lines
+            cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14), // lines
+            cursor.getInt(offset + 15) // visitity
         );
         return entity;
     }
@@ -193,6 +198,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         entity.setDeviceMac(cursor.isNull(offset + 12) ? null : cursor.getString(offset + 12));
         entity.setMcuVersion(cursor.getInt(offset + 13));
         entity.setLines(cursor.isNull(offset + 14) ? null : cursor.getString(offset + 14));
+        entity.setVisitity(cursor.getInt(offset + 15));
      }
     
     @Override

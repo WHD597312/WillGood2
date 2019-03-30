@@ -29,12 +29,11 @@ public class AlermDao extends AbstractDao<Alerm, Long> {
         public final static Property Name = new Property(2, String.class, "name", false, "NAME");
         public final static Property Type = new Property(3, int.class, "type", false, "TYPE");
         public final static Property Content = new Property(4, String.class, "content", false, "CONTENT");
-        public final static Property State = new Property(5, int.class, "state", false, "STATE");
-        public final static Property DeviceId = new Property(6, long.class, "deviceId", false, "DEVICE_ID");
-        public final static Property Value = new Property(7, double.class, "value", false, "VALUE");
-        public final static Property DeviceAlarmBroadcast = new Property(8, int.class, "deviceAlarmBroadcast", false, "DEVICE_ALARM_BROADCAST");
-        public final static Property DeviceAlarmFlag = new Property(9, int.class, "deviceAlarmFlag", false, "DEVICE_ALARM_FLAG");
-        public final static Property State2 = new Property(10, int.class, "state2", false, "STATE2");
+        public final static Property DeviceId = new Property(5, long.class, "deviceId", false, "DEVICE_ID");
+        public final static Property Value = new Property(6, double.class, "value", false, "VALUE");
+        public final static Property DeviceAlarmBroadcast = new Property(7, int.class, "deviceAlarmBroadcast", false, "DEVICE_ALARM_BROADCAST");
+        public final static Property DeviceAlarmFlag = new Property(8, int.class, "deviceAlarmFlag", false, "DEVICE_ALARM_FLAG");
+        public final static Property State2 = new Property(9, int.class, "state2", false, "STATE2");
     }
 
 
@@ -55,12 +54,11 @@ public class AlermDao extends AbstractDao<Alerm, Long> {
                 "\"NAME\" TEXT," + // 2: name
                 "\"TYPE\" INTEGER NOT NULL ," + // 3: type
                 "\"CONTENT\" TEXT," + // 4: content
-                "\"STATE\" INTEGER NOT NULL ," + // 5: state
-                "\"DEVICE_ID\" INTEGER NOT NULL ," + // 6: deviceId
-                "\"VALUE\" REAL NOT NULL ," + // 7: value
-                "\"DEVICE_ALARM_BROADCAST\" INTEGER NOT NULL ," + // 8: deviceAlarmBroadcast
-                "\"DEVICE_ALARM_FLAG\" INTEGER NOT NULL ," + // 9: deviceAlarmFlag
-                "\"STATE2\" INTEGER NOT NULL );"); // 10: state2
+                "\"DEVICE_ID\" INTEGER NOT NULL ," + // 5: deviceId
+                "\"VALUE\" REAL NOT NULL ," + // 6: value
+                "\"DEVICE_ALARM_BROADCAST\" INTEGER NOT NULL ," + // 7: deviceAlarmBroadcast
+                "\"DEVICE_ALARM_FLAG\" INTEGER NOT NULL ," + // 8: deviceAlarmFlag
+                "\"STATE2\" INTEGER NOT NULL );"); // 9: state2
     }
 
     /** Drops the underlying database table. */
@@ -93,12 +91,11 @@ public class AlermDao extends AbstractDao<Alerm, Long> {
         if (content != null) {
             stmt.bindString(5, content);
         }
-        stmt.bindLong(6, entity.getState());
-        stmt.bindLong(7, entity.getDeviceId());
-        stmt.bindDouble(8, entity.getValue());
-        stmt.bindLong(9, entity.getDeviceAlarmBroadcast());
-        stmt.bindLong(10, entity.getDeviceAlarmFlag());
-        stmt.bindLong(11, entity.getState2());
+        stmt.bindLong(6, entity.getDeviceId());
+        stmt.bindDouble(7, entity.getValue());
+        stmt.bindLong(8, entity.getDeviceAlarmBroadcast());
+        stmt.bindLong(9, entity.getDeviceAlarmFlag());
+        stmt.bindLong(10, entity.getState2());
     }
 
     @Override
@@ -125,12 +122,11 @@ public class AlermDao extends AbstractDao<Alerm, Long> {
         if (content != null) {
             stmt.bindString(5, content);
         }
-        stmt.bindLong(6, entity.getState());
-        stmt.bindLong(7, entity.getDeviceId());
-        stmt.bindDouble(8, entity.getValue());
-        stmt.bindLong(9, entity.getDeviceAlarmBroadcast());
-        stmt.bindLong(10, entity.getDeviceAlarmFlag());
-        stmt.bindLong(11, entity.getState2());
+        stmt.bindLong(6, entity.getDeviceId());
+        stmt.bindDouble(7, entity.getValue());
+        stmt.bindLong(8, entity.getDeviceAlarmBroadcast());
+        stmt.bindLong(9, entity.getDeviceAlarmFlag());
+        stmt.bindLong(10, entity.getState2());
     }
 
     @Override
@@ -146,12 +142,11 @@ public class AlermDao extends AbstractDao<Alerm, Long> {
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // name
             cursor.getInt(offset + 3), // type
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // content
-            cursor.getInt(offset + 5), // state
-            cursor.getLong(offset + 6), // deviceId
-            cursor.getDouble(offset + 7), // value
-            cursor.getInt(offset + 8), // deviceAlarmBroadcast
-            cursor.getInt(offset + 9), // deviceAlarmFlag
-            cursor.getInt(offset + 10) // state2
+            cursor.getLong(offset + 5), // deviceId
+            cursor.getDouble(offset + 6), // value
+            cursor.getInt(offset + 7), // deviceAlarmBroadcast
+            cursor.getInt(offset + 8), // deviceAlarmFlag
+            cursor.getInt(offset + 9) // state2
         );
         return entity;
     }
@@ -163,12 +158,11 @@ public class AlermDao extends AbstractDao<Alerm, Long> {
         entity.setName(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setType(cursor.getInt(offset + 3));
         entity.setContent(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
-        entity.setState(cursor.getInt(offset + 5));
-        entity.setDeviceId(cursor.getLong(offset + 6));
-        entity.setValue(cursor.getDouble(offset + 7));
-        entity.setDeviceAlarmBroadcast(cursor.getInt(offset + 8));
-        entity.setDeviceAlarmFlag(cursor.getInt(offset + 9));
-        entity.setState2(cursor.getInt(offset + 10));
+        entity.setDeviceId(cursor.getLong(offset + 5));
+        entity.setValue(cursor.getDouble(offset + 6));
+        entity.setDeviceAlarmBroadcast(cursor.getInt(offset + 7));
+        entity.setDeviceAlarmFlag(cursor.getInt(offset + 8));
+        entity.setState2(cursor.getInt(offset + 9));
      }
     
     @Override

@@ -3,16 +3,17 @@ package com.peihou.willgood2;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 //import com.baidu.mapapi.CoordType;
 //import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.CoordType;
+import com.baidu.mapapi.SDKInitializer;
 import com.mob.MobSDK;
-import com.tencent.bugly.beta.Beta;
-import com.tencent.tinker.loader.app.TinkerApplication;
-import com.tencent.tinker.loader.shareutil.ShareConstants;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -27,6 +28,8 @@ import cn.jpush.android.api.JPushInterface;
  */
 
 public class MyApplication extends Application {
+    public static String update="cancel";
+
     public static final String APP_NAME = "XXX";
     public static boolean isDebug=true;
     private int count = 0;
@@ -35,14 +38,13 @@ public class MyApplication extends Application {
     private static Context mContext;
 
 
-
     public static Context getContext(){
         return mContext;
     }
     @Override
     public void onCreate() {
         super.onCreate();
-        //
+
 
 //        Beta.applyTinkerPatch(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/patch_signed_7zip.apk");
 
@@ -54,10 +56,10 @@ public class MyApplication extends Application {
         Log.i("registrationIDqqq","-->"+registrationID);
         MobSDK.init(this);
         //在使用SDK各组件之前初始化context信息，传入ApplicationContext
-//        SDKInitializer.initialize(this);
+        SDKInitializer.initialize(this);
         //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置您使用的坐标类型.
         //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
-//        SDKInitializer.setCoordType(CoordType.BD09LL);
+        SDKInitializer.setCoordType(CoordType.BD09LL);
         mContext = getApplicationContext();
         fragments=new ArrayList<>();
 

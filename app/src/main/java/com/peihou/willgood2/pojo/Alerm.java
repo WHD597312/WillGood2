@@ -34,6 +34,7 @@ public class Alerm implements Serializable {
     private String content;
     @Transient
     private boolean open;
+    @Transient
     private int state;//报警开关状态
     private long deviceId;
     private double value;
@@ -51,15 +52,14 @@ public class Alerm implements Serializable {
     }
 
 
-    @Generated(hash = 1517740106)
-    public Alerm(Long id, String deviceMac, String name, int type, String content, int state, long deviceId,
-            double value, int deviceAlarmBroadcast, int deviceAlarmFlag, int state2) {
+    @Generated(hash = 1667367438)
+    public Alerm(Long id, String deviceMac, String name, int type, String content, long deviceId, double value,
+            int deviceAlarmBroadcast, int deviceAlarmFlag, int state2) {
         this.id = id;
         this.deviceMac = deviceMac;
         this.name = name;
         this.type = type;
         this.content = content;
-        this.state = state;
         this.deviceId = deviceId;
         this.value = value;
         this.deviceAlarmBroadcast = deviceAlarmBroadcast;

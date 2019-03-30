@@ -1,14 +1,18 @@
 package com.peihou.willgood2.device.menu;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.BaseActivity;
+import com.peihou.willgood2.service.MQService;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -25,9 +29,11 @@ public class PowerLostMomoryActivity extends BaseActivity {
     int plMemory;
     int type;
     int voice;
+    String deviceMac;
     @Override
     public void initParms(Bundle parms) {
         type=parms.getInt("type");
+        deviceMac=parms.getString("deviceMac");
         if (type==1){
             plMemory=parms.getInt("plMemory");
         }else {
@@ -44,6 +50,8 @@ public class PowerLostMomoryActivity extends BaseActivity {
 
     @Override
     public void initView(View view) {
+        Intent service=new Intent(this,MQService.class);
+        bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
         if (type==1){
             open=plMemory;
             tv_name.setText("掉电记忆");
@@ -100,11 +108,34 @@ public class PowerLostMomoryActivity extends BaseActivity {
                         img_open.setImageResource(R.mipmap.img_open);
                         voice=1;
                     }
+                    mqService.updateDevice(deviceMac,voice);
                 }
                 break;
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (bind){
+            unbindService(connection);
+        }
+    }
+
+    private boolean bind;
+    MQService mqService;
+    ServiceConnection connection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MQService.LocalBinder binder= (MQService.LocalBinder) service;
+            mqService=binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
     @Override
     public void onBackPressed() {
         if (type==1){

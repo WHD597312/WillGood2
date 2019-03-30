@@ -9,12 +9,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.TextView;
 
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.pojo.TimerTask;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.TenTwoUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
@@ -23,6 +32,10 @@ public class DemoActivity extends AppCompatActivity {
 
     Unbinder unbinder;
     TimerTask timerTask;
+    @BindView(R.id.grid_list) GridView grid_list;
+    MyAdapter adapter;
+
+    private List<String> strings=new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,115 +45,146 @@ public class DemoActivity extends AppCompatActivity {
         bindService(intent,connection,Context.BIND_AUTO_CREATE);
         timerTask=new TimerTask();
 
+        strings.add("基础数据");//0
+        strings.add("单次定时");//1
+        strings.add("循环定时");//2
+        strings.add("温度联动");//3
+        strings.add("湿度联动");//4
+        strings.add("开关量联动");//5
+        strings.add("电流联动");//6
+        strings.add("电压联动");//7
+        strings.add("模拟量电流1");//8
+        strings.add("模拟量电压1");//9
+        strings.add("删除定时");//10
+        strings.add("删除温度");//11
+        strings.add("删除湿度");//12
+        strings.add("删除开关量");//13
+        strings.add("删除电流");//14
+        strings.add("删除电压");//15
+        strings.add("删除模拟电流1");//16
+        strings.add("删除模拟电压1");//17
+        strings.add("地图定位");//18
+        adapter=new MyAdapter(this,strings);
+
+        grid_list.setAdapter(adapter);
+        grid_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 0:
+                        sendBasic(topicName1,1);
+                        break;
+                    case 1:
+                        sendTimer(topicName1,0,1);
+                        break;
+                    case 2:
+                        sendTimer(topicName1,1,1);
+                        break;
+                    case 3:
+                        sendLinkedSet(topicName1,0x34,1);
+                        break;
+                    case 4:
+                        sendLinkedSet(topicName1,0x35,1);
+                        break;
+                    case 5:
+                        sendLinkedSet(topicName1,0x36,1);
+                        break;
+                    case 6:
+                        sendLinkedSet(topicName1,0x37,1);
+                        break;
+                    case 7:
+                        sendLinkedSet(topicName1,0x38,1);
+                        break;
+                    case 8:
+                        sendMoniLink(topicName1,0,0,1);
+                        break;
+                    case 9:
+                        sendMoniLink(topicName1,1,4,1);
+                        break;
+                    case 10:
+                        sendTimer(topicName1,0,5);
+                        break;
+                    case 11:
+                        sendLinkedSet(topicName1,0x34,5);
+                        break;
+                    case 12:
+                        sendLinkedSet(topicName1,0x35,5);
+                        break;
+                    case 13:
+                        sendLinkedSet(topicName1,0x36,5);
+                        break;
+                    case 14:
+                        sendLinkedSet(topicName1,0x37,5);
+                        break;
+                    case 15:
+                        sendLinkedSet(topicName1,0x38,5);
+                        break;
+                    case 16:
+                        sendMoniLink(topicName1,0,0,5);
+                        break;
+                    case 17:
+                        sendMoniLink(topicName1,1,4,5);
+                        break;
+                    case 18:
+                        sendLocation(topicName1);
+                        break;
+                }
+            }
+        });
+    }
+    class MyAdapter extends BaseAdapter{
+
+        private Context context;
+        private List<String> list;
+
+        public MyAdapter(Context context, List<String> list) {
+            this.context = context;
+            this.list = list;
+        }
+
+        @Override
+        public int getCount() {
+            return list.size();
+        }
+
+        @Override
+        public String getItem(int position) {
+            return list.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder = null;
+            if (convertView == null) {
+                convertView = View.inflate(context, R.layout.item_line, null);
+                viewHolder = new ViewHolder(convertView);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+            String name=getItem(position);
+            viewHolder.tv_line.setText(name);
+            return convertView;
+        }
+    }
+    class ViewHolder {
+        @BindView(R.id.tv_line)
+        TextView tv_line;
+
+        public ViewHolder(View itemView) {
+            ButterKnife.bind(this, itemView);
+        }
     }
 
     String topicName1="qjjc/gateway/8655330313815/client_to_server";
     int state=1;
     int count=0;
     int ss=1;
-    @OnClick({R.id.button,R.id.button2,R.id.button3,R.id.button4,R.id.button5,R.id.button6,R.id.button7,
-            R.id.button8,R.id.button9,R.id.button10,R.id.button11,R.id.button12,R.id.button13,R.id.button14,
-            R.id.button15,R.id.button16,R.id.button17,R.id.button18,R.id.button19,R.id.button20
-    })
-    public void onClick(View view){
-        switch (view.getId()){
-            case R.id.button:
-                if (mqService!=null){
-                    sendBasic(topicName1,ss);
-                    ss = ss== 1 ? 0 : 1;
-                }
-                break;
-            case R.id.button2:
-                if (mqService!=null){
-                    sendTimer(topicName1,0,1);
-                }
-                break;
-            case R.id.button3:
-                if (mqService!=null){
-                    sendTimer(topicName1,1,1);
-                }
-                break;
-            case R.id.button4:
-                if (mqService!=null){
-                    sendTimer(topicName1,0,2);
-                }
-                break;
-            case R.id.button5:
-                if (mqService!=null){
-                    sendTimer(topicName1,1,2);
-                }
-                break;
-            case R.id.button6:
-                int alerm=0;
-                if (count==0)
-                    alerm=0x11;
-                else if (count==1)
-                    alerm=0x22;
-                else if (count==2)
-                    alerm=0x33;
-                else if (count==3)
-                    alerm=0x44;
-                else if (count==4)
-                    alerm=0x55;
-                else if (count==5)
-                    alerm=0x66;
-                else if (count==6)
-                    alerm=0x77;
-                else if (count==7)
-                    alerm=0x88;
-                sendAlerm(topicName1,alerm);
-                if (count>=8){
-                    count=0;
-                }else {
-                    count++;
-                }
-                break;
-            case R.id.button7:
-                sendSwitch(topicName1);
-                break;
-            case R.id.button8:
-                sendMoni(topicName1);
-                break;
-            case R.id.button9:
-                sendOffline();
-                break;
-            case R.id.button10:
-                sendLinkedSwitch(topicName1,0,232);
-                break;
-            case R.id.button11:
-                sendLinkedSet(topicName1,0x34);
-                break;
-            case R.id.button12:
-                sendLinkedSet(topicName1,0x36);
-                break;
-            case R.id.button13:
-                sendLinkedSet(topicName1,0x37);
-                break;
-            case R.id.button14:
-                sendLinkedSet(topicName1,0x38);
-                break;
-            case R.id.button15:
-                sendMoniLinkSwitch(topicName1);
-                break;
-            case R.id.button16:
-                sendMoniLink(topicName1,0,0);
-                break;
-            case R.id.button17:
-                sendMoniLink(topicName1,1,4);
-                break;
-            case R.id.button18:
-                sendJog(topicName1,0,30);
-                break;
-            case R.id.button19:
-                sendInterLine(topicName1);
-                break;
-            case R.id.button20:
-                sendAlerm(topicName1);
-                break;
-
-
-        }
-    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -152,6 +196,7 @@ public class DemoActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder= (MQService.LocalBinder) service;
+
             mqService=binder.getService();
         }
 
@@ -162,31 +207,36 @@ public class DemoActivity extends AppCompatActivity {
     };
     private void sendBasic(String topicName,int state){
         try {
-            byte[]bytes=new byte[61];
-            bytes[0]=0x3c;
+            byte[]bytes=new byte[59];
+            bytes[0]= (byte) 0x3c;
             bytes[1]=0x11;
-            bytes[2]=0x01;
-            bytes[3]=0x37;
-            bytes[4]=0x00;
-            bytes[5]= (byte) 0xF0;
-            bytes[8]=0x40;
-            bytes[44]=0x32;
-            bytes[45]=0x32;
-            bytes[46]=0x46;
-            bytes[47]=0x32;
-            bytes[48]=0x46;
-            bytes[49]=0x32;
-            bytes[50]=0x46;
-            bytes[51]=0x32;
-            bytes[52]=0x46;
-            bytes[53]=0x32;
-            bytes[54]=0x01;
-            bytes[55]=0x02;
-            bytes[56]=0x03;
-            bytes[57]=0x04;
-            bytes[59]=0x03;
-            bytes[60]=0x46;
-
+            bytes[2]=0;
+            bytes[3]=0x0d;
+            bytes[4]= (byte) state;
+            bytes[5]=96;
+            bytes[6]=32;
+            bytes[7]=32;
+            bytes[8]=32;
+            bytes[9]=96;
+            bytes[10]=32;
+            bytes[11]=1;
+            for (int i = 12; i <44 ; i++) {
+                bytes[i]= (byte) i;
+            }
+            bytes[44]=0x04;
+            bytes[45]= (byte) 0xA6;
+            bytes[46]=0x02;
+            bytes[47]= (byte) 0x80;
+            bytes[48]=0;
+            bytes[49]=0x7d;
+            bytes[50]=0;
+            bytes[51]=0x7d;
+            int sum=0;
+            for (int i = 0; i <bytes.length ; i++) {
+                sum+=bytes[i];
+            }
+            bytes[57]= (byte) (sum%256);
+            bytes[58]=0x46;
             boolean success=mqService.publish(topicName,1,bytes);
             Log.i("DemoActivity","-->"+success+"#"+topicName);
         } catch (Exception e) {
@@ -316,7 +366,7 @@ public class DemoActivity extends AppCompatActivity {
         }
         return success;
     }
-    public boolean sendLinkedSet(String topicName,int funCode) {
+    public boolean sendLinkedSet(String topicName,int funCode,int state) {
         boolean success = false;
         try {
             int mcuVersion = 0;
@@ -326,7 +376,6 @@ public class DemoActivity extends AppCompatActivity {
             int preLines = 192;
             int lastLines = 64;
             int triType = 1;//0单次触发，1循环触发
-            int state = 1;
             int[] x = new int[8];
             int type=2;
             if (type == 2) {
@@ -402,7 +451,7 @@ public class DemoActivity extends AppCompatActivity {
         }
         return false;
     }
-    public boolean sendMoniLink(String topicName,int type,int num) {
+    public boolean sendMoniLink(String topicName,int type,int num,int state) {
         boolean success = false;
         try {
             int headCode = 0x3c;
@@ -415,7 +464,6 @@ public class DemoActivity extends AppCompatActivity {
             int lastLine =192;
             int controlState = 1;
             int triType = 1;
-            int state = 1;
 
             int controlType = 0;
             int triType2 = 0;
@@ -577,6 +625,63 @@ public class DemoActivity extends AppCompatActivity {
         return false;
     }
 
+    public void send485(String topicName1){
+        byte[] bytes=new byte[26];
+        bytes[0]=0x3c;
+        bytes[1]= (byte) 0xaa;
+        bytes[2]=0x01;
+        bytes[3]=0x15;
+        bytes[4]=0x01;
+        bytes[5]=0x02;
+        bytes[6]=0x03;
+        bytes[7]=0x04;
+        bytes[7]=0x05;
+        bytes[8]=0x06;
+        bytes[9]=0x07;
+        bytes[10]=0x08;
+        bytes[11]=0x09;
+        bytes[12]=0x0a;
+        bytes[13]=0x0b;
+        bytes[14]=0x0c;
+        bytes[15]=0x0d;
+        bytes[16]=0x0e;
+        bytes[17]=0x0f;
+        bytes[18]=0x10;
+        int sum=0;
+        for (int i = 0; i <bytes.length ; i++) {
+            sum+=bytes[i];
+        }
+        bytes[24]= (byte) (sum%256);
+        bytes[25]=0x46;
+        boolean success = mqService.publish(topicName1, 1, bytes);
+
+    }
 
 
+    public void sendLocation(String topicName1){
+        byte[] bytes=new byte[22];
+        bytes[0]=0x3c;
+        bytes[1]=0x77;
+        bytes[2]=0;
+        bytes[3]=10;
+        bytes[4]=0x14;
+        bytes[5]=0x11;
+        bytes[6]= (byte) 0xA0;
+        bytes[7]=0x1D;
+        bytes[8]=0x38;
+        bytes[9]=0x45;
+        bytes[10]=0x48;
+        bytes[11]=0x6A;
+        bytes[12]=0x2D;
+        bytes[13]=0x12;
+        bytes[14]=0x60;
+        int sum=0;
+        for (int i = 0; i <bytes.length ; i++) {
+            sum+=bytes[i];
+        }
+        bytes[20]= (byte) (sum%256);
+        bytes[21]=0x46;
+        boolean success = mqService.publish(topicName1, 1, bytes);
+
+    }
 }

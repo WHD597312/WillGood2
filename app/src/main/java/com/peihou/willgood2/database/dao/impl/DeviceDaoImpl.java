@@ -2,6 +2,7 @@ package com.peihou.willgood2.database.dao.impl;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.peihou.willgood2.database.DBManager;
 import com.peihou.willgood2.database.dao.DaoMaster;
@@ -33,7 +34,8 @@ public class DeviceDaoImpl {
      * @return
      */
     public void insert(Device device){
-       deviceDao.insert(device);
+       long n=deviceDao.insert(device);
+        Log.i("boolean","--->"+n);
     }
 
     /**

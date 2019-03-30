@@ -161,57 +161,13 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
         inactivityTimer = new InactivityTimer(this);
     }
 
+    String gprs;
+    String gprsCode;
     @Override
     protected void onStart() {
         super.onStart();
-
-        et_name.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (addType==0){
-                    imei=s.toString();
-                }
-            }
-        });
-        et_pswd.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (deviceModel==0){
-                    char chars[] = s.toString().toCharArray();
-                    for (char c : chars) {
-                        if (IsChinese.isChinese(c)) {
-                            et_pswd.setText("");
-                            ToastUtil.showShort(QRScannerActivity.this, "不能输入中文");
-                            break;
-                        }
-                    }
-                }else {
-                    password=s.toString();
-                }
-            }
-        });
-
     }
+
 
     SurfaceView surfaceView;
     @Override
@@ -230,6 +186,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
         characterSet = null;
 
     }
+
 
     int deviceModel=0;
     String imei;
@@ -255,6 +212,10 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
             case R.id.tv_wifi:
                 if (deviceModel==0)
                     break;
+                if (deviceModel==1){
+                    gprs=et_name.getText().toString();
+                    gprsCode=et_pswd.getText().toString();
+                }
                 tv_gprs1.setText("输入要连接的无线网络,同时为了设备安全,防止他人恶意添加");
                 tv_wifi.setTextColor(Color.parseColor("#09c585"));
                 tv_gprs.setTextColor(Color.parseColor("#646464"));
@@ -263,8 +224,10 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                 if (!TextUtils.isEmpty(wifiName)){
                     et_name.setText(wifiName);
                 }
-                if (!TextUtils.isEmpty(wifiPswd)){
+                if (!TextUtils.isEmpty(wifiPassword)){
                     et_pswd.setText(wifiPassword);
+                }else {
+                    et_pswd.setText("");
                 }
                 et_pswd.setHint("请输入WiFi密码");
                 et_orignal_code.setHint("请输入初始码");
@@ -281,18 +244,21 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
             case R.id.tv_gprs:
                 if (deviceModel==1)
                     break;
+                if (deviceModel==0){
+                    wifiPassword=et_pswd.getText().toString();
+                }
                 tv_gprs1.setText("输入要连接的IMEI,同时为了设备安全,防止他人恶意添加");
                 tv_wifi.setTextColor(Color.parseColor("#646464"));
                 tv_gprs.setTextColor(Color.parseColor("#09c585"));
                 et_name.setHint("请输入IMEI号");
                 et_pswd.setHint("请输入初始码");
-                if (!TextUtils.isEmpty(imei)){
-                    et_name.setText(imei);
+                if (!TextUtils.isEmpty(gprs)){
+                    et_name.setText(gprs);
                 }else {
                     et_name.setText("");
                 }
-                if (!TextUtils.isEmpty(password)){
-                    et_pswd.setText(password);
+                if (!TextUtils.isEmpty(gprsCode)){
+                    et_pswd.setText(gprsCode);
                 }else {
                     et_pswd.setText("");
                 }
@@ -375,6 +341,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                         Gson gson=new Gson();
                         device=gson.fromJson(s,Device.class);
                         String deviceMac=device.getDeviceOnlyMac();
+                        device.setDeviceName(deviceName);
                         List<Device> deleteDevices=deviceDao.findDevicesByMac(deviceMac);
                         deviceDao.deleteDevices(deleteDevices);
                         deviceDao.insert(device);
@@ -427,6 +394,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
     /**
      * 处理扫描结果
      */
+    String deviceName;
     public void handleDecode(Result result) {
         inactivityTimer.onActivity();
         playBeepSoundAndVibrate();
@@ -450,7 +418,9 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                             int deviceMap=Integer.parseInt(s2[6].substring(10));
                             int deviceControl=Integer.parseInt(s2[7].substring(14));
                             int deviceAnalog=Integer.parseInt(s2[8].substring(13));
-                            deviceMac=s2[9].substring(11);
+
+                            deviceMac=s2[9].substring(10);
+                            deviceName=s2[10].substring(11);
                             Device device=deviceDao.findDeviceByMac2(deviceMac);
                             if (device!=null){
                                 ToastUtil.showShort(QRScannerActivity.this,"自己的设备不能分享给自己");
@@ -584,6 +554,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                         int deviceInching= (int) params.get("deviceInching");
                         int deviceAnalog= (int) params.get("deviceAnalog");
 
+
                         device=deviceDao.findDeviceByMac(deviceMac);
                         if (device==null){
 //                            device=new Device(deviceId,deviceMac,deviceMac,devicePassword,"share",deviceAlarm,deviceMap,deviceLineSwitch,deviceAnalog,deviceSwitch,devicePowerOff,deviceInching)
@@ -603,6 +574,8 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                             device.setDeviceAuthority_Poweroff(devicePowerOff);
                             device.setDeviceAuthority_Switch(deviceSwitch);
                             device.setDeviceAuthority_Linked(deviceLinked);
+                            device.setDeviceOnlyMac(deviceMac);
+                            device.setDeviceName(deviceName);
                             deviceDao.insert(device);
                         }else {
 
@@ -618,6 +591,9 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                             device.setDeviceAuthority_Poweroff(devicePowerOff);
                             device.setDeviceAuthority_Switch(deviceSwitch);
                             device.setDeviceAuthority_Linked(deviceLinked);
+                            device.setDeviceOnlyMac(deviceMac);
+                            device.setDeviceName(deviceName);
+
                             deviceDao.update(device);
                         }
                     }
@@ -631,11 +607,15 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
         @Override
         protected void onPostExecute(Activity activity, Integer integer) {
             if (integer==100){
-                Intent intent=new Intent(QRScannerActivity.this,DeviceListActivity.class);
-                startActivity(intent);
+//                Intent intent=new Intent(QRScannerActivity.this,DeviceListActivity.class);
+//                startActivity(intent);
+                Intent intent=new Intent();
+                intent.putExtra("device",device);
+                setResult(100,intent);
+                finish();
             }else {
                 ToastUtil.showShort(QRScannerActivity.this,"添加失败");
-                finish();
+//                finish();
             }
         }
     }
@@ -1088,7 +1068,8 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
             gifDrawable.start();
             image_heater_help.setImageDrawable(gifDrawable);
         }
-        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         backgroundAlpha(0.6f);
