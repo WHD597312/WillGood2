@@ -197,11 +197,11 @@ public class MQService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        connect();
-        if (intent != null) {
-            String reconnect = intent.getStringExtra("reconnect");
-            if (!TextUtils.isEmpty(reconnect)) {
-                countTime2.start();
+        if (intent!=null && intent.hasExtra("restart")){
+            int restart=intent.getIntExtra("restart",0);
+            Log.i("restart","-->"+restart);
+            if (restart==1){
+                connect(1);
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -210,7 +210,7 @@ public class MQService extends Service {
     public class LocalBinder extends Binder {
         public MQService getService() {
             Log.i(TAG, "Binder");
-//            connect();
+//            connect(0);
             return MQService.this;
         }
     }
@@ -230,19 +230,16 @@ public class MQService extends Service {
         }
     }
 
-    @Override
-    public boolean stopService(Intent name) {
-        Log.i(TAG, "stopService");
-        connect();
-        return super.stopService(name);
-    }
 
-    public void connect() {
+    public void connect(int state) {
         try {
             if (client != null && client.isConnected() == false) {
                 client.connect(options);
             }
-            new ConAsync(MQService.this).execute();
+            if (state==1) {
+                new ConAsync(MQService.this).execute();
+                countTime2.start();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -281,6 +278,7 @@ public class MQService extends Service {
         }
     }
 
+
     class ConAsync extends BaseWeakAsyncTask<Void, Void, Void, MQService> {
 
         public ConAsync(MQService mqService) {
@@ -294,8 +292,8 @@ public class MQService extends Service {
                 if (client.isConnected() == false) {
                     client.connect(options);
                 }
-
                 List<String> topicNames = getTopicNames();
+                Log.i("ConAsync","-->"+topicNames.size());
                 if (client.isConnected() && !topicNames.isEmpty()) {
                     for (String topicName : topicNames) {
                         if (!TextUtils.isEmpty(topicName)) {
@@ -316,6 +314,24 @@ public class MQService extends Service {
         }
     }
 
+    public void connectMqtt(String deviceMac){
+        try {
+            if (client!=null && !client.isConnected()){
+                client.connect(options);
+            }
+            String server = "qjjc/gateway/" + deviceMac + "/client_to_server";
+            String lwt = "qjjc/gateway/" + deviceMac + "/lwt";
+
+            if (client.isConnected()){
+                subscribe(server,1);
+                subscribe(lwt,1);
+                String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+                getData(topicName,0x11);
+            }
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
     public void subscribeAll(List<Device> devices) {
         try {
             for (Device device : devices) {
@@ -373,6 +389,7 @@ public class MQService extends Service {
             options.setConnectionTimeout(15);
             // 设置会话心跳时间 单位为秒 服务器会每隔1.5*20秒的时间向客户端发送个消息判断客户端是否在线，但这个方法并没有重连的机制
             options.setKeepAliveInterval(60);
+            options.setAutomaticReconnect(true);//打开重连机制
 
 
 //            options.setWill("sssssssss","rangossssss".getBytes("UTF-8"),1,false);
@@ -403,12 +420,9 @@ public class MQService extends Service {
                         Map<String, Object> params = new HashMap<>();
                         params.put("topicName", topicName);
                         params.put("bytes", bytes);
+                        Log.i("topicNamehhhhhhhhh", "-->" + topicName);
                         if (topicName.contains("client_to_server")) {
-                            Log.i("topicNamehhhhhhhhh", "-->" + topicName);
-                            Message msg = handler.obtainMessage();
-                            msg.what = 10005;
-                            msg.obj = params;
-                            handler.sendMessage(msg);
+                            new LoadAsyncTask(MQService.this).execute(params);
                         } else if (topicName.contains("lwt")) {
                             String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
                             Device device = deviceDao.findDeviceByMac(macAddress);
@@ -464,6 +478,9 @@ public class MQService extends Service {
 
     public void updateDevice(Device device) {
         deviceDao.update(device);
+    }
+    public List<Device> getDevices(){
+        return deviceDao.findAllDevice();
     }
 
     /**
@@ -725,9 +742,18 @@ public class MQService extends Service {
                             deviceDao.update(device);
                             offlineDevices.put(macAddress, device);
                             Message msg = handler.obtainMessage();
-                            msg.obj = macAddress;
-                            msg.what = 101;
-                            handler.sendMessage(msg);
+                            CountTimer countTimer2=null;
+                            for (CountTimer countTimer:countTimers){
+                                if (countTimer.getMacArress().equals(macAddress) && countTimer.getMillisUntilFinished()/1000==0){
+                                    countTimer2=countTimer;
+                                    break;
+                                }
+                            }
+                            if (countTimer2!=null){
+                                msg.obj = countTimer2;
+                                msg.what = 101;
+                                handler.sendMessage(msg);
+                            }
 
                             lines2 = sb.toString() + "";
                             if (!TextUtils.isEmpty(lines2)) {
@@ -1768,7 +1794,8 @@ public class MQService extends Service {
             @Override
             public void run() {
                 if (!client.isConnected()) {
-                    connect();
+                    connect(1);
+                    Log.i("MQService","-->startReconnect");
                 }
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
@@ -1779,13 +1806,12 @@ public class MQService extends Service {
             Log.e("addCountTimer", "-->" + macAddress);
             String deviceMac = timer.getMacArress();
             if (macAddress.equals(deviceMac)) {
-                continue;
-            } else {
-                CountTimer countTimer = new CountTimer(1000 * 60 * 30, 1000);
-                countTimer.setMacArress(macAddress);
-                countTimers.add(countTimer);
+                return;
             }
         }
+        CountTimer countTimer = new CountTimer(1000 * 60 * 5*6, 1000);
+        countTimer.setMacArress(macAddress);
+        countTimers.add(countTimer);
     }
 
     public void clearCountTimer() {
@@ -1820,7 +1846,7 @@ public class MQService extends Service {
 
         @Override
         public void onTick(long millisUntilFinished) {
-
+            Log.i("CountTime2","-->"+millisUntilFinished/1000);
         }
 
         @Override
@@ -1848,8 +1874,6 @@ public class MQService extends Service {
                     String deviceMac = device.getDeviceOnlyMac();
                     String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
                     getData(topicName, 0x11);
-                    Thread.sleep(300);
-                    getData(topicName, 0x44);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1883,11 +1907,12 @@ public class MQService extends Service {
         @Override
         public void onTick(long millisUntilFinished) {
             this.millisUntilFinished = millisUntilFinished;
-            Log.e("millisUntilFinished", "-->" + millisUntilFinished);
+            Log.e("millisUntilFinished", macArress+"->" + millisUntilFinished/1000);
         }
 
         @Override
         public void onFinish() {
+            Log.e("millisUntilFinished", "-->" + millisUntilFinished/1000);
 
             String topicName = "qjjc/gateway/" + macArress + "/server_to_client";
             getData(topicName, 0x11);
@@ -1963,6 +1988,14 @@ public class MQService extends Service {
      */
     public boolean subscribe(String topicName, int qos) {
         boolean flag = false;
+        try {
+            if (client!=null && !client.isConnected()){
+                client.connect(options);
+            }
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+
         if (client != null && client.isConnected()) {
             try {
                 client.subscribe(topicName, qos);
@@ -2265,6 +2298,7 @@ public class MQService extends Service {
             if (!success) {
                 publish(topicName, 1, bytes);
             }
+            Log.i("success","--->"+success);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2318,11 +2352,11 @@ public class MQService extends Service {
             datas[17] = (byte) (sum % 256);
             datas[18] = 0x09;
 
-
             success = publish(topicName, 1, datas);
             if (!success) {
                 publish(topicName, 1, datas);
             }
+            Log.i("Basic","-->"+success);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -2864,18 +2898,7 @@ public class MQService extends Service {
         return true;
     }
 
-    /**
-     * 获取模拟量检测
-     *
-     * @param params
-     */
-    private void getAnalogName(Map<String, Object> params) {
-        try {
-            new AnalogCheckAcync(MQService.this).execute(params);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
 
     private List<SwtichState> switchChecks = new ArrayList<>();
 
@@ -2883,6 +2906,10 @@ public class MQService extends Service {
         return switchChecks;
     }
 
+    /**
+     * 获取开关量名称
+     * @param params
+     */
     public void getSwitchName(Map<String, Object> params) {
         try {
             new GetSwichAsync(MQService.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
@@ -2890,15 +2917,14 @@ public class MQService extends Service {
             e.printStackTrace();
         }
     }
-
-    class GetSwichAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, MQService> {
+    class GetSwichAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Map<String,Object>, MQService> {
 
         public GetSwichAsync(MQService mqService) {
             super(mqService);
         }
 
         @Override
-        protected Integer doInBackground(MQService mqService, Map<String, Object>... maps) {
+        protected Map<String,Object> doInBackground(MQService mqService, Map<String, Object>... maps) {
             int code = 0;
             Map<String, Object> params = maps[0];
             String deviceMac = (String) params.get("deviceMac");
@@ -2931,20 +2957,23 @@ public class MQService extends Service {
                     }
                 }
                 params.put("deviceMac", deviceMac);
-                getAlarmName(params);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return code;
+            return params;
         }
 
         @Override
-        protected void onPostExecute(MQService mqService, Integer integer) {
-
+        protected void onPostExecute(MQService mqService, Map<String,Object> params) {
+            getAlarmName(params);
         }
 
     }
 
+    /**
+     * 获取报警
+     * @param params
+     */
     private void getAlarmName(Map<String, Object> params) {
         try {
             new AlermAsync(MQService.this).execute(params);
@@ -2953,24 +2982,24 @@ public class MQService extends Service {
         }
     }
 
-    class AlermAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, MQService> {
+    class AlermAsync extends BaseWeakAsyncTask<Map<String, Object>, Void,Map<String,Object>, MQService> {
 
         public AlermAsync(MQService mqService) {
             super(mqService);
         }
 
         @Override
-        protected Integer doInBackground(MQService mqService, Map<String, Object>... maps) {
+        protected Map<String,Object> doInBackground(MQService mqService, Map<String, Object>... maps) {
             int code = 0;
+            Map<String, Object> params = maps[0];
             try {
-
-                Map<String, Object> params = maps[0];
                 String deviceMac = (String) params.get("deviceMac");
                 long deviceId = (long) params.get("deviceId");
                 params.remove("deviceMac");
                 String url = HttpUtils.ipAddress + "device/getAlarmName";
                 String result = HttpUtils.requestPost(url, params);
                 if (!TextUtils.isEmpty(result)) {
+                    Log.i("getAlarmName","->"+result);
                     JSONObject jsonObject = new JSONObject(result);
                     code = jsonObject.getInt("returnCode");
                     if (code == 100) {
@@ -3032,20 +3061,29 @@ public class MQService extends Service {
                     }
                 }
                 params.put("deviceMac", deviceMac);
-//                getDeviceTrajectory(params);
-                getAnalogName(params);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return code;
+            return params;
         }
 
         @Override
-        protected void onPostExecute(MQService mqService, Integer integer) {
-
+        protected void onPostExecute(MQService mqService, Map<String,Object> params) {
+            getAnalogName(params);
         }
     }
-
+    /**
+     * 获取模拟量检测
+     *
+     * @param params
+     */
+    private void getAnalogName(Map<String, Object> params) {
+        try {
+            new AnalogCheckAcync(MQService.this).execute(params);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * 获取设备模拟量名称
      */
@@ -3067,7 +3105,9 @@ public class MQService extends Service {
                 params.remove("deviceMac");
                 if (TextUtils.isEmpty(result))
                     result = HttpUtils.requestPost(url, params);
+
                 if (!TextUtils.isEmpty(result)) {
+                    Log.i("getAnalogName","->"+result);
                     JSONObject jsonObject = new JSONObject(result);
                     code = jsonObject.getInt("returnCode");
                     if (code == 100) {
@@ -3187,7 +3227,8 @@ public class MQService extends Service {
                     }
                 }
                 params.put("deviceMac", deviceMac);
-                getAnalogName(params);
+
+//                getAnalogName(params);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -3216,14 +3257,9 @@ public class MQService extends Service {
                     ToastUtil.showShort(MQService.this, "设备" + name + "已离线");
                 }
             } else if (msg.what == 101) {
-                String macAddress = (String) msg.obj;
-                for (int i = 0; i < countTimers.size(); i++) {
-                    CountTimer countTimer = countTimers.get(i);
-                    if (macAddress.equals(countTimer.getMacArress()) && countTimer.getMillisUntilFinished() == 0) {
-                        countTimer.setMacArress(macAddress);
-                        countTimer.start();
-                        break;
-                    }
+                CountTimer countTimer = (CountTimer) msg.obj;
+                if (countTimer!=null){
+                    countTimer.start();
                 }
             } else if (msg.what == 10001) {
                 String ss = (String) msg.obj;
@@ -3238,12 +3274,13 @@ public class MQService extends Service {
                 sb.append(content + ",");
                 sb.append(content);
                 starSpeech2(sb.toString());
-            } else if (msg.what == 10005) {
-                Log.i("tttttttttttttttttttttt", "llllllllllllllllll");
-                Map<String, Object> params = (Map<String, Object>) msg.obj;
-                new LoadAsyncTask(MQService.this).execute(params);
-
             }
+//            } else if (msg.what == 10005) {
+//                Log.i("tttttttttttttttttttttt", "llllllllllllllllll");
+//                Map<String, Object> params = (Map<String, Object>) msg.obj;
+//                new LoadAsyncTask(MQService.this).execute(params);
+//
+//            }
             return true;
         }
     };

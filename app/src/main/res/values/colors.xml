@@ -59,4 +59,5 @@
     <color name="base_back">#09c585</color>
     <color name="gray2">#575757</color>
     <color name="gray3">#cfd0cf</color>
+    <color name="gallery_blue">#000000</color>
 </resources>

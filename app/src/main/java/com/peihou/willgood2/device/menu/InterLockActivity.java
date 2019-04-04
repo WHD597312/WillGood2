@@ -156,27 +156,14 @@ public class InterLockActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        updates();
         super.onBackPressed();
     }
 
-    private void updates(){
-        List<Line2> list=deviceLineDao.findDeviceLines(deviceMac);
-        for (int i = 0; i <list.size() ; i++) {
-            Line2 line2=list.get(i);
-            line2.setVisitity(0);
-            list.set(i,line2);
-        }
-        if (mqService!=null && !list.isEmpty()){
-            mqService.updateLines(list);
-        }
-    }
     int click=0;
     @OnClick({R.id.img_back, R.id.btn_lock})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_back:
-                updates();
                 finish();
                 break;
             case R.id.btn_lock:
@@ -310,6 +297,10 @@ public class InterLockActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         if (bind) {
             unbindService(connection);
         }

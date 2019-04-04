@@ -126,7 +126,6 @@ public class DeviceInterLockActivity extends BaseActivity {
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
-                updates();
                 finish();
                 break;
         }
@@ -148,21 +147,9 @@ public class DeviceInterLockActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        updates();
         super.onBackPressed();
     }
 
-    private void updates(){
-        List<Line2> list=deviceLineDao.findDeviceLines(deviceMac);
-        for (int i = 0; i <list.size() ; i++) {
-            Line2 line2=list.get(i);
-            line2.setVisitity(0);
-            list.set(i,line2);
-        }
-        if (mqService!=null && !list.isEmpty()){
-            mqService.updateLines(list);
-        }
-    }
 
     int num1=0;
     int num2=0;
@@ -248,12 +235,13 @@ public class DeviceInterLockActivity extends BaseActivity {
                     lastlineSwitch=TenTwoUtil.changeToTen2(lastLineSwitch);
                     device.setPrelineswitch(prelineSwitch);
                     device.setLastlineswitch(lastlineSwitch);
+                    device.setPrelinesjog(0);
+                    device.setLastlinesjog(0);
                     if (mqService!=null){
                         boolean success=mqService.sendBasic(topicName,device);
                         countTimer.start();
                         click=1;
                         if (success){
-
 //                            interLock.setOperate(1);
 //                            list.set(position,interLock);
 //                            notifyDataSetChanged();
@@ -282,13 +270,14 @@ public class DeviceInterLockActivity extends BaseActivity {
 
                     }else if (deviceLineNum2>=8){
                         lastLineSwitch[deviceLineNum2-9]=0;
-
                     }
 
                     prelineSwitch=TenTwoUtil.changeToTen2(preLineSwitch);
                     lastlineSwitch=TenTwoUtil.changeToTen2(lastLineSwitch);
                     device.setPrelineswitch(prelineSwitch);
                     device.setLastlineswitch(lastlineSwitch);
+                    device.setPrelinesjog(0);
+                    device.setLastlinesjog(0);
                     if (mqService!=null){
                         boolean success=mqService.sendBasic(topicName,device);
                         click=1;
@@ -333,6 +322,8 @@ public class DeviceInterLockActivity extends BaseActivity {
                     lastlineSwitch=TenTwoUtil.changeToTen2(lastLineSwitch);
                     device.setPrelineswitch(prelineSwitch);
                     device.setLastlineswitch(lastlineSwitch);
+                    device.setPrelinesjog(0);
+                    device.setLastlinesjog(0);
                     if (mqService!=null){
                         boolean success=mqService.sendBasic(topicName,device);
                         countTimer.start();
@@ -371,6 +362,10 @@ public class DeviceInterLockActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         if (bind){
             unbindService(connection);
         }

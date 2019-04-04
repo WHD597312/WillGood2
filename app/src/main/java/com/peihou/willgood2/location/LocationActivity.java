@@ -622,6 +622,10 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
     @Override
     protected void onDestroy() {
         mapView.onDestroy();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         if (receiver!=null){
             unregisterReceiver(receiver);
         }

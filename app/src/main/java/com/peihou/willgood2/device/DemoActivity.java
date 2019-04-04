@@ -73,6 +73,7 @@ public class DemoActivity extends AppCompatActivity {
                 switch (position){
                     case 0:
                         sendBasic(topicName1,1);
+                        sendBasic(topicName2,1);
                         break;
                     case 1:
                         sendTimer(topicName1,0,1);
@@ -182,6 +183,7 @@ public class DemoActivity extends AppCompatActivity {
     }
 
     String topicName1="qjjc/gateway/8655330313815/client_to_server";
+    String topicName2="qjjc/gateway/866289037318450/client_to_server";
     int state=1;
     int count=0;
     int ss=1;
@@ -196,7 +198,6 @@ public class DemoActivity extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder= (MQService.LocalBinder) service;
-
             mqService=binder.getService();
         }
 
@@ -213,8 +214,8 @@ public class DemoActivity extends AppCompatActivity {
             bytes[2]=0;
             bytes[3]=0x0d;
             bytes[4]= (byte) state;
-            bytes[5]=96;
-            bytes[6]=32;
+            bytes[5]= (byte) 255;
+            bytes[6]= (byte) 255;
             bytes[7]=32;
             bytes[8]=32;
             bytes[9]=96;

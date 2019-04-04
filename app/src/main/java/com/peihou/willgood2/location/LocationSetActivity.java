@@ -183,6 +183,10 @@ public class LocationSetActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         if (bind){
             unbindService(connection);
         }

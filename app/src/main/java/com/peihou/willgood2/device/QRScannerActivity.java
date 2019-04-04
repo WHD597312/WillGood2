@@ -318,6 +318,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
         }
     }
 
+    int insert=0;
     class AddDeivceAsync extends BaseWeakAsyncTask<Map<String,Object>,Void,Integer,QRScannerActivity> {
 
         public AddDeivceAsync(QRScannerActivity activity) {
@@ -341,10 +342,14 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                         Gson gson=new Gson();
                         device=gson.fromJson(s,Device.class);
                         String deviceMac=device.getDeviceOnlyMac();
-                        device.setDeviceName(deviceName);
-                        List<Device> deleteDevices=deviceDao.findDevicesByMac(deviceMac);
-                        deviceDao.deleteDevices(deleteDevices);
-                        deviceDao.insert(device);
+                        Device device2=deviceDao.findDeviceByMac(deviceMac);
+                        if (device2==null){
+                            deviceDao.insert(device);
+                            insert=1;
+                        }else {
+                            deviceDao.update(device);
+                            insert=0;
+                        }
                     }
                 }
             }catch (Exception e){
@@ -360,6 +365,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                     ToastUtil.showShort(QRScannerActivity.this,"添加成功");
                     Intent intent=new Intent();
                     intent.putExtra("device",device);
+                    intent.putExtra("insert",insert);
                     setResult(100,intent);
                     finish();
                     break;
@@ -384,6 +390,10 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
     @Override
     protected void onDestroy() {
         inactivityTimer.shutdown();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         if (mReceiver!=null){
             unregisterReceiver(mReceiver);
         }
@@ -577,6 +587,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                             device.setDeviceOnlyMac(deviceMac);
                             device.setDeviceName(deviceName);
                             deviceDao.insert(device);
+                            insert=1;
                         }else {
 
                             device.setShare("share");
@@ -593,7 +604,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                             device.setDeviceAuthority_Linked(deviceLinked);
                             device.setDeviceOnlyMac(deviceMac);
                             device.setDeviceName(deviceName);
-
+                            insert=0;
                             deviceDao.update(device);
                         }
                     }
@@ -611,6 +622,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
 //                startActivity(intent);
                 Intent intent=new Intent();
                 intent.putExtra("device",device);
+                intent.putExtra("insert",insert);
                 setResult(100,intent);
                 finish();
             }else {

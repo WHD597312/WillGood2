@@ -147,7 +147,7 @@ public class DeviceListActivity extends BaseActivity {
                         PackageInfo packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
                         params.clear();
                         versionName = packageInfo.versionName;
-                        versionCode=packageInfo.versionCode;
+                        versionCode = packageInfo.versionCode;
                         params.put("appType", versionCode);
                         new UpdateAppAsync(this).execute(params).get(3, TimeUnit.SECONDS);
                     } catch (Exception e) {
@@ -158,7 +158,7 @@ public class DeviceListActivity extends BaseActivity {
                 }
 //                }
 
-                load=1;
+                load = 1;
                 params.clear();
                 params.put("userId", userId);
                 new LoadDeviceListAsync(this).execute(params);
@@ -199,6 +199,7 @@ public class DeviceListActivity extends BaseActivity {
     String updateAppUrl = "https://pgyer.com/OSRU";
     AppUpdateDialog appUpdateDialog;
 
+    String updateAppVersion;
     class UpdateAppAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, DeviceListActivity> {
 
         public UpdateAppAsync(DeviceListActivity activity) {
@@ -218,6 +219,7 @@ public class DeviceListActivity extends BaseActivity {
                     if (resultCode == 100) {
                         JSONObject returnData = jsonObject.getJSONObject("returnData");
                         String appVersion = returnData.getString("appVersion");
+                        updateAppVersion=appVersion;
                         Log.i("appversion", "-->" + appVersion + "," + versionName);
                         if (appVersion.equals(versionName)) {
                             code = -2000;
@@ -230,6 +232,7 @@ public class DeviceListActivity extends BaseActivity {
                 e.printStackTrace();
             }
 
+
             return code;
         }
 
@@ -238,6 +241,7 @@ public class DeviceListActivity extends BaseActivity {
             if (integer == 2000) {
                 appUpdateDialog = new AppUpdateDialog(DeviceListActivity.this);
                 appUpdateDialog.setCanceledOnTouchOutside(false);
+                appUpdateDialog.setName(updateAppVersion);
                 appUpdateDialog.setOnNegativeClickListener(new AppUpdateDialog.OnNegativeClickListener() {
                     @Override
                     public void onNegativeClick() {
@@ -379,6 +383,48 @@ public class DeviceListActivity extends BaseActivity {
         }
     };
 
+    class LoadDataAysnc2 extends BaseWeakAsyncTask<Void, Void, Integer, DeviceListActivity> {
+
+        public LoadDataAysnc2(DeviceListActivity deviceListActivity) {
+            super(deviceListActivity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+
+        @Override
+        protected Integer doInBackground(DeviceListActivity deviceListActivity, Void... voids) {
+            int code = 0;
+            List<Device> devices = deviceDao.findAllDevice();
+            try {
+                int i = 0;
+                for (Device device : devices) {
+                    String deviceMac = device.getDeviceOnlyMac();
+                    String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+                    Log.i("topicName","-->"+topicName);
+                    if (mqService != null) {
+                        mqService.getData(topicName, 0x11);
+                        Thread.currentThread().sleep(500);
+                        i++;
+                        if (i == devices.size()) {
+                            code = 100;
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return code;
+        }
+
+        @Override
+        protected void onPostExecute(DeviceListActivity deviceListActivity, Integer code) {
+        }
+    }
+
     class LoadDataAsync extends BaseWeakAsyncTask<List<String>, Void, List<String>, DeviceListActivity> {
 
         public LoadDataAsync(DeviceListActivity deviceListActivity) {
@@ -394,9 +440,7 @@ public class DeviceListActivity extends BaseActivity {
                     for (String topicName : topicNames) {
                         Log.i("LoadDataAsync", "-->" + topicName);
                         mqService.getData(topicName, 0x11);
-//                        Thread.sleep(300);
-
-                        mqService.getData(topicName, 0x44);
+                        Thread.currentThread().sleep(300);
                         String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
                         Log.i("deviceMac", "-->" + macAddress);
                         list.add(macAddress);
@@ -410,23 +454,23 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(DeviceListActivity deviceListActivity, List<String> list) {
-            Log.i("onPostExecute","-->"+list.size());
+            Log.i("onPostExecute", "-->" + list.size());
             if (!list.isEmpty()) {
                 int n = list.size();
                 int total = 0;
                 if (0 < n && n <= 2) {
-                    total = 2000;
-                } else if (n > 2 && n <= 6) {
                     total = 4000;
+                } else if (n > 2 && n <= 6) {
+                    total = 6000;
                 } else if (n > 6) {
-                    total = 5000;
+                    total = 8000;
                 }
                 CountTimer2 countTimer = new CountTimer2(total, 1000);
                 countTimer.start();
                 for (String deviceMac : list) {
                     mqService.addCountTimer(deviceMac);
                 }
-                load=0;
+                load = 0;
             }
         }
     }
@@ -535,6 +579,16 @@ public class DeviceListActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.i("devicehhhhhhhhhhhh","-->"+onResult);
+        if (!running && mqService!=null && onResult==0){
+            List<Device> devices=mqService.getDevices();
+            list.clear();
+            list.addAll(devices);
+            adapter.notifyDataSetChanged();
+            countTimer.start();
+            onResult=0;
+            new LoadDataAysnc2(this).execute();
+        }
         running = true;
     }
 
@@ -563,6 +617,12 @@ public class DeviceListActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (popupWindow!=null && popupWindow.isShowing()){
+            popupWindow.dismiss();
+        }
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
         if (reveiver != null) {
             unregisterReceiver(reveiver);
         }
@@ -575,24 +635,32 @@ public class DeviceListActivity extends BaseActivity {
         handler.removeCallbacksAndMessages(null);
     }
 
+    int onResult = 0;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == 100) {
+            onResult = 1;
             Device device = (Device) data.getSerializableExtra("device");
+
             if (device != null) {
                 if (mqService != null) {
+                    countTimer.start();
                     String deviceMac = device.getDeviceOnlyMac();
                     String tioncName2 = "qjjc/gateway/" + deviceMac + "/lwt";
                     String topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
-                    String topicName3 = "qjjc/gateway/" + deviceMac + "server_to_server";
+                    String topicName3 = "qjjc/gateway/" + deviceMac + "/server_to_client";
                     mqService.subscribe(topicName, 1);
                     mqService.subscribe(tioncName2, 1);
                     mqService.getData(topicName3, 0x11);
                     mqService.addCountTimer(deviceMac);
                 }
-                list.add(device);
-                adapter.notifyDataSetChanged();
+                int insert=data.getIntExtra("insert",0);
+                if (insert==1){
+                    list.add(device);
+                    adapter.notifyDataSetChanged();
+                }
             }
         }
     }
@@ -708,6 +776,8 @@ public class DeviceListActivity extends BaseActivity {
                         device.setPrelines(0);
                         device.setDeviceState(0);
                         device.setLastlines(0);
+                        device.setPrelinesjog(0);
+                        device.setLastlinesjog(0);
                         choices++;
                         if (mqService != null) {
                             String deviceMac = device.getDeviceOnlyMac();
@@ -740,6 +810,8 @@ public class DeviceListActivity extends BaseActivity {
                         device.setPrelines(255);
                         device.setLastlines(255);
                         device.setDeviceState(1);
+                        device.setPrelinesjog(0);
+                        device.setLastlinesjog(0);
                         if (mqService != null) {
                             String deviceMac = device.getDeviceOnlyMac();
                             String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
@@ -1100,7 +1172,7 @@ public class DeviceListActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null){
+        if (popupWindow2 == null) {
             popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         }
         //添加弹出、弹入的动画

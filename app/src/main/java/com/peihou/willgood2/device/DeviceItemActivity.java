@@ -45,11 +45,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.peihou.willgood2.BaseActivity;
+import com.peihou.willgood2.CheckPermissionsActivity;
 import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.ChangeDialog;
-import com.peihou.willgood2.custom.OnRecyclerItemClickListener;
 import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceLineDaoImpl;
 import com.peihou.willgood2.device.menu.AlermActivity;
@@ -69,6 +68,7 @@ import com.peihou.willgood2.pojo.DeviceTrajectory;
 import com.peihou.willgood2.pojo.Line2;
 import com.peihou.willgood2.pojo.SwtichState;
 import com.peihou.willgood2.service.MQService;
+import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.ConstUtils;
 import com.peihou.willgood2.utils.DisplayUtil;
 import com.peihou.willgood2.utils.TenTwoUtil;
@@ -96,8 +96,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import me.jessyan.autosize.internal.CustomAdapt;
 
-public class DeviceItemActivity extends AppCompatActivity implements View.OnTouchListener {
+public class DeviceItemActivity extends CheckPermissionsActivity implements View.OnTouchListener, CustomAdapt {
 
     Unbinder unbinder;
     /**
@@ -156,6 +157,7 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
     int init = 0;
     int userId;
     String lines;
+    String checkLine;
     Map<Integer, Integer> mapChoiceLines = new HashMap<>();
     int width;
     int heigth;
@@ -163,7 +165,7 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        application= (MyApplication) getApplication();
+        application = (MyApplication) getApplication();
         application.addActivity(this);
         setContentView(R.layout.activity_device_item);
         DisplayMetrics dm = new DisplayMetrics();
@@ -230,6 +232,8 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
         list = deviceLineDao.findDeviceOnlineLines(deviceId);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+//        rv_lines.setPadding(25,0,25,0);
+//        rv_lines.addItemDecoration(new SpacesItemDecoration(25));
         rv_lines.setLayoutManager(layoutManager);
         linesAadpter = new LinesAadpter(list, this);
         rv_lines.setAdapter(linesAadpter);
@@ -409,8 +413,19 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
 
     CountTimer countTimer = new CountTimer(2000, 1000);
 
+    @Override
+    public boolean isBaseOnWidth() {
+        return false;
+    }
+
+    @Override
+    public float getSizeInDp() {
+        return 640;
+    }
+
 
     class CountTimer extends CountDownTimer {
+
 
         /**
          * @param millisInFuture    The number of millis in the future from the call
@@ -431,6 +446,12 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
         @Override
         public void onFinish() {
             if (popupWindow2 != null && popupWindow2.isShowing()) {
+                if (load == 1) {
+                    if (mqService != null) {
+                        mqService.connectMqtt(deviceMac);
+                    }
+                }
+                load = 0;
                 popupWindow2.dismiss();
             }
         }
@@ -445,7 +466,7 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null){
+        if (popupWindow2 == null) {
             popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         }
         //添加弹出、弹入的动画
@@ -587,20 +608,32 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
 
     public static boolean running = false;
 
+    int load = 0;
+
     @Override
     protected void onStart() {
         super.onStart();
+        boolean running2 = ServiceUtils.isServiceRunning(this, "com.peihou.willgood2.service.MQService");
+        if (!running2) {
+            Intent intent = new Intent(this, MQService.class);
+            intent.putExtra("restart", 1);
+            startService(intent);
+        }
+        if (!running && mqService != null) {
+            load = 1;
+            mqService.connectMqtt(deviceMac);
+            countTimer.start();
+        }
         running = true;
         plMemory = device.getPlMemory();
-        if (mqService != null) {
-            mqService.getData(topicName, 0x11);
-        }
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         running = false;
+        load = 0;
     }
 
     @Override
@@ -631,6 +664,10 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         handler.removeCallbacksAndMessages(null);
         if (bind) {
             unbindService(connection);
@@ -670,8 +707,8 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                         device.setTemp(0);
                         device.setHum(0);
                         device.setCurrent(0);
-                        device.setVotage(0);
                         deviceDao.update(device);
+                        device.setVotage(0);
                         setMode(device);
                     }
                 } else {
@@ -683,6 +720,7 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                             device = device2;
 //                            plMemory=device.getPlMemory();
                             setMode(device2);
+                            lines = "";
                             lines = intent.getStringExtra("lines");
                             if (click == 1) {
                                 handler.sendEmptyMessage(101);//关
@@ -706,7 +744,7 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
     int allClose = 0;//0表示 多关按钮为灰色，1为绿色
     int allJog = 0;//0表示 多点动按钮为灰色，1为绿色
     int singleSwitch = -1;//0表示 单个按钮为灰色，1为绿色
-    int onKey = 1;
+    int onKey = -1;
 
     /**
      * 设置单开关
@@ -785,7 +823,10 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                     click = 1;
                     device.setPrelineswitch(0);
                     device.setLastlineswitch(0);
+                    device.setPrelinesjog(0);
+                    device.setLastlinesjog(0);
                     device.setDeviceState(0);
+                    onKey = 1;
                     boolean success = mqService.sendBasic(topicName, device);
                     countTimer.start();
 
@@ -811,7 +852,10 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                     device.setPrelineswitch(255);
                     device.setLastlineswitch(255);
                     device.setDeviceState(1);
+                    device.setPrelinesjog(0);
+                    device.setLastlinesjog(0);
                     click = 2;
+                    onKey = 2;
                     boolean success = mqService.sendBasic(topicName, device);
                     countTimer.start();
 //                    if (success){
@@ -840,8 +884,8 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                     break;
                 }
 
-                int[] preLines = TenTwoUtil.changeToTwo(device.getPrelinesjog());
-                int[] lastLines = TenTwoUtil.changeToTwo(device.getLastlinesjog());
+                int[] preLines = new int[8];
+                int[] lastLines = new int[8];
                 for (int i = 0; i < list.size(); i++) {
                     Line2 line2 = list.get(i);
 
@@ -856,13 +900,13 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                 }
                 int preLinesJog = TenTwoUtil.changeToTen2(preLines);
                 int lastLinesJog = TenTwoUtil.changeToTen2(lastLines);
-                Log.i("preLinesJog","-->"+preLinesJog+","+lastLinesJog);
+                Log.i("preLinesJog", "-->" + preLinesJog + "," + lastLinesJog);
                 device.setPrelinesjog(preLinesJog);
                 device.setLastlinesjog(lastLinesJog);
+
                 if (mqService != null) {
                     boolean success = mqService.sendBasic(topicName, device);
                     countTimer.start();
-
                     click = 3;
 //                    if (success){
 //                        linesAadpter.notifyDataSetChanged();
@@ -895,26 +939,29 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                     for (int i = 0; i < list.size(); i++) {
                         Line2 line2 = list.get(i);
                         int deviceLineNum = line2.getDeviceLineNum();
-                        boolean open=line2.getOpen();
+                        boolean open = line2.getOpen();
                         if (line2.getClick2() == 1) {
                             if (deviceLineNum <= 8) {
-                                if (open){
+                                if (open) {
                                     preLinesS[deviceLineNum - 1] = 0;
-                                }else {
+                                } else {
                                     preLinesS[deviceLineNum - 1] = 1;
                                 }
                             } else if (deviceLineNum > 8) {
-                                if (open){
+                                if (open) {
                                     lastLinesS[(deviceLineNum - 1) - 8] = 0;
-                                }else {
+                                } else {
                                     lastLinesS[(deviceLineNum - 1) - 8] = 1;
                                 }
                             }
-                            int state=open==true?0:1;
-                            if (state==0){
-                                click=1;
-                            }else if (state==1){
-                                click=2;
+                            checkLine="";
+                            checkLine = deviceLineNum + "";
+
+                            int state = open == true ? 0 : 1;
+                            if (state == 0) {
+                                click = 1;
+                            } else if (state == 1) {
+                                click = 2;
                             }
                             device.setDeviceState(state);
                             break;
@@ -922,8 +969,11 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                     }
                     int preLinesSwitch = TenTwoUtil.changeToTen2(preLinesS);
                     int lastLinesSwitch = TenTwoUtil.changeToTen2(lastLinesS);
+                    onKey = 0;
                     device.setPrelineswitch(preLinesSwitch);
                     device.setLastlineswitch(lastLinesSwitch);
+                    device.setPrelinesjog(0);
+                    device.setLastlinesjog(0);
                     if (mqService != null) {
                         mqService.sendBasic(topicName, device);
                         countTimer.start();
@@ -1105,7 +1155,8 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
     }
 
 
-    int firstItem=-1;
+    int firstItem = -1;
+
     class LinesAadpter extends RecyclerView.Adapter<LineHolder> {
 
         private List<Line2> list;
@@ -1124,7 +1175,7 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
         }
 
         @Override
-        public void onBindViewHolder(@NonNull final LineHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull LineHolder holder, final int position) {
             final Line2 line2 = list.get(position);
             double seconds = line2.getSeconds();
             String name = line2.getName();
@@ -1148,26 +1199,26 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
             }
 
 
-            if (choicedLines==1){
-                for (int i = 0; i <list.size() ; i++) {
-                    Line2 line3=list.get(i);
-                    if (line3.getClick2()==1){
-                        boolean open3=line3.getOpen();
-                        if (open3){
+            if (choicedLines == 1) {
+                for (int i = 0; i < list.size(); i++) {
+                    Line2 line3 = list.get(i);
+                    if (line3.getClick2() == 1) {
+                        boolean open3 = line3.getOpen();
+                        if (open3) {
                             tv_switch2.setText("关");
-                            singleSwitch=1;
+                            singleSwitch = 1;
                             setImageRes();
-                        }else {
+                        } else {
                             tv_switch2.setText("开");
-                            singleSwitch=1;
+                            singleSwitch = 1;
                             setImageRes();
                         }
                         break;
                     }
                 }
-            }else if (choicedLines==0){
+            } else if (choicedLines == 0) {
                 tv_switch2.setText("开");
-                singleSwitch=0;
+                singleSwitch = 0;
                 setImageRes();
             }
 
@@ -1184,6 +1235,13 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
             } else {
                 holder.tv_line_value.setVisibility(View.GONE);
             }
+            if (click == 1) {
+                mapChoiceLines.put(position, line2.getDeviceLineNum());
+            } else {
+                if (mapChoiceLines.containsKey(position)) {
+                    mapChoiceLines.remove(position);
+                }
+            }
             holder.rl_item.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -1192,21 +1250,15 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                         return;
                     }
                     if (line2.getClick2() == 1) {
-                        holder.img_line.setBackgroundResource(R.drawable.shape_circle_gray);
                         line2.setClick2(0);
                         if (choicedLines > 0) {
                             choicedLines--;
                         } else {
                             choicedLines = 0;
                         }
-                        if (mapChoiceLines.containsKey(position)) {
-                            mapChoiceLines.remove(position);
-                        }
                     } else {
-                        holder.img_line.setBackgroundResource(R.drawable.shape_circle_ring);
                         line2.setClick2(1);
                         choicedLines++;
-                        mapChoiceLines.put(position, line2.getDeviceLineNum());
                     }
                     list.set(position, line2);
                     notifyDataSetChanged();
@@ -1425,21 +1477,15 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                 case 101:
                     if (mqService != null) {
                         click = 0;
-                        onKey = 1;
-                        sb.setLength(0);
-                        for (Map.Entry<Integer, Integer> entry : mapChoiceLines.entrySet()) {
-                            int value = entry.getValue();
-                            sb.append(value + ",");
-                        }
-                        String lines2 = sb.toString();
-                        if (!TextUtils.isEmpty(lines2)) {
-                            char ch = lines2.charAt(lines2.length() - 1);
-                            if (',' == ch) {
-                                lines2 = lines2.substring(0, lines2.length() - 1);
-                            }
+                        String lines2 = "";
+                        if (onKey == 0) {
+                            lines2=checkLine;
                         } else {
-                            lines2 = "";
+                            lines2 = lines;
                         }
+
+                        Log.i("line2", "-->" + lines2);
+                        onKey = -1;
                         mqService.starSpeech(deviceMac, "关闭成功");
                         operateLog.clear();
                         operateLog.put("deviceMac", deviceMac);
@@ -1453,22 +1499,16 @@ public class DeviceItemActivity extends AppCompatActivity implements View.OnTouc
                 case 102:
                     if (mqService != null) {
                         click = 0;
-                        onKey = 0;
                         mqService.starSpeech(deviceMac, "开启成功");
-                        sb.setLength(0);
-                        for (Map.Entry<Integer, Integer> entry : mapChoiceLines.entrySet()) {
-                            int value = entry.getValue();
-                            sb.append(value + ",");
-                        }
-                        String lines2 = sb.toString();
-                        if (!TextUtils.isEmpty(lines2)) {
-                            char ch = lines2.charAt(lines2.length() - 1);
-                            if (',' == ch) {
-                                lines2 = lines2.substring(0, lines2.length() - 1);
-                            }
+                        String lines2 = "";
+                        if (onKey == 0) {
+                            lines2=checkLine;
                         } else {
-                            lines2 = "";
+                            lines2 = lines;
                         }
+                        Log.i("line2", "-->" + lines2);
+
+                        onKey = -1;
                         operateLog.clear();
                         operateLog.put("deviceMac", deviceMac);
                         operateLog.put("deviceControll", 1);

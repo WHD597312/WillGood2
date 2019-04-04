@@ -448,6 +448,10 @@ public class MoniCheckActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (popupWindow2!=null && popupWindow2.isShowing()){
+            popupWindow2.dismiss();
+        }
+
         unregisterReceiver(receiver);
         if (bind){
             unbindService(connection);

@@ -17,6 +17,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 
+import com.peihou.willgood2.service.MQService;
+import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.LogUtil;
 import com.peihou.willgood2.utils.SharedPreferencesHelper;
 import com.peihou.willgood2.utils.StatusBarUtil;
@@ -118,6 +120,17 @@ public abstract class BaseActivity extends AppCompatActivity {
             view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getStatusBarHeight(this)));
             view.setBackgroundColor(color);
             contentView.addView(view);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        boolean running=ServiceUtils.isServiceRunning(this,"com.peihou.willgood2.service.MQService");
+        if (!running){
+            Intent intent=new Intent(this, MQService.class);
+            intent.putExtra("restart",1);
+            startService(intent);
         }
     }
 

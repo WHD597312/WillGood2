@@ -83,8 +83,7 @@ public class DeviceLineDaoImpl {
         Map map=new HashMap();
         WhereCondition whereCondition=lineDao.queryBuilder().and(
                 Line2Dao.Properties.DeviceMac.eq(deviceMac),
-                Line2Dao.Properties.Lock.eq(1),
-                Line2Dao.Properties.Visitity.eq(1)
+                Line2Dao.Properties.Lock.eq(1)
         );
         List<Line2> list=lineDao.queryBuilder().where(whereCondition).list();
         for (int i = 0; i <list.size() ; i++) {
