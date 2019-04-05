@@ -31,7 +31,6 @@ import com.peihou.willgood2.database.dao.impl.DeviceInterLockDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceLineDaoImpl;
 import com.peihou.willgood2.pojo.InterLock;
 import com.peihou.willgood2.pojo.Line2;
-import com.peihou.willgood2.pojo.Lock;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.ToastUtil;
 

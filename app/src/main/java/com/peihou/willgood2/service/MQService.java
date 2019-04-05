@@ -274,6 +274,7 @@ public class MQService extends Service {
             deviceMoniLinkDaoDao.deletes(deviceMac);
             deviceAlermDao.deleteDeviceAlerms(deviceMac);
             deviceLinkedTypeDao.deleteLinkedTypes(deviceMac);
+            deviceInterLockDao.deletes(deviceMac);
             String server = "qjjc/gateway/" + deviceMac + "/client_to_server";
             String lwt = "qjjc/gateway/" + deviceMac + "/lwt";
             unsubscribe(server);

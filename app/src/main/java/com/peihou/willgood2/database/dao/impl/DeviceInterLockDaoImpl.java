@@ -8,7 +8,6 @@ import com.peihou.willgood2.database.dao.DaoMaster;
 import com.peihou.willgood2.database.dao.DaoSession;
 import com.peihou.willgood2.database.dao.InterLockDao;
 import com.peihou.willgood2.pojo.InterLock;
-import com.peihou.willgood2.pojo.Lock;
 
 import org.greenrobot.greendao.query.WhereCondition;
 
