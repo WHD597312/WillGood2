@@ -27,7 +27,9 @@ import android.widget.TextView;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.ChangeDialog;
+import com.peihou.willgood2.database.dao.impl.DeviceInterLockDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceLineDaoImpl;
+import com.peihou.willgood2.pojo.InterLock;
 import com.peihou.willgood2.pojo.Line2;
 import com.peihou.willgood2.pojo.Lock;
 import com.peihou.willgood2.service.MQService;
@@ -50,19 +52,16 @@ public class InterLockActivity extends BaseActivity {
     ListView list_lock;//以列表形式展示以互锁的线路
     List<Line2> lockLineList = new ArrayList<>();//线路集合
     LockLineAdapter lockLineAdapter;//线路适配器
-    private List<Lock> locks = new ArrayList<>();//互锁的线路集合
     LockAdapter lockAdapter;//互锁线路适配器
     private DeviceLineDaoImpl deviceLineDao;//设备线路表的操作对象
-    private long deviceId;
     private String deviceMac;
-    private Map<String, String> interLockMap = new HashMap<>();
     boolean online;
+    private List<InterLock> interLocks=new ArrayList<>();//互锁线路
+    private DeviceInterLockDaoImpl deviceInterLockDao;
     @Override
     public void initParms(Bundle parms) {
-        deviceId = parms.getLong("deviceId");
         deviceMac = parms.getString("deviceMac");
         online=parms.getBoolean("online");
-
     }
 
     @Override
@@ -84,10 +83,10 @@ public class InterLockActivity extends BaseActivity {
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         deviceLineDao = new DeviceLineDaoImpl(getApplicationContext());
 
+        deviceInterLockDao=new DeviceInterLockDaoImpl(getApplicationContext());
 
         lockLineList = deviceLineDao.findDeviceOnlineLines(deviceMac);
-
-
+        interLocks=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
         lockLineAdapter = new LockLineAdapter(this, lockLineList);
         grid_lock.setAdapter(lockLineAdapter);
         grid_lock.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -130,20 +129,9 @@ public class InterLockActivity extends BaseActivity {
                 }
             }
         });
-        interLockMap=deviceLineDao.findInterLockLine(deviceMac);
-        for (Map.Entry<String, String> entry : interLockMap.entrySet()) {
-            String interLock = entry.getKey();
-            String[] s = interLock.split("&");
-            int deviceLineNum = Integer.parseInt(s[0]);
-            int deviceLineNum2 = Integer.parseInt(s[1]);
-            Line2 line = deviceLineDao.findDeviceLine(deviceMac,deviceLineNum);
-            Line2 line2 = deviceLineDao.findDeviceLine(deviceMac,deviceLineNum2);
-            String name = line.getName();
-            String name2 = line2.getName();
-            locks.add(new Lock(name, name2, interLock));
-        }
 
-        lockAdapter = new LockAdapter(this, locks);
+
+        lockAdapter = new LockAdapter(this, interLocks);
         list_lock.setAdapter(lockAdapter);
         Intent service = new Intent(this, MQService.class);
         bind = bindService(service, connection, Context.BIND_AUTO_CREATE);
@@ -154,8 +142,23 @@ public class InterLockActivity extends BaseActivity {
         registerReceiver(receiver,filter);
     }
 
+    private void updateInterLocks(){
+
+        for (int i = 0; i < interLocks.size(); i++) {
+            InterLock interLock=interLocks.get(i);
+            interLock.setVisitity(0);
+            interLocks.set(i,interLock);
+        }
+
+        if (mqService!=null){
+            mqService.updateLines(deviceMac);
+            mqService.updateDeviceInterLock(interLocks);
+        }
+    }
+
     @Override
     public void onBackPressed() {
+        updateInterLocks();
         super.onBackPressed();
     }
 
@@ -164,6 +167,7 @@ public class InterLockActivity extends BaseActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_back:
+                updateInterLocks();
                 finish();
                 break;
             case R.id.btn_lock:
@@ -172,16 +176,13 @@ public class InterLockActivity extends BaseActivity {
                     int[]interLines=new int[16];
 //                    interLines[]
                     int i=0;
-                    for (Map.Entry entry : interLockMap.entrySet()) {
-                        String key = (String) entry.getKey();
-                        if (!TextUtils.isEmpty(key)){
-                            String[] s = key.split("&");
-                            int inter1 = Integer.parseInt(s[0]);
-                            int inter2 = Integer.parseInt(s[1]);
-                            interLines[i] = inter1;
-                            interLines[++i] = inter2;
-                            ++i;
-                        }
+                    for (int j = 0;  j<interLocks.size() ; j++) {
+                        InterLock interLock=interLocks.get(j);
+                        int deviceLineNum=interLock.getDeviceLineNum();
+                        int deviceLineNum2=interLock.getDeviceLineNum2();
+                        interLines[i]=deviceLineNum;
+                        interLines[++i]=deviceLineNum2;
+                        ++i;
                     }
                     interLines[i]=deviceLineNum;
                     interLines[++i]=deviceLineNum2;
@@ -256,11 +257,6 @@ public class InterLockActivity extends BaseActivity {
                     if (macAddress.equals(deviceMac)) {
                         boolean online2=intent.getBooleanExtra("online",false);
                         online=online2;
-                        interLockMap.clear();
-                        locks.clear();
-                        Map<String,String> map= (Map<String, String>) intent.getSerializableExtra("map");
-                        interLockMap.putAll(map);
-                        int[] x=new int[16];
                         if (click==1){
                             if (interLock==2)
                                 interLock = 0;
@@ -269,18 +265,9 @@ public class InterLockActivity extends BaseActivity {
 //                        mqService.starSpeech("控制成功");
                             click=0;
                         }
-                        for (Map.Entry<String, String> entry : interLockMap.entrySet()) {
-                            String interLock = entry.getKey();
-                            String[] s = interLock.split("&");
-                            int deviceLineNum = Integer.parseInt(s[0]);
-                            int deviceLineNum2 = Integer.parseInt(s[1]);
-                            Line2 line = deviceLineDao.findDeviceLine(deviceMac,deviceLineNum);
-                            Line2 line2 = deviceLineDao.findDeviceLine(deviceMac,deviceLineNum2);
-                            String name = line.getName();
-                            String name2 = line2.getName();
-                            locks.add(new Lock(name, name2, interLock));
-                        }
-
+                        List<InterLock> interLocks2=mqService.getDeviceVisityInterLock(deviceMac);
+                        interLocks.clear();
+                        interLocks.addAll(interLocks2);
                         lockLineList.clear();
                         List<Line2> line2List=mqService.getDeviceOnlineLiens(deviceMac);
                         lockLineList.addAll(line2List);
@@ -348,7 +335,7 @@ public class InterLockActivity extends BaseActivity {
             String name = lockLine.getName();
             boolean click = lockLine.isOnClick();
             int lock = lockLine.getLock();
-            if (click) {
+            if (click || lock==1) {
                 viewHolder.tv_lock_line.setBackgroundResource(R.drawable.shape_lock_line);
             } else {
                 viewHolder.tv_lock_line.setBackgroundResource(R.drawable.shape_lock_line2);
@@ -371,9 +358,9 @@ public class InterLockActivity extends BaseActivity {
     class LockAdapter extends BaseAdapter {
 
         private Context context;
-        private List<Lock> list;
+        private List<InterLock> list;
 
-        public LockAdapter(Context context, List<Lock> list) {
+        public LockAdapter(Context context, List<InterLock> list) {
             this.context = context;
             this.list = list;
         }
@@ -384,7 +371,7 @@ public class InterLockActivity extends BaseActivity {
         }
 
         @Override
-        public Lock getItem(int position) {
+        public InterLock getItem(int position) {
             return list.get(position);
         }
 
@@ -403,11 +390,11 @@ public class InterLockActivity extends BaseActivity {
             } else {
                 holderView = (HolderView) convertView.getTag();
             }
-            Lock lock = getItem(position);
-            String line = lock.getName1();
-            String line2 = lock.getName2();
-            holderView.tv_line.setText(line);
-            holderView.tv_line2.setText(line2);
+            InterLock lock = getItem(position);
+            String name = lock.getName();
+            String name2 = lock.getName2();
+            holderView.tv_line.setText(name);
+            holderView.tv_line2.setText(name2);
             holderView.btn_unbind.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -453,22 +440,20 @@ public class InterLockActivity extends BaseActivity {
                 }
 
                 if (mqService != null) {
-                    Lock lock = locks.get(position);
-                    String inter = lock.getInter();
+                    InterLock lock = interLocks.get(position);
+                    lock.setDeviceLineNum(0);
+                    lock.setDeviceLineNum2(0);
+                    interLocks.set(position,lock);
                     if (mqService != null) {
-                        interLockMap.remove(inter);
                         int[]interLines=new int[16];
                         int i=0;
-                        for (Map.Entry entry : interLockMap.entrySet()) {
-                            String key = (String) entry.getKey();
-                            if (!TextUtils.isEmpty(key)){
-                                String[] s = key.split("&");
-                                int inter1 = Integer.parseInt(s[0]);
-                                int inter2 = Integer.parseInt(s[1]);
-                                interLines[i] = inter1;
-                                interLines[++i] = inter2;
-                                ++i;
-                            }
+                        for (int j = 0; j <interLocks.size() ; j++) {
+                            InterLock interLock=interLocks.get(j);
+                            int deviceLineNum=interLock.getDeviceLineNum();
+                            int deviceLineNum2=interLock.getDeviceLineNum2();
+                            interLines[i]=deviceLineNum;
+                            interLines[++i]=deviceLineNum2;
+                            ++i;
                         }
                         if (mqService != null) {
                             boolean success = mqService.sendInterLine(topicName, mcuVersion, interLines);

@@ -438,10 +438,11 @@ public class DeviceListActivity extends BaseActivity {
                 if (mqService != null) {
                     List<String> topicNames = lists[0];
                     for (String topicName : topicNames) {
-                        Log.i("LoadDataAsync", "-->" + topicName);
-                        mqService.getData(topicName, 0x11);
-                        Thread.currentThread().sleep(300);
                         String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
+                        Log.i("LoadDataAsync", "-->" + topicName);
+                        mqService.addCountTimer(macAddress);
+                        mqService.getData(topicName, 0x11);
+                        Thread.sleep(300);
                         Log.i("deviceMac", "-->" + macAddress);
                         list.add(macAddress);
                     }
@@ -467,9 +468,6 @@ public class DeviceListActivity extends BaseActivity {
                 }
                 CountTimer2 countTimer = new CountTimer2(total, 1000);
                 countTimer.start();
-                for (String deviceMac : list) {
-                    mqService.addCountTimer(deviceMac);
-                }
                 load = 0;
             }
         }

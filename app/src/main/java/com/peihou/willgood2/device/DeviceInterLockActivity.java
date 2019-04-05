@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
+import com.peihou.willgood2.database.dao.impl.DeviceInterLockDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceLineDaoImpl;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.pojo.InterLock;
@@ -61,9 +62,12 @@ public class DeviceInterLockActivity extends BaseActivity {
     private DeviceLineDaoImpl deviceLineDao;//设备线路表的操纵对象
     private Device device;//设备
     private DeviceDaoImpl deviceDao;//设备表的操作对象
+    private List<InterLock> interLocks=new ArrayList<>();
 
+    private DeviceInterLockDaoImpl deviceInterLockDao;
     private int userId;
     private boolean online;
+
     @Override
     public void initParms(Bundle parms) {
         deviceId=parms.getLong("deviceId");
@@ -82,36 +86,35 @@ public class DeviceInterLockActivity extends BaseActivity {
     public void initView(View view) {
         deviceDao=new DeviceDaoImpl(getApplicationContext());
         deviceLineDao=new DeviceLineDaoImpl(getApplicationContext());
+        List<Line2> line2List=deviceLineDao.findDeviceLines(deviceMac);
+        deviceInterLockDao=new DeviceInterLockDaoImpl(getApplicationContext());
         device=deviceDao.findDeviceById(deviceId);
-        List<Line2> lockLineList=deviceLineDao.findDeviceLines(deviceId);
-        Map<String,String> map=deviceLineDao.findInterLockLine(deviceMac);
+        list=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
         topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
-        for(Map.Entry<String,String> entry:map.entrySet()){
-            String key=entry.getKey();
-            String [] s=key.split("&");
-            int deviceLineNum=Integer.parseInt(s[0]);
-            int deviceLineNum2=Integer.parseInt(s[1]);
-            Line2 line=lockLineList.get(deviceLineNum-1);
-            Line2 line2=lockLineList.get(deviceLineNum2-1);
-            String name=line.getName();
-            String name2=line2.getName();
-            boolean open1=line.getOpen();
-            boolean open2=line2.getOpen();
-            int state=open1?1:0;
-            int state2=open2?1:0;
-            int operate=0;//互锁线路的正，停，反 0停，1正，2反
-            if (state==1 && state2==0)
-                operate=1;
-            else if (state==0 && state2==1){
-                operate=2;
-            }else if (state==0 && state2==0){
-                operate=0;
-            }
-            list.add( new InterLock(name,name2,deviceLineNum,deviceLineNum2,operate));
-        }
 
         listInterLock.setLayoutManager(new LinearLayoutManager(this));
+        for (int i = 0; i < interLocks.size(); i++) {
+            InterLock interLock = interLocks.get(i);
+            int deviceLineNum = interLock.getDeviceLineNum();
+            int deviceLineNum2 = interLock.getDeviceLineNum2();
+            Line2 line20 = line2List.get(deviceLineNum - 1);
+            Line2 line21 = line2List.get(deviceLineNum2 - 1);
+            boolean open1 = line20.getOpen();
+            boolean open2 = line21.getOpen();
+            int state1 = open1 ? 1 : 0;
+            int state2 = open2 ? 1 : 0;
+            int operate = 0;//互锁线路的正，停，反 0停，1正，2反
+            if (state1 == 1 && state2 == 0) {
+                operate = 1;
+            } else if (state1 == 0 && state2 == 1) {
+                operate = 2;
+            } else if (state1 == 0 && state2 == 0) {
+                operate = 0;
+            }
+            interLock.setOperate(operate);
+            deviceInterLockDao.update(interLock);
+        }
         adapter=new InterLockAdapter(this,list);
         listInterLock.setAdapter(adapter);
         Intent service=new Intent(this,MQService.class);
@@ -121,11 +124,13 @@ public class DeviceInterLockActivity extends BaseActivity {
         IntentFilter filter=new IntentFilter("DeviceInterLockActivity");
         filter.addAction("offline");
         registerReceiver(receiver,filter);
+
     }
     @OnClick({R.id.img_back})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
+                updateInterLocks();
                 finish();
                 break;
         }
@@ -139,6 +144,16 @@ public class DeviceInterLockActivity extends BaseActivity {
         running=true;
     }
 
+    private void updateInterLocks(){
+        for (int i = 0; i < list.size(); i++) {
+            InterLock interLock=list.get(i);
+            interLock.setVisitity(0);
+            list.set(i,interLock);
+        }
+        if (mqService!=null && !list.isEmpty()){
+            mqService.updateDeviceInterLock(list);
+        }
+    }
     @Override
     protected void onStop() {
         super.onStop();
@@ -147,6 +162,7 @@ public class DeviceInterLockActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        updateInterLocks();
         super.onBackPressed();
     }
 
@@ -228,7 +244,6 @@ public class DeviceInterLockActivity extends BaseActivity {
                     }else if (deviceLineNum2>8){
                         lastLineSwitch[deviceLineNum2-9]=0;
                         num2=deviceLineNum2;
-
                     }
 
                     prelineSwitch=TenTwoUtil.changeToTen2(preLineSwitch);
@@ -307,7 +322,6 @@ public class DeviceInterLockActivity extends BaseActivity {
                     }else if (deviceLineNum>8){
                         lastLineSwitch[deviceLineNum-9]=0;
                         num2=deviceLineNum;
-
                     }
                     if (deviceLineNum2<=8){
                         preLineSwitch[deviceLineNum2-1]=1;
@@ -424,45 +438,27 @@ public class DeviceInterLockActivity extends BaseActivity {
                 String macAddress=intent.getStringExtra("macAddress");
                 String action=intent.getAction();
                 if ("offline".equals(action)){
+                    if (popupWindow2!=null && popupWindow2.isShowing()){
+                        popupWindow2.dismiss();
+                    }
                     if (intent.hasExtra("all") || deviceMac.equals(macAddress))
                     online=false;
                 }else {
                     if (macAddress.equals(deviceMac)){
                         online=true;
+
                         if (mqService!=null){
-                            List<Line2> lockLineList=mqService.getDeviceLines(deviceMac);
-                            Map<String,String> map=mqService.getDeviceInterLock(deviceMac);
+                            if (popupWindow2!=null && popupWindow2.isShowing()){
+                                popupWindow2.dismiss();
+                            }
+
+                            List<InterLock> interLocks=mqService.getDeviceVisityInterLock(deviceMac);
                             list.clear();
+                            list.addAll(interLocks);
                             if (click==1){
                                 handler.sendEmptyMessage(0);
                                 mqService.starSpeech(macAddress,"控制成功");
                                 click=0;
-                            }
-                            sb.setLength(0);
-                            sb2.setLength(0);
-                            for(Map.Entry<String,String> entry:map.entrySet()){
-                                String key=entry.getKey();
-                                String [] s=key.split("&");
-                                int deviceLineNum=Integer.parseInt(s[0]);
-                                int deviceLineNum2=Integer.parseInt(s[1]);
-                                Line2 line=lockLineList.get(deviceLineNum-1);
-                                Line2 line2=lockLineList.get(deviceLineNum2-1);
-                                String name=line.getName();
-                                String name2=line2.getName();
-                                boolean open1=line.getOpen();
-                                boolean open2=line2.getOpen();
-                                int state=open1?1:0;
-                                int state2=open2?1:0;
-                                int operate=0;//互锁线路的正，停，反 0停，1正，2反
-                                if (state==1 && state2==0) {
-                                    operate = 1;
-                                }
-                                else if (state==0 && state2==1){
-                                    operate=2;
-                                }else if (state==0 && state2==0){
-                                    operate=0;
-                                }
-                                list.add( new InterLock(name,name2,deviceLineNum,deviceLineNum2,operate));
                             }
                             adapter.notifyDataSetChanged();
                         }

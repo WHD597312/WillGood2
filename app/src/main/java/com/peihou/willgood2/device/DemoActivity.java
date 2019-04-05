@@ -64,6 +64,14 @@ public class DemoActivity extends AppCompatActivity {
         strings.add("删除模拟电流1");//16
         strings.add("删除模拟电压1");//17
         strings.add("地图定位");//18
+        strings.add("开关量检测");//19
+        strings.add("报警设置");//20
+        strings.add("模拟量检测");//21
+        strings.add("点动设置");//22
+        strings.add("联动设置");//23
+        strings.add("模拟量联动");//24
+        strings.add("报警");//25
+        strings.add("485数据");
         adapter=new MyAdapter(this,strings);
 
         grid_list.setAdapter(adapter);
@@ -129,6 +137,37 @@ public class DemoActivity extends AppCompatActivity {
                     case 18:
                         sendLocation(topicName1);
                         break;
+                    case 19:
+                        sendSwitch(topicName1);
+                        break;
+                    case 20:
+                        sendAlerm(topicName1);
+                        break;
+                    case 21:
+                        sendMoni(topicName1);
+                        break;
+                    case 22:
+                        sendJog(topicName1,0,5);
+                        break;
+                    case 23:
+                        sendLinkedSwitch(topicName1,0,224);
+                        break;
+                    case 24:
+                        sendMoniLinkSwitch(topicName1);
+                        break;
+                    case 25:
+                        sendAlerm(topicName1,0x11);
+                        break;
+                    case 26:
+                        send485(topicName1);
+                        break;
+//                    strings.add("开关量检测");//19
+//                    strings.add("报警设置");//20
+//                    strings.add("模拟量检测");//21
+//                    strings.add("点动设置");//22
+//                    strings.add("联动设置");//23
+//                    strings.add("模拟量联动");//24
+//                    strings.add("报警");//25
                 }
             }
         });
