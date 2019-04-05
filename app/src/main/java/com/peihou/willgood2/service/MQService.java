@@ -447,9 +447,9 @@ public class MQService extends Service {
                         params.put("bytes", bytes);
                         Log.i("topicNamehhhhhhhhh", "-->" + topicName);
                         if (topicName.contains("client_to_server")) {
-                            if (NoFastClickUtils.isFastClick2()) {
+//                            if (NoFastClickUtils.isFastClick2()) {
                                 new LoadAsyncTask(MQService.this).execute(params);
-                            }
+//                            }
                         } else if (topicName.contains("lwt")) {
                             String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
                             Device device = deviceDao.findDeviceByMac(macAddress);
