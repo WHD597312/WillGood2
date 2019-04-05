@@ -1758,7 +1758,7 @@ public class MQService extends Service {
                         intent.putExtra("operate", operateState);
                         intent.putExtra("online", true);
                         sendBroadcast(intent);
-                    } else if (LinkedControlActivity.running) {
+                    } else if (LinkedControlActivity.running && funCode==0x33) {
                         Intent intent = new Intent("LinkedControlActivity");
                         intent.putExtra("macAddress", macAddress);
                         if (linkedTypes != null && linkedTypes.size() == 6) {
@@ -1767,7 +1767,7 @@ public class MQService extends Service {
                         }
                         intent.putExtra("online", true);
                         sendBroadcast(intent);
-                    } else if (LinkItemActivity.running && (funCode==0x33 || funCode==0x34 || funCode==0x35 || funCode==0x36 || funCode==0x37 || funCode==0x38 || funCode==0x39)) {
+                    } else if (LinkItemActivity.running && (funCode==0x34 || funCode==0x35 || funCode==0x36 || funCode==0x37 || funCode==0x38 || funCode==0x39)) {
                         Intent intent = new Intent("LinkItemActivity");
                         intent.putExtra("macAddress", macAddress);
                         intent.putExtra("linkType", linkType);
