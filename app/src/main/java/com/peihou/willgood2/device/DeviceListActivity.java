@@ -51,6 +51,7 @@ import com.peihou.willgood2.login.LoginActivity;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.receiver.MQTTMessageReveiver;
 import com.peihou.willgood2.service.MQService;
+import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.DisplayUtil;
 import com.peihou.willgood2.utils.ToastUtil;
 import com.peihou.willgood2.utils.WeakRefHandler;
@@ -583,6 +584,12 @@ public class DeviceListActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        boolean running2= ServiceUtils.isServiceRunning(this,"com.peihou.willgood2.service.MQService");
+        if (!running2){
+            Intent intent=new Intent(this, MQService.class);
+            intent.putExtra("restart",1);
+            startService(intent);
+        }
         Log.i("devicehhhhhhhhhhhh","-->"+onResult);
         if (!running && mqService!=null && onResult==0){
             List<Device> devices=mqService.getDevices();

@@ -183,6 +183,7 @@ public class TimerTaskActivity extends BaseActivity {
                     TimerTask timerTask=timerTasks.get(position);
                     timerTask.setState(2);
                     boolean success=mqService.sendTimerTask(topicName,timerTask);
+                    countTimer.start();
                     returnData=1;
                 }
                 dialog.dismiss();
@@ -404,7 +405,7 @@ public class TimerTaskActivity extends BaseActivity {
                             }
                             return;
                         }
-                        returnData=1;
+
                         if (timerTask.getState()==1){
                             timerTask.setState(0);
                         }else {
@@ -412,6 +413,7 @@ public class TimerTaskActivity extends BaseActivity {
                         }
                         if (mqService!=null){
                             boolean success=mqService.sendTimerTask(topicName,timerTask);
+                            returnData=1;
                             countTimer.start();
                         }
                     }

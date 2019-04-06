@@ -245,20 +245,21 @@ public class AddTimeActivity extends BaseActivity {
                     int[] lastLines = new int[8];
                     for (int i = 0; i < list.size(); i++) {
                         Line2 line2 = list.get(i);
+                        int deviceLineNum = line2.getDeviceLineNum() - 1;
                         String name = line2.getName();
-                        if (i < 8) {
+                        if (deviceLineNum < 8) {
                             if (line2.isOnClick()) {
-                                preLines[i] = 1;
+                                preLines[deviceLineNum] = 1;
                                 sb.append(name + ",");
                             } else {
-                                preLines[i] = 0;
+                                preLines[deviceLineNum] = 0;
                             }
-                        } else if (i >= 8) {
+                        } else if (deviceLineNum >= 8) {
                             if (line2.isOnClick()) {
-                                lastLines[i - 8] = 1;
+                                lastLines[deviceLineNum - 8] = 1;
                                 sb.append(name + ",");
                             } else {
-                                lastLines[i - 8] = 0;
+                                lastLines[deviceLineNum - 8] = 0;
                             }
                         }
                     }

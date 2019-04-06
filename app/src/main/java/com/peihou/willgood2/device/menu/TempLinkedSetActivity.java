@@ -251,17 +251,17 @@ public class TempLinkedSetActivity extends BaseActivity {
                         String name = line2.getName();
                         if (deviceLineNum < 8) {
                             if (line2.isOnClick()) {
-                                pre[7 - deviceLineNum] = 1;
+                                pre[deviceLineNum] = 1;
                                 sb.append(name + ",");
                             } else {
-                                pre[7 - deviceLineNum] = 0;
+                                pre[deviceLineNum] = 0;
                             }
                         } else if (deviceLineNum >= 8) {
                             if (line2.isOnClick()) {
-                                last[7 - (deviceLineNum - 8)] = 1;
+                                last[(deviceLineNum - 8)] = 1;
                                 sb.append(name + ",");
                             } else {
-                                last[7 - (deviceLineNum - 8)] = 0;
+                                last[(deviceLineNum - 8)] = 0;
                             }
                         }
                     }

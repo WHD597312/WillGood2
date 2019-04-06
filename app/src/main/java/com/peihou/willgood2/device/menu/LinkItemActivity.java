@@ -368,6 +368,7 @@ public class LinkItemActivity extends BaseActivity {
                     if (mqService != null) {
                         dialog.dismiss();
                         mqService.sendMoniLink(topicName, moniLink);
+                        countTimer.start();
                         returnData = 1;
                     }
                 } else {
@@ -376,6 +377,7 @@ public class LinkItemActivity extends BaseActivity {
                     if (mqService != null) {
                         dialog.dismiss();
                         boolean success = mqService.sendLinkedSet(topicName, linked);
+                        countTimer.start();
                         returnData = 1;
                     }
                 }
