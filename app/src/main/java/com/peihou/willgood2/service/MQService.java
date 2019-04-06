@@ -448,7 +448,7 @@ public class MQService extends Service {
                         Log.i("topicNamehhhhhhhhh", "-->" + topicName);
                         if (topicName.contains("client_to_server")) {
 //                            if (NoFastClickUtils.isFastClick2()) {
-                                new LoadAsyncTask(MQService.this).execute(params);
+                            new LoadAsyncTask(MQService.this).execute(params);
 //                            }
                         } else if (topicName.contains("lwt")) {
                             String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
@@ -1759,7 +1759,7 @@ public class MQService extends Service {
                         intent.putExtra("operate", operateState);
                         intent.putExtra("online", true);
                         sendBroadcast(intent);
-                    } else if (LinkedControlActivity.running && funCode==0x33) {
+                    } else if (LinkedControlActivity.running && funCode == 0x33) {
                         Intent intent = new Intent("LinkedControlActivity");
                         intent.putExtra("macAddress", macAddress);
                         if (linkedTypes != null && linkedTypes.size() == 6) {
@@ -1768,7 +1768,7 @@ public class MQService extends Service {
                         }
                         intent.putExtra("online", true);
                         sendBroadcast(intent);
-                    } else if (LinkItemActivity.running && (funCode==0x34 || funCode==0x35 || funCode==0x36 || funCode==0x37 || funCode==0x38 || funCode==0x39)) {
+                    } else if (LinkItemActivity.running && (funCode == 0x34 || funCode == 0x35 || funCode == 0x36 || funCode == 0x37 || funCode == 0x38 || funCode == 0x39)) {
                         Intent intent = new Intent("LinkItemActivity");
                         intent.putExtra("macAddress", macAddress);
                         intent.putExtra("linkType", linkType);
@@ -1931,7 +1931,9 @@ public class MQService extends Service {
                 for (Device device : devices) {
                     String deviceMac = device.getDeviceOnlyMac();
                     String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+                    Log.i("topicNamegetData","-->"+topicName);
                     getData(topicName, 0x11);
+                    Thread.currentThread().sleep(500);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

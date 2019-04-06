@@ -149,7 +149,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void onBackPressed() {
         Log.i("sssss","-->onBackPressed2");
         super.onBackPressed();
-
         if (application!=null){
             Log.i("sssss","-->onBackPressed");
             application.removeActivity(this);

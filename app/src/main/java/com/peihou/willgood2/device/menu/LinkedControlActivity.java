@@ -287,7 +287,6 @@ public class LinkedControlActivity extends BaseActivity {
                         }
                     }
 
-
                     int data=TenTwoUtil.changeToTen(x);
                     boolean success=mqService.sendLinkedSwitch(topicName,mcuVerion,data);
                     countTimer.start();

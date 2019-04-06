@@ -75,6 +75,12 @@ public class LoginActivity extends BaseActivity {
         phone=sharedPreferences.getString("phone","");
         password=sharedPreferences.getString("password","");
 
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         if (!TextUtils.isEmpty(phone) && !TextUtils.isEmpty(password)){
             try {
                 if (exit==1){

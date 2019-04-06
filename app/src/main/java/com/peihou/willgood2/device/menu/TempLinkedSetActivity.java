@@ -265,8 +265,8 @@ public class TempLinkedSetActivity extends BaseActivity {
                             }
                         }
                     }
-                    preLines = TenTwoUtil.changeToTen(pre);
-                    lastLines = TenTwoUtil.changeToTen(last);
+                    preLines = TenTwoUtil.changeToTen2(pre);
+                    lastLines = TenTwoUtil.changeToTen2(last);
                     if (preLines+lastLines == 0) {
                         ToastUtil.showShort(this, "请选择线路");
                         break;

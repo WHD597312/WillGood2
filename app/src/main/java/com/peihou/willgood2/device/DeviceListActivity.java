@@ -351,11 +351,10 @@ public class DeviceListActivity extends BaseActivity {
             switch (code) {
                 case 100:
                     Log.i("subscribeAll", "--------");
-
                     list.clear();
                     list.addAll(devices);
                     adapter.notifyDataSetChanged();
-
+                    new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
                     break;
                 default:
                     break;
@@ -372,8 +371,7 @@ public class DeviceListActivity extends BaseActivity {
             mqService = binder.getService();
             if (mqService != null && load == 1) {
                 Log.i("subscribeAll", "--------");
-                mqService.subscribeAll(list);
-                new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
+
             }
         }
 
@@ -432,31 +430,38 @@ public class DeviceListActivity extends BaseActivity {
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
         protected List<String> doInBackground(DeviceListActivity deviceListActivity, List<String>... lists) {
-            List<String> list = new ArrayList<>();
             try {
                 if (mqService != null) {
+                    mqService.subscribeAll(DeviceListActivity.this.list);
                     List<String> topicNames = lists[0];
                     for (String topicName : topicNames) {
                         String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
                         Log.i("LoadDataAsync", "-->" + topicName);
                         mqService.addCountTimer(macAddress);
-                        mqService.getData(topicName, 0x11);
-                        Thread.sleep(300);
                         Log.i("deviceMac", "-->" + macAddress);
-                        list.add(macAddress);
+                        mqService.getData(topicName, 0x11);
+                        Thread.currentThread().sleep(500);
                     }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return list;
+            return lists[0];
         }
 
         @Override
-        protected void onPostExecute(DeviceListActivity deviceListActivity, List<String> list) {
+        protected void onPostExecute(DeviceListActivity deviceListActivity, List<String> list1) {
             Log.i("onPostExecute", "-->" + list.size());
+
             if (!list.isEmpty()) {
+                popupmenuWindow3();
                 int n = list.size();
                 int total = 0;
                 if (0 < n && n <= 2) {
@@ -466,6 +471,7 @@ public class DeviceListActivity extends BaseActivity {
                 } else if (n > 6) {
                     total = 8000;
                 }
+
                 CountTimer2 countTimer = new CountTimer2(total, 1000);
                 countTimer.start();
                 load = 0;
@@ -1107,7 +1113,7 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            popupmenuWindow3();
+
             Log.e("CountDownTimer", "-->" + millisUntilFinished);
         }
 
