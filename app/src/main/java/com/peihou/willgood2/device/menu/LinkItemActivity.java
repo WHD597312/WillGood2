@@ -174,13 +174,13 @@ public class LinkItemActivity extends BaseActivity {
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         if (type == 5) {
             deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
-            moniLinks = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
+//            moniLinks = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
             moniLinkAdapter = new MoniLinkAdapter(this, moniLinks);
             list_linked.setLayoutManager(new LinearLayoutManager(this));
             list_linked.setAdapter(moniLinkAdapter);
         } else {
             deviceLinkDao = new DeviceLinkDaoImpl(getApplicationContext());
-            list = deviceLinkDao.findLinkeds(deviceMac, type);
+//            list = deviceLinkDao.findLinkeds(deviceMac, type);
             adapter = new MyAdapter(this, list);
             list_linked.setLayoutManager(new LinearLayoutManager(this));
             list_linked.setAdapter(adapter);
@@ -297,10 +297,13 @@ public class LinkItemActivity extends BaseActivity {
                     int linkType = intent.getIntExtra("linkType", -1);
                     if (macAddress.equals(deviceMac) && linkType == type) {
                         int operate = intent.getIntExtra("operate", 0);
-                        if (operate == 1) {
-                            mqService.starSpeech(deviceMac,"删除成功");
-                        } else {
-                            mqService.starSpeech(deviceMac,"设置成功");
+                        if (returnData==1){
+                            if (operate == 1) {
+                                mqService.starSpeech(deviceMac,"删除成功");
+                            } else {
+                                mqService.starSpeech(deviceMac,"设置成功");
+                            }
+                            returnData=0;
                         }
                         if (intent.hasExtra("linkTypeNum") && intent.hasExtra("moniType")) {
                             int moniType2 = intent.getIntExtra("moniType", -1);

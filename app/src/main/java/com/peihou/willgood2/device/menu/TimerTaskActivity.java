@@ -88,7 +88,7 @@ public class TimerTaskActivity extends BaseActivity {
         deviceLineDao=new DeviceLineDaoImpl(getApplicationContext());
         topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
-        timerTasks=timerTaskDao.findDeviceTimeTask(deviceMac);
+//        timerTasks=timerTaskDao.findDeviceTimeTask(deviceMac);
         Intent service=new Intent(this,MQService.class);
         bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
 
@@ -248,7 +248,6 @@ public class TimerTaskActivity extends BaseActivity {
                                     }
                                 }
                             }
-
                             List<TimerTask> timerTasks2 = mqService.getTimerTask(deviceMac);
                             timerTasks.clear();
                             timerTasks.addAll(timerTasks2);
