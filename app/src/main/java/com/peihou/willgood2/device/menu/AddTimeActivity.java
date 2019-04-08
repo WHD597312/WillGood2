@@ -139,7 +139,7 @@ public class AddTimeActivity extends BaseActivity {
         day = calendar.get(Calendar.DAY_OF_MONTH);
         hour = calendar.get(Calendar.HOUR_OF_DAY);
         min = calendar.get(Calendar.MINUTE);
-        String time = "";
+
         String ss = "" + month;
         if (month < 10) {
             ss = "0" + month;
@@ -150,6 +150,7 @@ public class AddTimeActivity extends BaseActivity {
         }
         String sss = "" + min;
         String ss1=hour+"";
+
         if (hour<10){
             ss1="0"+hour;
         }
@@ -157,9 +158,11 @@ public class AddTimeActivity extends BaseActivity {
         if (min < 10) {
             sss = "0" + min;
         }
-        time = year + "-" + ss + "-" + day1 + " " + ss1 + ":" + sss;
 
+        String time = year + "-" + ss + "-" + day1 + " " + ss1 + ":" + sss;
+        Log.i("timer","--->"+time);
         tv_timer_value.setText(time);
+
         tv_1.setTag(0);
         tv_2.setTag(0);
         tv_3.setTag(0);
@@ -309,8 +312,6 @@ public class AddTimeActivity extends BaseActivity {
                 setOnlyOne();
 
                 tv_timer_set.setText("设定时间");
-                String timer = year + "-" + month + "-" + day + "  " + hour + ":" + min;
-                tv_timer_value.setText(timer);
                 linear_week.setVisibility(View.GONE);
                 tv_repeat.setVisibility(View.GONE);
                 break;
@@ -321,8 +322,6 @@ public class AddTimeActivity extends BaseActivity {
                 only = 1;
                 setOnlyOne();
                 tv_timer_set.setText("循环时间");
-                String timer2 = hour + ":" + min;
-                tv_timer_value.setText(timer2);
                 linear_week.setVisibility(View.VISIBLE);
                 tv_repeat.setVisibility(View.VISIBLE);
                 break;
@@ -331,7 +330,6 @@ public class AddTimeActivity extends BaseActivity {
                 setWeekView(tv_1, onClick);
                 onClick = (int) tv_1.getTag();
                 weeks[0] = onClick;
-
                 break;
             case R.id.tv_2:
                 onClick = (int) tv_2.getTag();
@@ -424,7 +422,6 @@ public class AddTimeActivity extends BaseActivity {
             tv_timer_loop.setBackground(getResources().getDrawable(R.drawable.shape_once));
         }
         if (only == 0) {
-            String time = "";
             String ss = "" + month;
             if (month < 10) {
                 ss = "0" + month;
@@ -443,11 +440,12 @@ public class AddTimeActivity extends BaseActivity {
             if (min < 10) {
                 sss = "0" + min;
             }
-            time = year + "-" + ss + "-" + day1 + " " + ss1 + ":" + sss;
 
+            String time = year + "-" + ss + "-" + day1 + " " + ss1 + ":" + sss;
+            Log.i("timer","--->"+time);
             tv_timer_value.setText(time);
         }else {
-            String time = "";
+
             String sss = "" + min;
             String ss=hour+"";
             if (hour<10){
@@ -456,7 +454,8 @@ public class AddTimeActivity extends BaseActivity {
             if (min < 10) {
                 sss = "0" + min;
             }
-            time=ss+":"+sss;
+            String time=ss+":"+sss;
+            Log.i("timer","--->"+time);
             tv_timer_value.setText(time);
         }
     }
@@ -534,7 +533,6 @@ public class AddTimeActivity extends BaseActivity {
         timerMin.setMinValue(0);
         timerMin.setValue(min);
         if (only == 0) {
-            String time = "";
             String ss = "" + month;
             if (month < 10) {
                 ss = "0" + month;
@@ -553,11 +551,12 @@ public class AddTimeActivity extends BaseActivity {
             if (min < 10) {
                 sss = "0" + min;
             }
-            time = year + "-" + ss + "-" + day1 + " " + ss1 + ":" + sss;
 
+            String time = year + "-" + ss + "-" + day1 + " " + ss1 + ":" + sss;
+            Log.i("timer","--->"+time);
             tv_timer_value.setText(time);
         }else {
-            String time = "";
+
             String sss = "" + min;
             String ss=hour+"";
             if (hour<10){
@@ -566,7 +565,8 @@ public class AddTimeActivity extends BaseActivity {
             if (min < 10) {
                 sss = "0" + min;
             }
-            time=ss+":"+sss;
+            String time=ss+":"+sss;
+            Log.i("timer","--->"+time);
             tv_timer_value.setText(time);
         }
 

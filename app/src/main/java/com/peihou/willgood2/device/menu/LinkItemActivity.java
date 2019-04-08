@@ -116,11 +116,13 @@ public class LinkItemActivity extends BaseActivity {
             case R.id.img_back:
                 if (mqService!=null){
                     if (type==5){
+                        List<MoniLink> moniLinks=mqService.getMoniLink(deviceMac,type,moniNum);
                         if (!moniLinks.isEmpty()){
                             List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
                             mqService.updateMoniLinks(moniLinkList);
                         }
                     }else {
+                        List<Linked> list=mqService.getLinkeds(deviceMac,type);
                         if (!list.isEmpty()){
                             List<Linked> linkeds=updateLinkeds(list);
                             mqService.updateLinkeds(linkeds);
@@ -203,11 +205,13 @@ public class LinkItemActivity extends BaseActivity {
     public void onBackPressed() {
         if (mqService!=null){
             if (type==5){
+                List<MoniLink> moniLinks=mqService.getMoniLink(deviceMac,type,moniNum);
                 if (!moniLinks.isEmpty()){
                     List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
                     mqService.updateMoniLinks(moniLinkList);
                 }
             }else {
+                List<Linked> list=mqService.getLinkeds(deviceMac,type);
                 if (!list.isEmpty()){
                     List<Linked> linkeds=updateLinkeds(list);
                     mqService.updateLinkeds(linkeds);
@@ -303,7 +307,7 @@ public class LinkItemActivity extends BaseActivity {
                             if (operate == 1) {
                                 mqService.starSpeech(deviceMac,"删除成功");
                             } else {
-                                mqService.starSpeech(deviceMac,"设置成功");
+                                mqService.starSpeech(deviceMac,"控制成功");
                             }
                             returnData=0;
                         }

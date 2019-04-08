@@ -218,20 +218,15 @@ public class DeviceRecordActivity extends BaseActivity {
 
         @Override
         public void onBindChildViewHolder(BaseViewHolder holder, final int groupPosition, final int childPosition) {
-            int last=devices.get(groupPosition).size()-1;
             RelativeLayout rl_body=holder.itemView.findViewById(R.id.rl_body);
-            if (last%2==0){
+            if (childPosition%2==0){
                 if (childPosition==0){
                     rl_body.setBackgroundResource(R.drawable.shape_operate_share_top);
                 }else {
                     rl_body.setBackgroundColor(Color.parseColor("#F0F0F0"));
                 }
             }else if (childPosition%2!=0){
-                if (childPosition==last){
-                    rl_body.setBackgroundResource(R.drawable.shape_operate_share_bottom);
-                }else {
-                    rl_body.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                }
+                rl_body.setBackgroundColor(Color.parseColor("#FFFFFF"));
             }
             final Device device=devices.get(groupPosition).get(childPosition);
             if (device!=null){
@@ -411,6 +406,7 @@ public class DeviceRecordActivity extends BaseActivity {
                 Map<String,Object> map=maps[0];
                 String url=HttpUtils.ipAddress+"device/getSharedDeviceList";
                 String result=HttpUtils.requestPost(url,map);
+                Log.i("SharedDeviceAsync","-->"+result);
                 if (!TextUtils.isEmpty(result)){
                     JSONObject jsonObject=new JSONObject(result);
                     code=jsonObject.getInt("returnCode");

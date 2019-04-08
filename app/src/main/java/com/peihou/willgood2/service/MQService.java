@@ -1751,7 +1751,7 @@ public class MQService extends Service {
                         intent.putExtra("online", true);
                         intent.putExtra("lineJog", lineJog);
                         sendBroadcast(intent);
-                    } else if (DeviceInterLockActivity.running && funCode == 0x11 || funCode==0x46) {
+                    } else if (DeviceInterLockActivity.running && (funCode == 0x11 || funCode==0x46)) {
                         Intent intent = new Intent("DeviceInterLockActivity");
                         intent.putExtra("macAddress", macAddress);
                         intent.putExtra("device", device);
@@ -2202,7 +2202,6 @@ public class MQService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -2338,6 +2337,11 @@ public class MQService extends Service {
     };
 
 
+    /**
+     * 获取设备的定位频率
+     * @param deviceMac
+     * @return
+     */
     public int getDeviceLocationFre(String deviceMac){
         Device device=deviceDao.findDeviceByMac(deviceMac);
         int location=device.getLocation();

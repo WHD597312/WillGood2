@@ -109,6 +109,7 @@ public class TimerTaskActivity extends BaseActivity {
         switch (view.getId()){
             case R.id.img_back:
                 if (mqService!=null){
+                    List<TimerTask> timerTasks=mqService.getTimerTask(deviceMac);
                     if (!timerTasks.isEmpty()){
                         List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
                         mqService.updateTimerTasks(timerTasks2);
@@ -137,6 +138,7 @@ public class TimerTaskActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (mqService!=null){
+            List<TimerTask> timerTasks=mqService.getTimerTask(deviceMac);
             if (!timerTasks.isEmpty()){
                 List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
                 mqService.updateTimerTasks(timerTasks2);
@@ -244,7 +246,7 @@ public class TimerTaskActivity extends BaseActivity {
                                     if (operate==1){
                                         mqService.starSpeech(deviceMac,"删除成功");
                                     }else {
-                                        mqService.starSpeech(deviceMac,"设置成功");
+                                        mqService.starSpeech(deviceMac,"控制成功");
                                     }
                                 }
                             }
@@ -323,6 +325,15 @@ public class TimerTaskActivity extends BaseActivity {
                 String name=timerTask.getName();
                 int hour=timerTask.getHour();
                 int min=timerTask.getMin();
+                String hour2=""+hour;
+                String min2=""+min;
+                if (hour<10){
+                    hour2="0"+hour;
+                }
+
+                if (min < 10) {
+                    min2 = "0" + min;
+                }
                 String switchState="";
                 if (controlState==1){
                     switchState="开启";
@@ -347,12 +358,22 @@ public class TimerTaskActivity extends BaseActivity {
                     int year=timerTask.getYear();
                     int month=timerTask.getMonth();
                     int day=timerTask.getDay();
-                    String time=year+"-"+month+"-"+day+" "+hour+":"+min;
+                    String month2=""+month;
+                    if (month < 10) {
+                        month2 = "0" + month;
+                    }
+                    String day1=""+day;
+                    if (day<10){
+                        day1="0"+day;
+                    }
+
+
+                    String time=year+"-"+month2+"-"+day1+" "+hour2+":"+min2;
                     holder.tv_timer.setText(time);
                     holder.tv_timers.setText("单次定时");
                     holder.tv_week.setText("");
                 }else if (choice==0x22){
-                    String time=hour+":"+min;
+                    String time=hour2+":"+min2;
                     holder.tv_timer.setText(time);
                     int week=timerTask.getWeek();
                     String mon="";
