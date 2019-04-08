@@ -77,7 +77,8 @@ public class DeviceDao extends AbstractDao<Device, Long> {
         public final static Property Current = new Property(50, double.class, "current", false, "CURRENT");
         public final static Property Votage = new Property(51, double.class, "votage", false, "VOTAGE");
         public final static Property Re485 = new Property(52, String.class, "re485", false, "RE485");
-        public final static Property Vlice2 = new Property(53, int.class, "vlice2", false, "VLICE2");
+        public final static Property Location = new Property(53, int.class, "location", false, "LOCATION");
+        public final static Property Vlice2 = new Property(54, int.class, "vlice2", false, "VLICE2");
     }
 
 
@@ -146,7 +147,8 @@ public class DeviceDao extends AbstractDao<Device, Long> {
                 "\"CURRENT\" REAL NOT NULL ," + // 50: current
                 "\"VOTAGE\" REAL NOT NULL ," + // 51: votage
                 "\"RE485\" TEXT," + // 52: re485
-                "\"VLICE2\" INTEGER NOT NULL );"); // 53: vlice2
+                "\"LOCATION\" INTEGER NOT NULL ," + // 53: location
+                "\"VLICE2\" INTEGER NOT NULL );"); // 54: vlice2
     }
 
     /** Drops the underlying database table. */
@@ -243,7 +245,8 @@ public class DeviceDao extends AbstractDao<Device, Long> {
         if (re485 != null) {
             stmt.bindString(53, re485);
         }
-        stmt.bindLong(54, entity.getVlice2());
+        stmt.bindLong(54, entity.getLocation());
+        stmt.bindLong(55, entity.getVlice2());
     }
 
     @Override
@@ -334,7 +337,8 @@ public class DeviceDao extends AbstractDao<Device, Long> {
         if (re485 != null) {
             stmt.bindString(53, re485);
         }
-        stmt.bindLong(54, entity.getVlice2());
+        stmt.bindLong(54, entity.getLocation());
+        stmt.bindLong(55, entity.getVlice2());
     }
 
     @Override
@@ -398,7 +402,8 @@ public class DeviceDao extends AbstractDao<Device, Long> {
             cursor.getDouble(offset + 50), // current
             cursor.getDouble(offset + 51), // votage
             cursor.isNull(offset + 52) ? null : cursor.getString(offset + 52), // re485
-            cursor.getInt(offset + 53) // vlice2
+            cursor.getInt(offset + 53), // location
+            cursor.getInt(offset + 54) // vlice2
         );
         return entity;
     }
@@ -458,7 +463,8 @@ public class DeviceDao extends AbstractDao<Device, Long> {
         entity.setCurrent(cursor.getDouble(offset + 50));
         entity.setVotage(cursor.getDouble(offset + 51));
         entity.setRe485(cursor.isNull(offset + 52) ? null : cursor.getString(offset + 52));
-        entity.setVlice2(cursor.getInt(offset + 53));
+        entity.setLocation(cursor.getInt(offset + 53));
+        entity.setVlice2(cursor.getInt(offset + 54));
      }
     
     @Override

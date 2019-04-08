@@ -182,7 +182,7 @@ public class TimerTaskActivity extends BaseActivity {
                 if (mqService!=null){
                     TimerTask timerTask=timerTasks.get(position);
                     timerTask.setState(2);
-                    boolean success=mqService.sendTimerTask(topicName,timerTask);
+                    boolean success=mqService.sendTimerTask(topicName,timerTask,0x02);
                     countTimer.start();
                     returnData=1;
                 }
@@ -286,7 +286,7 @@ public class TimerTaskActivity extends BaseActivity {
             if (mqService!=null){
                 TimerTask timerTask= (TimerTask) data.getSerializableExtra("timerTask");
                 if (timerTask!=null){
-                    mqService.sendTimerTask(topicName,timerTask);
+                    mqService.sendTimerTask(topicName,timerTask,0x01);
                     returnData=1;
                     countTimer.start();
                 }
@@ -411,7 +411,7 @@ public class TimerTaskActivity extends BaseActivity {
                             timerTask.setState(1);
                         }
                         if (mqService!=null){
-                            boolean success=mqService.sendTimerTask(topicName,timerTask);
+                            boolean success=mqService.sendTimerTask(topicName,timerTask,0x02);
                             returnData=1;
                             countTimer.start();
                         }

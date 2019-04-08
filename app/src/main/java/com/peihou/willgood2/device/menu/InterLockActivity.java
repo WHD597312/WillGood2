@@ -85,7 +85,7 @@ public class InterLockActivity extends BaseActivity {
         deviceInterLockDao=new DeviceInterLockDaoImpl(getApplicationContext());
 
         lockLineList = deviceLineDao.findDeviceOnlineLines(deviceMac);
-        interLocks=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
+//        interLocks=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
         lockLineAdapter = new LockLineAdapter(this, lockLineList);
         grid_lock.setAdapter(lockLineAdapter);
         grid_lock.setOnItemClickListener(new AdapterView.OnItemClickListener() {

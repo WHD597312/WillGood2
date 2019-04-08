@@ -214,6 +214,10 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
                 intent.putExtra("deviceMac", deviceMac);
                 intent.putExtra("mcuVersion", mcuVersion);
                 intent.putExtra("deviceId",deviceId);
+                if (mqService!=null){
+                    int location=mqService.getDeviceLocationFre(deviceMac);
+                    intent.putExtra("location",location);
+                }
                 startActivityForResult(intent, 1000);
                 break;
             case R.id.rl_position:

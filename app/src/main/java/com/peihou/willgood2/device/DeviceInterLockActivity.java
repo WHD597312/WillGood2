@@ -61,7 +61,6 @@ public class DeviceInterLockActivity extends BaseActivity {
     private DeviceLineDaoImpl deviceLineDao;//设备线路表的操纵对象
     private Device device;//设备
     private DeviceDaoImpl deviceDao;//设备表的操作对象
-    private List<InterLock> interLocks=new ArrayList<>();
 
     private DeviceInterLockDaoImpl deviceInterLockDao;
     private int userId;
@@ -88,32 +87,11 @@ public class DeviceInterLockActivity extends BaseActivity {
         List<Line2> line2List=deviceLineDao.findDeviceLines(deviceMac);
         deviceInterLockDao=new DeviceInterLockDaoImpl(getApplicationContext());
         device=deviceDao.findDeviceById(deviceId);
-        list=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
+//        list=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
         topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
 
         listInterLock.setLayoutManager(new LinearLayoutManager(this));
-        for (int i = 0; i < interLocks.size(); i++) {
-            InterLock interLock = interLocks.get(i);
-            int deviceLineNum = interLock.getDeviceLineNum();
-            int deviceLineNum2 = interLock.getDeviceLineNum2();
-            Line2 line20 = line2List.get(deviceLineNum - 1);
-            Line2 line21 = line2List.get(deviceLineNum2 - 1);
-            boolean open1 = line20.getOpen();
-            boolean open2 = line21.getOpen();
-            int state1 = open1 ? 1 : 0;
-            int state2 = open2 ? 1 : 0;
-            int operate = 0;//互锁线路的正，停，反 0停，1正，2反
-            if (state1 == 1 && state2 == 0) {
-                operate = 1;
-            } else if (state1 == 0 && state2 == 1) {
-                operate = 2;
-            } else if (state1 == 0 && state2 == 0) {
-                operate = 0;
-            }
-            interLock.setOperate(operate);
-            deviceInterLockDao.update(interLock);
-        }
         adapter=new InterLockAdapter(this,list);
         listInterLock.setAdapter(adapter);
         Intent service=new Intent(this,MQService.class);
@@ -451,9 +429,9 @@ public class DeviceInterLockActivity extends BaseActivity {
                                 popupWindow2.dismiss();
                             }
 
-                            List<InterLock> interLocks=mqService.getDeviceVisityInterLock(deviceMac);
+                            List<InterLock> interLocks2=mqService.getDeviceVisityInterLock(deviceMac);
                             list.clear();
-                            list.addAll(interLocks);
+                            list.addAll(interLocks2);
                             if (click==1){
                                 handler.sendEmptyMessage(0);
                                 mqService.starSpeech(macAddress,"控制成功");

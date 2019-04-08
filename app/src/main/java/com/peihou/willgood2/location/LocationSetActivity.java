@@ -56,11 +56,13 @@ public class LocationSetActivity extends BaseActivity {
     String deviceMac;
     String topicName;
     long deviceId;
+
     @Override
     public void initParms(Bundle parms) {
         deviceMac=parms.getString("deviceMac");
         mcuVersion=parms.getInt("mcuVersion");
         deviceId=parms.getLong("deviceId");
+        choices=parms.getInt("location");
     }
 
     @Override
@@ -79,7 +81,40 @@ public class LocationSetActivity extends BaseActivity {
         params.put("deviceId",deviceId);
         Intent service=new Intent(this,MQService.class);
         bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
-
+        setLocationFre();
+    }
+    private void setLocationFre(){
+        if (choices==10){
+            cb.setChecked(true);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
+        }else if (choices==20){
+            cb.setChecked(false);
+            cb2.setChecked(true);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
+        }else if (choices==30){
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(true);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
+        }else if (choices==60){
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(true);
+            cb5.setChecked(false);
+        }else if (choices==120){
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(true);
+        }
     }
     boolean checked=false;
     int choices=10;

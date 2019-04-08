@@ -63,6 +63,9 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -466,11 +469,11 @@ public class DeviceListActivity extends BaseActivity {
                 int n = list.size();
                 int total = 0;
                 if (0 < n && n <= 2) {
-                    total = 4000;
+                    total = 2000;
                 } else if (n > 2 && n <= 6) {
-                    total = 6000;
+                    total = 4000;
                 } else if (n > 6) {
-                    total = 8000;
+                    total = 6000;
                 }
 
                 CountTimer2 countTimer = new CountTimer2(total, 1000);
@@ -537,14 +540,15 @@ public class DeviceListActivity extends BaseActivity {
         public boolean handleMessage(Message msg) {
             int what = msg.what;
             if (what == 1001) {
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
-                    popupWindow2.dismiss();
-                }
+
                 Device device = (Device) msg.obj;
                 for (int i = 0; i < list.size(); i++) {
                     Device device2 = list.get(i);
                     if (device2 != null && device.getDeviceOnlyMac().equals(device2.getDeviceOnlyMac())) {
                         if (onClick == 1) {
+                            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                                popupWindow2.dismiss();
+                            }
                             mqService.starSpeech(device.getDeviceOnlyMac(), "开启成功");
                             operateLog.clear();
                             operateLog.put("deviceMac", device.getDeviceOnlyMac());
@@ -555,6 +559,9 @@ public class DeviceListActivity extends BaseActivity {
                             new AddOperationLogAsync(DeviceListActivity.this).execute(operateLog);
                             onClick = 0;
                         } else if (onClick == 2) {
+                            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                                popupWindow2.dismiss();
+                            }
                             operateLog.clear();
                             operateLog.put("deviceMac", device.getDeviceOnlyMac());
                             operateLog.put("deviceControll", 1);
@@ -584,12 +591,6 @@ public class DeviceListActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        boolean running2= ServiceUtils.isServiceRunning(this,"com.peihou.willgood2.service.MQService");
-        if (!running2){
-            Intent intent=new Intent(this, MQService.class);
-            intent.putExtra("restart",1);
-            startService(intent);
-        }
         Log.i("devicehhhhhhhhhhhh","-->"+onResult);
         if (!running && mqService!=null && onResult==0){
             List<Device> devices=mqService.getDevices();
@@ -784,9 +785,9 @@ public class DeviceListActivity extends BaseActivity {
                 for (int i = 0; i < list.size(); i++) {
                     Device device = list.get(i);
                     if (device.getChoice() == 1) {
-                        device.setPrelines(0);
+                        device.setPrelineswitch(0);
+                        device.setLastlineswitch(0);
                         device.setDeviceState(0);
-                        device.setLastlines(0);
                         device.setPrelinesjog(0);
                         device.setLastlinesjog(0);
                         choices++;
@@ -818,8 +819,8 @@ public class DeviceListActivity extends BaseActivity {
                     Device device = list.get(i);
                     if (device.getChoice() == 1) {
                         choices++;
-                        device.setPrelines(255);
-                        device.setLastlines(255);
+                        device.setPrelineswitch(255);
+                        device.setLastlineswitch(255);
                         device.setDeviceState(1);
                         device.setPrelinesjog(0);
                         device.setLastlinesjog(0);

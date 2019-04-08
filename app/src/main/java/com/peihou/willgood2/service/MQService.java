@@ -674,7 +674,7 @@ public class MQService extends Service {
                                 if ((list2 != null && list2.size() != 16)) {
                                     deviceLineDao.deleteDeviceLines(list2);
                                     for (int i = 1; i <= 16; i++) {
-                                        Line2 line21 = new Line2(false, "线路", 0, false, i, deviceId, macAddress);
+                                        Line2 line21 = new Line2(false, i+"路", 0, false, i, deviceId, macAddress);
                                         line2List.add(line21);
                                     }
                                     deviceLineDao.insertDeviceLines(line2List);
@@ -1527,12 +1527,18 @@ public class MQService extends Service {
                             }
                         });
                     } else if (funCode == 0x77) {
+                        int location=data[4];//地图定位刷新频率
                         int symbol = data[6];
                         int[] x = TenTwoUtil.changeToTwo(symbol);
                         int x1 = x[0];
                         int x2 = x[1];
                         int x3 = x[2];
                         int x4 = x[3];
+                        device=deviceDao.findDeviceByMac(macAddress);
+                        if (location==10 || location==20 || location==30 || location==60 || location==120){
+                            device.setLocation(location);
+                            deviceDao.update(device);
+                        }
                         String s = "";
                         if (x1 == 1 && x2 == 0 && x3 == 1 && x4 == 0) {
 
@@ -1745,7 +1751,7 @@ public class MQService extends Service {
                         intent.putExtra("online", true);
                         intent.putExtra("lineJog", lineJog);
                         sendBroadcast(intent);
-                    } else if (DeviceInterLockActivity.running && funCode == 0x11) {
+                    } else if (DeviceInterLockActivity.running && funCode == 0x11 || funCode==0x46) {
                         Intent intent = new Intent("DeviceInterLockActivity");
                         intent.putExtra("macAddress", macAddress);
                         intent.putExtra("device", device);
@@ -2332,6 +2338,11 @@ public class MQService extends Service {
     };
 
 
+    public int getDeviceLocationFre(String deviceMac){
+        Device device=deviceDao.findDeviceByMac(deviceMac);
+        int location=device.getLocation();
+        return location;
+    }
     public void updateLine(Line2 line2) {
         deviceLineDao.update(line2);
     }
@@ -2400,8 +2411,8 @@ public class MQService extends Service {
             datas[4] = (byte) deviceState;
             datas[5] = (byte) prelines;
             datas[6] = (byte) lastlines;
-            datas[8] = (byte) lastlineswitch;
             datas[7] = (byte) prelineswitch;
+            datas[8] = (byte) lastlineswitch;
             datas[9] = (byte) prelinesjog;
             datas[10] = (byte) lastlinesjog;
             datas[11] = (byte) plMemory;
@@ -2429,7 +2440,7 @@ public class MQService extends Service {
      * @param topicName
      * @param timerTask
      */
-    public boolean sendTimerTask(String topicName, TimerTask timerTask) {
+    public boolean sendTimerTask(String topicName, TimerTask timerTask,int operate) {
         boolean success = false;
         try {
             int mcuVersion = timerTask.getMcuVersion();
@@ -2463,6 +2474,7 @@ public class MQService extends Service {
             data[13] = (byte) lastlines;
             data[14] = (byte) controlState;
             data[15] = (byte) state;
+            data[16]= (byte) operate;
             int sum = 0;
             for (int i : data) {
                 sum += i;
@@ -2481,6 +2493,7 @@ public class MQService extends Service {
         return false;
     }
 
+
     class LinkedAsync extends BaseWeakAsyncTask<List<Linked>, Void, Void, MQService> {
 
         public LinkedAsync(MQService mqService) {
@@ -2495,7 +2508,7 @@ public class MQService extends Service {
                 String deviceMac = linked.getDeviceMac();
                 String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
                 for (Linked linked2 : linkeds) {
-                    sendLinkedSet(topicName, linked2);
+                    sendLinkedSet(topicName, linked2,0x02);
                     Thread.sleep(500);
                 }
             } catch (Exception e) {
@@ -2517,7 +2530,7 @@ public class MQService extends Service {
      * @param linked
      * @return
      */
-    public boolean sendLinkedSet(String topicName, Linked linked) {
+    public boolean sendLinkedSet(String topicName, Linked linked,int operate) {
         boolean success = false;
         try {
             int type = linked.getType();
@@ -2581,6 +2594,8 @@ public class MQService extends Service {
             if (type == 2) {
                 bytes[9] = (byte) switchLine;
             }
+            bytes[10]= (byte) operate;
+
             int sum = 0;
             for (int i = 0; i < bytes.length; i++) {
                 sum += bytes[i];
@@ -2606,7 +2621,7 @@ public class MQService extends Service {
      * @param moniLink
      * @return
      */
-    public boolean sendMoniLink(String topicName, MoniLink moniLink) {
+    public boolean sendMoniLink(String topicName, MoniLink moniLink,int operate) {
         boolean success = false;
         try {
             int headCode = 0x90;
@@ -2678,7 +2693,7 @@ public class MQService extends Service {
             bytes[7] = (byte) triType2;
             bytes[8] = (byte) state;
             bytes[9] = (byte) controlType;
-
+            bytes[10]= (byte) operate;
             int sum = 0;
             for (int i = 0; i < bytes.length; i++) {
                 sum += bytes[i];

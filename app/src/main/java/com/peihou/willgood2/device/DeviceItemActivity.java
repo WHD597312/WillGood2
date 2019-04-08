@@ -338,6 +338,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                         locationIntent.putExtra("deviceMac", deviceMac);
                         locationIntent.putExtra("deviceId", deviceId);
                         locationIntent.putExtra("mcuVersion", mcuVersion);
+                        locationIntent.putExtra("location",device.getLocation());
                         if (mqService != null) {
                             List<DeviceTrajectory> deviceTrajectories = mqService.getDeviceTrajectory();
                             locationIntent.putExtra("deviceTrajectories", (Serializable) deviceTrajectories);
@@ -664,7 +665,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (popupWindow2!=null && popupWindow2.isShowing()){
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
             popupWindow2.dismiss();
         }
 
@@ -954,7 +955,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                                     lastLinesS[(deviceLineNum - 1) - 8] = 1;
                                 }
                             }
-                            checkLine="";
+                            checkLine = "";
                             checkLine = deviceLineNum + "";
 
                             int state = open == true ? 0 : 1;
@@ -1401,6 +1402,9 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
             try {
                 String url = HttpUtils.ipAddress + "device/getLineName";
                 String result = HttpUtils.requestPost(url, params);
+                if (TextUtils.isEmpty(result))
+                    result = HttpUtils.requestPost(url, params);
+
                 if (!TextUtils.isEmpty(result)) {
                     Log.i("GetDeviceLineAsync", "-->" + result);
                     JSONObject jsonObject = new JSONObject(result);
@@ -1429,7 +1433,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     if ((list2 != null && list2.size() != 16)) {
                         deviceLineDao.deleteDeviceLines(list2);
                         for (int i = 1; i <= 16; i++) {
-                            Line2 line2 = new Line2(false, "线路", 0, false, i, deviceId, deviceMac);
+                            Line2 line2 = new Line2(false,  i+"路", 0, false, i, deviceId, deviceMac);
                             list.add(line2);
                         }
                         deviceLineDao.insertDeviceLines(list);
@@ -1479,7 +1483,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                         click = 0;
                         String lines2 = "";
                         if (onKey == 0) {
-                            lines2=checkLine;
+                            lines2 = checkLine;
                         } else {
                             lines2 = lines;
                         }
@@ -1502,7 +1506,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                         mqService.starSpeech(deviceMac, "开启成功");
                         String lines2 = "";
                         if (onKey == 0) {
-                            lines2=checkLine;
+                            lines2 = checkLine;
                         } else {
                             lines2 = lines;
                         }

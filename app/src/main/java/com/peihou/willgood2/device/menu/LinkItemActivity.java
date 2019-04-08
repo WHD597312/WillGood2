@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -171,6 +172,7 @@ public class LinkItemActivity extends BaseActivity {
 
         tv_title.setText(name + "联动");
         topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
+        Log.i("topicName","-->"+topicName);
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         if (type == 5) {
             deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
@@ -370,7 +372,7 @@ public class LinkItemActivity extends BaseActivity {
                     moniLink.setState(2);
                     if (mqService != null) {
                         dialog.dismiss();
-                        mqService.sendMoniLink(topicName, moniLink);
+                        mqService.sendMoniLink(topicName, moniLink,0x02);
                         countTimer.start();
                         returnData = 1;
                     }
@@ -379,7 +381,7 @@ public class LinkItemActivity extends BaseActivity {
                     linked.setState(2);
                     if (mqService != null) {
                         dialog.dismiss();
-                        boolean success = mqService.sendLinkedSet(topicName, linked);
+                        boolean success = mqService.sendLinkedSet(topicName, linked,0x02);
                         countTimer.start();
                         returnData = 1;
                     }
@@ -499,7 +501,7 @@ public class LinkItemActivity extends BaseActivity {
                         linked.setState(1);
                     }
                     if (mqService != null) {
-                        boolean success = mqService.sendLinkedSet(topicName, linked);
+                        boolean success = mqService.sendLinkedSet(topicName, linked,0x02);
                         returnData = 1;
                         countTimer.start();
                     }
@@ -592,7 +594,7 @@ public class LinkItemActivity extends BaseActivity {
                         moniLink.setState(1);
                     }
                     if (mqService != null) {
-                        boolean success = mqService.sendMoniLink(topicName, moniLink);
+                        boolean success = mqService.sendMoniLink(topicName, moniLink,0x02);
                         countTimer.start();
                         if (success) {
                             list.set(position, moniLink);
@@ -639,15 +641,17 @@ public class LinkItemActivity extends BaseActivity {
                 }
                 returnData = 1;
                 Linked linked = (Linked) data.getSerializableExtra("linked");
+                Log.i("topicName","-->"+topicName);
                 if (linked != null) {
-                    mqService.sendLinkedSet(topicName, linked);
+                    mqService.sendLinkedSet(topicName, linked,0x01);
                     add = 1;
                     countTimer.start();
                 }
             } else if (resultCode == 1001) {
+                Log.i("topicName","-->"+topicName);
                 MoniLink moniLink = (MoniLink) data.getSerializableExtra("moniLink");
                 if (moniLink != null) {
-                    mqService.sendMoniLink(topicName, moniLink);
+                    mqService.sendMoniLink(topicName, moniLink,0x01);
                     add = 1;
                     countTimer.start();
                 }

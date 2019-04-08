@@ -70,6 +70,7 @@ public class Device implements Serializable {
     private double current;//电流
     private double votage;//电压
     private String re485;
+    private int location=10;//地图刷新频率,默认为10s
 
     public Device(String deviceName, String deviceOnlyMac, String devicePassword) {
         this.deviceName = deviceName;
@@ -126,10 +127,10 @@ public class Device implements Serializable {
     public Device() {
     }
 
-    @Generated(hash = 668839196)
+    @Generated(hash = 1137549523)
     public Device(Long id, long deviceId, String deviceName, String deviceOnlyMac, String devicePassword, int deviceSellerId, int deviceCreatorId, int deviceModel, String name, String imei, String share, int deviceAuthority_Alarm, int deviceAuthority_Map, int deviceAuthority_LineSwitch, int deviceAuthority_Analog, int deviceAuthority_Switch,
             int deviceAuthority_Poweroff, int deviceAuthority_Inching, int deviceAuthority_Timer, int deviceAuthority_Lock, int deviceAuthority_Linked, int mcuVersion, int deviceState, int prelines, int lastlines, int prelineswitch, int lastlineswitch, int prelinesjog, int lastlinesjog, boolean online, int plMemory, double lineJog, double line, double line2,
-            double line3, double line4, double line5, double line6, double line7, double line8, double line9, double line10, double line11, double line12, double line13, double line14, double line15, double line16, double temp, double hum, double current, double votage, String re485, int vlice2) {
+            double line3, double line4, double line5, double line6, double line7, double line8, double line9, double line10, double line11, double line12, double line13, double line14, double line15, double line16, double temp, double hum, double current, double votage, String re485, int location, int vlice2) {
         this.id = id;
         this.deviceId = deviceId;
         this.deviceName = deviceName;
@@ -183,6 +184,7 @@ public class Device implements Serializable {
         this.current = current;
         this.votage = votage;
         this.re485 = re485;
+        this.location = location;
         this.vlice2 = vlice2;
     }
 
@@ -649,6 +651,14 @@ public class Device implements Serializable {
 
     public void setId(Long Id) {
         this.id = Id;
+    }
+
+    public int getLocation() {
+        return this.location;
+    }
+
+    public void setLocation(int location) {
+        this.location = location;
     }
 
 
