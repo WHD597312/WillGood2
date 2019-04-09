@@ -14,17 +14,11 @@ import org.greenrobot.greendao.query.WhereCondition;
 import java.util.List;
 
 public class DeviceInterLockDaoImpl {
-    private Context context;
-    private SQLiteDatabase db;
-    private DaoMaster master;
     private InterLockDao interLockDao;
-    private DaoSession session;
 
     public DeviceInterLockDaoImpl(Context context) {
-        this.context = context;
-        db= DBManager.getInstance(context).getWritableDasebase();
-        master=new DaoMaster(db);
-        session=master.newSession();
+        DBManager dbManager=DBManager.getInstance(context);//获取数据库管理者单例对象
+        DaoSession session=dbManager.getDaoSession();//获取数据库会话对象
         interLockDao=session.getInterLockDao();
     }
 

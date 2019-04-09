@@ -15,16 +15,10 @@ import org.greenrobot.greendao.query.WhereCondition;
 import java.util.List;
 
 public class DeviceLinkDaoImpl {
-    private Context context;
-    private SQLiteDatabase db;
-    private DaoMaster master;
     private LinkedDao linkedDao;
-    private DaoSession session;
     public DeviceLinkDaoImpl(Context context) {
-        this.context = context;
-        db= DBManager.getInstance(context).getWritableDasebase();
-        master=new DaoMaster(db);
-        session=master.newSession();
+        DBManager dbManager=DBManager.getInstance(context);//获取数据库管理者单例对象
+        DaoSession session=dbManager.getDaoSession();//获取数据库会话对象
         linkedDao=session.getLinkedDao();
     }
     public void insert(Linked linked){
@@ -75,25 +69,7 @@ public class DeviceLinkDaoImpl {
                 LinkedDao.Properties.LastLines.eq(lastline),LinkedDao.Properties.TriType.eq(triType));
         return linkedDao.queryBuilder().where(whereCondition).unique();
     }
-    /**
-     *
-     * @param deviceMac
-     * @param type
-     * @param condition
-     * @param conditionState 为1时，查询>condition的某些联动,为0时，查询<=condition的某些联动
-     * @return
-     */
-    public List<Linked> findLinkeds(String deviceMac,int type,int condition,int conditionState){
-        WhereCondition whereCondition=null;
-        if (conditionState==1){
-            whereCondition=linkedDao.queryBuilder().and(LinkedDao.Properties.DeviceMac.eq(deviceMac)
-                    ,LinkedDao.Properties.Type.eq(type),LinkedDao.Properties.Condition.gt(condition));
-        }else if (conditionState==0){
-            whereCondition=linkedDao.queryBuilder().and(LinkedDao.Properties.DeviceMac.eq(deviceMac)
-                    ,LinkedDao.Properties.Type.eq(type),LinkedDao.Properties.Condition.le(condition));
-        }
-        return linkedDao.queryBuilder().where(whereCondition).list();
-    }
+
 
     /**
      * 查询设备的某一类型的所有联动

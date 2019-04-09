@@ -11,7 +11,6 @@ import org.greenrobot.greendao.internal.DaoConfig;
 import com.peihou.willgood2.pojo.Alerm;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.pojo.Line2;
-import com.peihou.willgood2.pojo.Link;
 import com.peihou.willgood2.pojo.Linked;
 import com.peihou.willgood2.pojo.LinkedType;
 import com.peihou.willgood2.pojo.MoniLink;
@@ -22,7 +21,6 @@ import com.peihou.willgood2.pojo.InterLock;
 import com.peihou.willgood2.database.dao.AlermDao;
 import com.peihou.willgood2.database.dao.DeviceDao;
 import com.peihou.willgood2.database.dao.Line2Dao;
-import com.peihou.willgood2.database.dao.LinkDao;
 import com.peihou.willgood2.database.dao.LinkedDao;
 import com.peihou.willgood2.database.dao.LinkedTypeDao;
 import com.peihou.willgood2.database.dao.MoniLinkDao;
@@ -42,7 +40,6 @@ public class DaoSession extends AbstractDaoSession {
     private final DaoConfig alermDaoConfig;
     private final DaoConfig deviceDaoConfig;
     private final DaoConfig line2DaoConfig;
-    private final DaoConfig linkDaoConfig;
     private final DaoConfig linkedDaoConfig;
     private final DaoConfig linkedTypeDaoConfig;
     private final DaoConfig moniLinkDaoConfig;
@@ -53,7 +50,6 @@ public class DaoSession extends AbstractDaoSession {
     private final AlermDao alermDao;
     private final DeviceDao deviceDao;
     private final Line2Dao line2Dao;
-    private final LinkDao linkDao;
     private final LinkedDao linkedDao;
     private final LinkedTypeDao linkedTypeDao;
     private final MoniLinkDao moniLinkDao;
@@ -73,9 +69,6 @@ public class DaoSession extends AbstractDaoSession {
 
         line2DaoConfig = daoConfigMap.get(Line2Dao.class).clone();
         line2DaoConfig.initIdentityScope(type);
-
-        linkDaoConfig = daoConfigMap.get(LinkDao.class).clone();
-        linkDaoConfig.initIdentityScope(type);
 
         linkedDaoConfig = daoConfigMap.get(LinkedDao.class).clone();
         linkedDaoConfig.initIdentityScope(type);
@@ -98,7 +91,6 @@ public class DaoSession extends AbstractDaoSession {
         alermDao = new AlermDao(alermDaoConfig, this);
         deviceDao = new DeviceDao(deviceDaoConfig, this);
         line2Dao = new Line2Dao(line2DaoConfig, this);
-        linkDao = new LinkDao(linkDaoConfig, this);
         linkedDao = new LinkedDao(linkedDaoConfig, this);
         linkedTypeDao = new LinkedTypeDao(linkedTypeDaoConfig, this);
         moniLinkDao = new MoniLinkDao(moniLinkDaoConfig, this);
@@ -109,7 +101,6 @@ public class DaoSession extends AbstractDaoSession {
         registerDao(Alerm.class, alermDao);
         registerDao(Device.class, deviceDao);
         registerDao(Line2.class, line2Dao);
-        registerDao(Link.class, linkDao);
         registerDao(Linked.class, linkedDao);
         registerDao(LinkedType.class, linkedTypeDao);
         registerDao(MoniLink.class, moniLinkDao);
@@ -122,7 +113,6 @@ public class DaoSession extends AbstractDaoSession {
         alermDaoConfig.clearIdentityScope();
         deviceDaoConfig.clearIdentityScope();
         line2DaoConfig.clearIdentityScope();
-        linkDaoConfig.clearIdentityScope();
         linkedDaoConfig.clearIdentityScope();
         linkedTypeDaoConfig.clearIdentityScope();
         moniLinkDaoConfig.clearIdentityScope();
@@ -141,10 +131,6 @@ public class DaoSession extends AbstractDaoSession {
 
     public Line2Dao getLine2Dao() {
         return line2Dao;
-    }
-
-    public LinkDao getLinkDao() {
-        return linkDao;
     }
 
     public LinkedDao getLinkedDao() {

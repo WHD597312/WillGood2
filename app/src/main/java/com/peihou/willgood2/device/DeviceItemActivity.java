@@ -253,7 +253,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         menus.add(new DeviceMenu(7, "点动控制", R.mipmap.img_menu_jog));
         menus.add(new DeviceMenu(8, "掉电记忆", R.mipmap.img_menu_pd));
         menus.add(new DeviceMenu(9, "485接口", R.mipmap.img_menu_pd));
-        menus.add(new DeviceMenu(10, "设备开关控制语言", R.mipmap.img_menu_voice));
+        menus.add(new DeviceMenu(10, "控制语音", R.mipmap.img_menu_voice));
 
         Collections.sort(menus, new Comparator<DeviceMenu>() {
             @Override
@@ -548,11 +548,23 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
 
     @Override
     public void onBackPressed() {
+        updateLines(deviceMac);
         if (!TextUtils.isEmpty(search)) {
 
             startActivity(new Intent(this, DeviceListActivity.class));
         } else {
             super.onBackPressed();
+        }
+    }
+
+    public void updateLines(String deviceMac) {
+        List<Line2> list = deviceLineDao.findDeviceLines(deviceMac);
+        for (int i = 0; i < list.size(); i++) {
+            Line2 line2 = list.get(i);
+            line2.setOnClick(false);
+            line2.setClick(0);
+            line2.setClick2(0);
+            list.set(i, line2);
         }
     }
 
@@ -785,6 +797,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_back:
+                updateLines(deviceMac);
                 if (!TextUtils.isEmpty(search)) {
                     startActivity(new Intent(this, DeviceListActivity.class));
                     break;
@@ -893,9 +906,9 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     int deviceLineNum = line2.getDeviceLineNum();
                     if (line2.getClick2() == 1) {
                         if (deviceLineNum <= 8) {
-                            preLines[deviceLineNum - 1] = 1;
+                            preLines[deviceLineNum - 1] = 0;
                         } else {
-                            lastLines[(deviceLineNum - 1) - 8] = 1;
+                            lastLines[(deviceLineNum - 1) - 8] = 0;
                         }
                     }
                 }

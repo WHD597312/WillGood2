@@ -61,8 +61,8 @@ public class PowerLostMomoryActivity extends BaseActivity {
                 img_open.setImageResource(R.mipmap.img_close);
             }
         }else if (type==2){
-            tv_title.setText("设备开关控制语言");
-            tv_name.setText("设备开关控制语言");
+            tv_title.setText("控制语音");
+            tv_name.setText("控制语音");
             open=voice;
             if (voice==1){
                 img_open.setImageResource(R.mipmap.img_open);

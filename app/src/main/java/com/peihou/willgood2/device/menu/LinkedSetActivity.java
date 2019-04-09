@@ -190,11 +190,22 @@ public class LinkedSetActivity extends BaseActivity {
     int[] pre = new int[8];
     int[] last = new int[8];
     StringBuffer sb = new StringBuffer();
+    public void updateLines(String deviceMac) {
+        List<Line2> list = deviceLineDao.findDeviceLines(deviceMac);
+        for (int i = 0; i < list.size(); i++) {
+            Line2 line2 = list.get(i);
+            line2.setOnClick(false);
+            line2.setClick(0);
+            line2.setClick2(0);
+            list.set(i, line2);
+        }
+    }
 
     @OnClick({R.id.img_back, R.id.btn_low, R.id.btn_high, R.id.btn_once, R.id.btn_loop, R.id.img_ensure, R.id.btn_open, R.id.btn_close})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_back:
+                updateLines(deviceMac);
                 finish();
                 break;
             case R.id.img_ensure:
@@ -228,6 +239,7 @@ public class LinkedSetActivity extends BaseActivity {
                         break;
                     }
                     touch=touch==1?0:1;
+                    updateLines(deviceMac);
                     MoniLink moniLink = new MoniLink(moniType, analog, value, condition, preLines, lastLines, controlState, touch, 1, deviceMac, 0);
                     Intent intent = new Intent();
                     intent.putExtra("moniLink", moniLink);
@@ -263,6 +275,7 @@ public class LinkedSetActivity extends BaseActivity {
                         break;
                     }
                     touch=touch==1?0:1;
+                    updateLines(deviceMac);
                     Linked linked = new Linked(deviceMac, type, "", value, condition, controlState, 1, preLines, lastLines, touch);
                     Intent intent = new Intent();
                     intent.putExtra("linked", linked);
@@ -313,6 +326,12 @@ public class LinkedSetActivity extends BaseActivity {
                 setTouchMode();
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        updateLines(deviceMac);
     }
 
     @Override

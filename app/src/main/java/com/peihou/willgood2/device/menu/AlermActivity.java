@@ -389,6 +389,7 @@ public class AlermActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_back:
+                updateAlerms();
                 finish();
                 break;
             case R.id.img_log:
@@ -403,6 +404,22 @@ public class AlermActivity extends BaseActivity {
     int once = 2;//2时，为循环，1时为3次，0时是0次
 
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        updateAlerms();
+
+    }
+
+    private void updateAlerms(){
+        List<Alerm> list=deviceAlermDao.findDeviceAlerms(deviceMac);
+        for (int i = 0; i <list.size() ; i++) {
+            Alerm alerm=list.get(i);
+            alerm.setOpen(false);
+            alerm.setState(0);
+            alerm.setState2(0);
+        }
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

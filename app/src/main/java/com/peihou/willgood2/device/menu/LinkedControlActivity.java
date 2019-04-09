@@ -28,7 +28,6 @@ import com.peihou.willgood2.R;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.database.dao.impl.DeviceLinkDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceLinkedTypeDaoImpl;
-import com.peihou.willgood2.pojo.Link;
 import com.peihou.willgood2.pojo.Linked;
 import com.peihou.willgood2.pojo.LinkedType;
 import com.peihou.willgood2.pojo.MoniLink;
@@ -134,13 +133,28 @@ public class LinkedControlActivity extends BaseActivity {
         running=false;
     }
 
+    private void updateLinkedType(){
+        List<LinkedType> list=deviceLinkedTypeDao.findLinkdType(deviceMac);
+        for (int i = 0; i <list.size() ; i++) {
+            LinkedType linkedType=list.get(i);
+            linkedType.setState(0);
+            list.set(i,linkedType);
+        }
+    }
     @OnClick({R.id.img_back})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
+                updateLinkedType();
                 finish();
                 break;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        updateLinkedType();
     }
 
     @Override

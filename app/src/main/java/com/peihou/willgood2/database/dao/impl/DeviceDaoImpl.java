@@ -15,18 +15,12 @@ import org.greenrobot.greendao.query.WhereCondition;
 import java.util.List;
 
 public class DeviceDaoImpl {
-        private Context context;
-        private SQLiteDatabase db;
-        private DaoMaster master;
-        private DeviceDao deviceDao;
-        private DaoSession session;
-        public DeviceDaoImpl(Context context) {
-            this.context = context;
-            db= DBManager.getInstance(context).getWritableDasebase();
-            master=new DaoMaster(db);
-            session=master.newSession();
-            deviceDao=session.getDeviceDao();
-        }
+    private DeviceDao deviceDao;
+    public DeviceDaoImpl(Context context) {
+        DBManager dbManager= DBManager.getInstance(context);
+        DaoSession session=dbManager.getDaoSession();//获取数据库会话对象
+        deviceDao=session.getDeviceDao();
+    }
 
     /**
      * 添加设备

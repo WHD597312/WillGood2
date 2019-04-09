@@ -204,6 +204,7 @@ public class AddTimeActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_back:
+                updateLines(deviceMac);
                 finish();
                 break;
             case R.id.img_add:
@@ -280,6 +281,7 @@ public class AddTimeActivity extends BaseActivity {
                     }
                     timerTask = new TimerTask(deviceMac, 0x22, week, hour, min, open, preLine, lastLine, 1);
                 }
+                updateLines(deviceMac);
                 Intent intent = new Intent();
                 intent.putExtra("timerTask", timerTask);
                 setResult(1001, intent);
@@ -367,6 +369,23 @@ public class AddTimeActivity extends BaseActivity {
                 onClick = (int) tv_7.getTag();
                 weeks[6] = onClick;
                 break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        updateLines(deviceMac);
+    }
+
+    public void updateLines(String deviceMac) {
+        List<Line2> list = deviceLineDao.findDeviceLines(deviceMac);
+        for (int i = 0; i < list.size(); i++) {
+            Line2 line2 = list.get(i);
+            line2.setOnClick(false);
+            line2.setClick(0);
+            line2.setClick2(0);
+            list.set(i, line2);
         }
     }
 

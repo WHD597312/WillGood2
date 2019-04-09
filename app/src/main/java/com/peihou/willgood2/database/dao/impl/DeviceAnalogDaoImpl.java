@@ -14,16 +14,10 @@ import org.greenrobot.greendao.query.WhereCondition;
 import java.util.List;
 
 public class DeviceAnalogDaoImpl {
-    private Context context;
-    private SQLiteDatabase db;
-    private DaoMaster master;
     private TableDao tableDao;
-    private DaoSession session;
     public DeviceAnalogDaoImpl(Context context) {
-        this.context = context;
-        db= DBManager.getInstance(context).getWritableDasebase();
-        master=new DaoMaster(db);
-        session=master.newSession();
+        DBManager dbManager=DBManager.getInstance(context);//获取数据库管理者单例对象
+        DaoSession session=dbManager.getDaoSession();//获取数据库会话对象
         tableDao=session.getTableDao();
     }
 

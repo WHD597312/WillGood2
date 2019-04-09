@@ -69,7 +69,6 @@ import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.pojo.DeviceTrajectory;
 import com.peihou.willgood2.pojo.InterLock;
 import com.peihou.willgood2.pojo.Line2;
-import com.peihou.willgood2.pojo.Link;
 import com.peihou.willgood2.pojo.Linked;
 import com.peihou.willgood2.pojo.LinkedType;
 import com.peihou.willgood2.pojo.MoniLink;
@@ -298,6 +297,9 @@ public class MQService extends Service {
         for (int i = 0; i < list.size(); i++) {
             Line2 line2 = list.get(i);
             line2.setLock(0);
+            line2.setClick2(0);
+            line2.setClick(0);
+            line2.setOnClick(false);
             list.set(i, line2);
         }
         deviceLineDao.update(list);
@@ -1721,7 +1723,7 @@ public class MQService extends Service {
                         Message msg = handler.obtainMessage();
                         CountTimer countTimer2 = null;
                         for (CountTimer countTimer : countTimers) {
-                            if (countTimer.getMacArress().equals(macAddress) && countTimer.getMillisUntilFinished() / 1000 == 0) {
+                            if (countTimer.getMacArress().equals(macAddress) && countTimer.getMillisUntilFinished() / 1000 <=1) {
                                 countTimer2 = countTimer;
                                 break;
                             }
@@ -2784,15 +2786,6 @@ public class MQService extends Service {
         return success;
     }
 
-    /**
-     * 同步设备互锁
-     *
-     * @param deviceMac
-     * @return
-     */
-    public Map<String, String> getDeviceInterLock(String deviceMac) {
-        return deviceLineDao.findInterLockLine(deviceMac);
-    }
 
     public List<Line2> getDeviceLines(String deviceMac) {
         return deviceLineDao.findDeviceLines(deviceMac);
