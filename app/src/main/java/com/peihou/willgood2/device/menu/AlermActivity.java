@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +70,6 @@ public class AlermActivity extends BaseActivity {
     private long deviceId;
     private String deviceMac;
     private DeviceAlermDaoImpl deviceAlermDao;
-    int[] data = new int[17];
-    int[] x = new int[8];//报警类型
     String topicName;
     int mcuVersion;
     public static boolean running = false;
@@ -101,42 +100,10 @@ public class AlermActivity extends BaseActivity {
         deviceAlermDao = new DeviceAlermDaoImpl(getApplicationContext());
         list_alerm.setLayoutManager(new LinearLayoutManager(this));
         list = deviceAlermDao.findDeviceAlerms(deviceId);
-        int j = 1;
 
-        for (int i = 2; i < list.size() - 1; i++) {
-            Alerm alerm = list.get(i);
-            int state = alerm.getState();
-            x[i] = state;
-            once = alerm.getDeviceAlarmBroadcast();
-            notify = alerm.getDeviceAlarmFlag();
-            double value = alerm.getValue();
-            BigDecimal b = new BigDecimal(value);
-            value = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-            int k = (int) (value * 10);
-            data[j] = k / 256;// 1 3 5,
-            data[++j] = k % 256;//2 4 6
-            int x = alerm.getState2();
-            if (x != 0x11 || x != 0x22)
-                data[++j] = 0x11;
-            else {
-                data[++j] = x;
-            }
-            j++;
-        }
-        if (list.size() == 8) {
-            Alerm alerm = list.get(7);
-            int state2 = alerm.getState2();
-            data[16] = state2;
-            Alerm alerm1 = list.get(0);
-            Alerm alerm2 = list.get(1);
-            int state = alerm1.getState();
-            int state3 = alerm2.getState();
-            x[0] = state;
-            x[1] = state3;
-        }
-        data[0] = TenTwoUtil.changeToTen(x);
 
         topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+        Log.i("topicName","-->"+topicName);
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         adapter = new MyAdapter(this, list);
         list_alerm.setAdapter(adapter);
@@ -389,7 +356,7 @@ public class AlermActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_back:
-                updateAlerms();
+                mqService.initAlarmData();
                 finish();
                 break;
             case R.id.img_log:
@@ -407,19 +374,18 @@ public class AlermActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        updateAlerms();
-
+        mqService.initAlarmData();
     }
 
-    private void updateAlerms(){
-        List<Alerm> list=deviceAlermDao.findDeviceAlerms(deviceMac);
-        for (int i = 0; i <list.size() ; i++) {
-            Alerm alerm=list.get(i);
-            alerm.setOpen(false);
-            alerm.setState(0);
-            alerm.setState2(0);
-        }
-    }
+//    private void updateAlerms(){
+//        List<Alerm> list=deviceAlermDao.findDeviceAlerms(deviceMac);
+//        for (int i = 0; i <list.size() ; i++) {
+//            Alerm alerm=list.get(i);
+//            alerm.setOpen(false);
+//            alerm.setState(0);
+//            alerm.setState2(0);
+//        }
+//    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -667,24 +633,15 @@ public class AlermActivity extends BaseActivity {
                             ToastUtil.showShort(AlermActivity.this, "设备已离线");
                             return;
                         }
+                        int[] data=mqService.getAlermData();
+                        int alermState=data[0];
+                        int states[]=TenTwoUtil.changeToTwo(alermState);
                         if (alerm.getState() == 1) {
-                            x[7 - (position - 4)] = 0;
-//                            alerm.setState(0);
+                            states[position-4]=0;
                         } else {
-//                            alerm.setState(1);
-                            x[7 - (position - 4)] = 1;
+                            states[position - 4] = 1;
                         }
-                        int k = TenTwoUtil.changeToTen(x);
-                        data[0] = k;
-
-                        double s = list.get(2).getValue();
-                        s += 50;
-                        BigDecimal b = new BigDecimal(s);
-                        s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                        int alermValue = (int) (s) * 10;
-                        data[1] = alermValue / 256;
-                        data[2] = alermValue % 256;
-
+                        data[0] = TenTwoUtil.changeToTen2(states);
                         if (mqService != null) {
                             boolean success = mqService.sendAlerm(topicName, mcuVersion, data);
                             click = 1;
@@ -836,6 +793,7 @@ public class AlermActivity extends BaseActivity {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s) * 10;
+                            int data []=mqService.getAlermData();
                             data[1] = alermValue / 256;
                             data[2] = alermValue % 256;
                             if (open == 1) {
@@ -855,6 +813,7 @@ public class AlermActivity extends BaseActivity {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s) * 10;
+                            int data []=mqService.getAlermData();
                             data[4] = alermValue / 256;
                             data[5] = alermValue % 256;
                             if (open == 1) {
@@ -874,6 +833,7 @@ public class AlermActivity extends BaseActivity {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s);
+                            int data []=mqService.getAlermData();
                             data[7] = alermValue / 256;
                             data[8] = alermValue % 256;
                             if (open == 1) {
@@ -893,6 +853,7 @@ public class AlermActivity extends BaseActivity {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s) * 10;
+                            int data []=mqService.getAlermData();
                             data[10] = alermValue / 256;
                             data[11] = alermValue % 256;
                             if (open == 1) {
@@ -912,6 +873,7 @@ public class AlermActivity extends BaseActivity {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s) * 10;
+                            int data []=mqService.getAlermData();
                             data[13] = alermValue / 256;
                             data[14] = alermValue % 256;
                             if (open == 1) {
@@ -991,6 +953,7 @@ public class AlermActivity extends BaseActivity {
                     ToastUtil.showShort(AlermActivity.this, "内容不能为空");
                 else {
                     try {
+                        int[] data=mqService.getAlermData();
                         data[16] = open;
                         mqService.sendAlerm(topicName, mcuVersion, data);
                         params.clear();

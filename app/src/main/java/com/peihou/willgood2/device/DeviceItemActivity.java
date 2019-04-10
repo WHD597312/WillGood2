@@ -216,7 +216,6 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         receiver = new MessageReceiver();
         registerReceiver(receiver, intentFilter);
         deviceLineDao = new DeviceLineDaoImpl(getApplicationContext());
-        int lines = deviceLineDao.findDeviceLines(deviceId).size();
         try {
             params.put("deviceId", deviceId);
             new GetDeviceLineAsync(DeviceItemActivity.this).execute(params).get(5, TimeUnit.SECONDS);
@@ -548,7 +547,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
 
     @Override
     public void onBackPressed() {
-        updateLines(deviceMac);
+//        updateLines(deviceMac);
         if (!TextUtils.isEmpty(search)) {
 
             startActivity(new Intent(this, DeviceListActivity.class));
@@ -557,16 +556,16 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         }
     }
 
-    public void updateLines(String deviceMac) {
-        List<Line2> list = deviceLineDao.findDeviceLines(deviceMac);
-        for (int i = 0; i < list.size(); i++) {
-            Line2 line2 = list.get(i);
-            line2.setOnClick(false);
-            line2.setClick(0);
-            line2.setClick2(0);
-            list.set(i, line2);
-        }
-    }
+//    public void updateLines(String deviceMac) {
+//        List<Line2> list = deviceLineDao.findDeviceLines(deviceMac);
+//        for (int i = 0; i < list.size(); i++) {
+//            Line2 line2 = list.get(i);
+//            line2.setOnClick(false);
+//            line2.setClick(0);
+//            line2.setClick2(0);
+//            list.set(i, line2);
+//        }
+//    }
 
     private void initWindows() {
         Window window = getWindow();
@@ -797,7 +796,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_back:
-                updateLines(deviceMac);
+//                updateLines(deviceMac);
                 if (!TextUtils.isEmpty(search)) {
                     startActivity(new Intent(this, DeviceListActivity.class));
                     break;

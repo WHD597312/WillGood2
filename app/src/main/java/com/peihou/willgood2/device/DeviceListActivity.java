@@ -1378,8 +1378,6 @@ public class DeviceListActivity extends BaseActivity {
                 }
             });
             viewHolder.tv_name.setText(name);
-
-
             if (TextUtils.isEmpty(share)) {
                 viewHolder.rl_item2.setImageResource(R.mipmap.device_back);
             } else {

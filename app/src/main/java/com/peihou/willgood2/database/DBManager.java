@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import com.peihou.willgood2.database.dao.DaoMaster;
 import com.peihou.willgood2.database.dao.DaoSession;
 
+import org.greenrobot.greendao.identityscope.IdentityScopeType;
+
 /**
  * Created by win7 on 2018/3/22.
  */
@@ -65,7 +67,7 @@ public class DBManager {
                     if (daoMaster==null){
                         daoMaster=getDaoMaster();
                     }
-                    daoSession=daoMaster.newSession();
+                    daoSession=daoMaster.newSession(IdentityScopeType.None);
                 }
             }
         }

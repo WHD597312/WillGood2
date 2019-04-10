@@ -1475,7 +1475,9 @@ public class MQService extends Service {
                         Alerm alerm7 = deviceAlermDao.findDeviceAlerm(macAddress, 6);//功率报警
                         Alerm alerm8 = deviceAlermDao.findDeviceAlerm(macAddress, 7);//开关量报警
 
-
+                        for (int i = 4; i <data.length-8; i++) {
+                            alermData[i-4]=data[i];
+                        }
                         alerm.setState(x[0]);
                         alerm2.setState(x[1]);
                         alerm3.setState(x[2]);
@@ -2127,6 +2129,16 @@ public class MQService extends Service {
                 swtichState.setState(0);
                 switchChecks.set(i, swtichState);
             }
+        }
+    }
+
+    int[] alermData=new int[17];
+    public int[] getAlermData(){
+        return alermData;
+    }
+    public void initAlarmData(){
+        for (int i = 0; i <alermData.length ; i++) {
+            alermData[i]=0;
         }
     }
 

@@ -84,7 +84,6 @@ public class DeviceInterLockActivity extends BaseActivity {
     public void initView(View view) {
         deviceDao=new DeviceDaoImpl(getApplicationContext());
         deviceLineDao=new DeviceLineDaoImpl(getApplicationContext());
-        List<Line2> line2List=deviceLineDao.findDeviceLines(deviceMac);
         deviceInterLockDao=new DeviceInterLockDaoImpl(getApplicationContext());
         device=deviceDao.findDeviceById(deviceId);
 //        list=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);

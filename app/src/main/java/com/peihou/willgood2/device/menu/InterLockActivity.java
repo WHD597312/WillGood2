@@ -150,7 +150,6 @@ public class InterLockActivity extends BaseActivity {
         }
 
         if (mqService!=null){
-            mqService.updateLines(deviceMac);
             mqService.updateDeviceInterLock(interLocks);
         }
     }
