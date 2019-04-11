@@ -199,7 +199,7 @@ public class DeviceListActivity extends BaseActivity {
 
     int versionCode;
     String versionName;
-    String appUrl = "http://47.98.131.11:8095/qjjc/user/getAPPVersion";
+    String appUrl = HttpUtils.ipAddress+"user/getAPPVersion";
     String updateAppUrl = "https://pgyer.com/OSRU";
     AppUpdateDialog appUpdateDialog;
 

@@ -122,9 +122,9 @@ import java.util.concurrent.TimeoutException;
 public class MQService extends Service {
 
     private String TAG = "MQService";
-    private String host = "tcp://47.98.131.11:1883";//mqtt连接服务端ip
-    private String userName = "admin";//mqtt连接用户名
-    private String passWord = "Xr7891122";//mqtt连接密码
+    private String host = "tcp://47.111.101.184:1883";//mqtt连接服务端ip
+    private String userName = "mosquitto";//mqtt连接用户名
+    private String passWord = "mosquitto";//mqtt连接密码
 
 
     private MqttClient client;//mqtt客户端
@@ -359,6 +359,10 @@ public class MQService extends Service {
         }
     }
 
+    /**
+     * 订阅所有的设备主题
+     * @param devices
+     */
     public void subscribeAll(List<Device> devices) {
         try {
             for (Device device : devices) {
@@ -374,26 +378,8 @@ public class MQService extends Service {
         }
     }
 
-    private String result;
 
     Map<String, Object> operateLog = new HashMap<>();
-    private Map<String, Object> params = new HashMap<>();
-
-
-    private Map<String, Device> offlineDevices = new LinkedHashMap<>();
-
-    public Map<String, Device> getOfflineDevices() {
-        return offlineDevices;
-    }
-
-    public void removeOfflineDevices() {
-        offlineDevices.clear();
-    }
-
-    public void revoveOfflineDevice(String macAddress) {
-        if (offlineDevices.containsKey(macAddress))
-            offlineDevices.remove(macAddress);
-    }
 
     /**
      * 初始化MQTT
@@ -504,11 +490,76 @@ public class MQService extends Service {
     public List<Linked> getLinkeds(String deviceMac, int type) {
         return deviceLinkDao.findLinkeds(deviceMac, type);
     }
+    /**
+     * 离线设备集合
+     */
+    private Map<String, Device> offlineDevices = new LinkedHashMap<>();
 
+    /**
+     * 获取离线设备集合
+     * @return
+     */
+    public Map<String, Device> getOfflineDevices() {
+        return offlineDevices;
+    }
+
+    /**
+     * 清除离线设备集合
+     */
+    public void removeOfflineDevices() {
+        offlineDevices.clear();
+    }
+
+    /**
+     * 移除某个离线设备
+     * @param macAddress
+     */
+    public void revoveOfflineDevice(String macAddress) {
+        if (offlineDevices.containsKey(macAddress))
+            offlineDevices.remove(macAddress);
+    }
+
+    /**
+     * 更新设备
+     * @param device
+     */
     public void updateDevice(Device device) {
         deviceDao.update(device);
     }
 
+    /**
+     * 获取设备
+     * @param deviceMac
+     * @return
+     */
+    public Device getDeviceByMac(String deviceMac){
+        return deviceDao.findDeviceByMac2(deviceMac);
+    }
+
+    /**
+     * 更新设备的控制声音
+     * @param deviceMac
+     * @param vloce
+     */
+    public void updateDevice(String deviceMac, int vloce) {
+        Device device = deviceDao.findDeviceByMac(deviceMac);
+        if (device != null) {
+            device.setVlice2(vloce);
+            deviceDao.update(device);
+        }
+    }
+
+    /**
+     * 更新报警
+     * @param alerm
+     */
+    public void update(Alerm alerm) {
+        deviceAlermDao.update(alerm);
+    }
+    /**
+     * 获取所有设备
+     * @return
+     */
     public List<Device> getDevices() {
         return deviceDao.findAllDevice();
     }
@@ -577,6 +628,7 @@ public class MQService extends Service {
             Device device = null;
             double latitude = 0;
             double longitude = 0;
+            CountTimer countTimer2 = null;
             try {
                 if (topicName.contains("client_to_server")) {
                     int funCode = data[1];
@@ -784,7 +836,7 @@ public class MQService extends Service {
                             device.setHum(hum);
                             device.setCurrent(current);
                             device.setVotage(voltage);
-//                            device.setPlMemory(plMemory);
+                            device.setPlMemory(plMemory);
                             device.setOnline(true);
                             deviceDao.update(device);
                             offlineDevices.put(macAddress, device);
@@ -800,6 +852,15 @@ public class MQService extends Service {
                                 lines2 = "";
                             }
                         }
+
+
+                        for (CountTimer countTimer : countTimers) {
+                            if (macAddress.equals(countTimer.getMacArress()) && countTimer.getMillisUntilFinished()<=1) {
+                                countTimer2 = countTimer;
+                                break;
+                            }
+                        }
+
                     } else if (funCode == 0x22) {
                         int mcuVersion = data[2];
                         int choice = data[4];
@@ -1722,19 +1783,7 @@ public class MQService extends Service {
                         intent.putExtra("device", device);
                         intent.putExtra("lines", lines2);
                         sendBroadcast(intent);
-                        Message msg = handler.obtainMessage();
-                        CountTimer countTimer2 = null;
-                        for (CountTimer countTimer : countTimers) {
-                            if (countTimer.getMacArress().equals(macAddress) && countTimer.getMillisUntilFinished() / 1000 <=1) {
-                                countTimer2 = countTimer;
-                                break;
-                            }
-                        }
-                        if (countTimer2 != null) {
-                            msg.obj = countTimer2;
-                            msg.what = 101;
-                            handler.sendMessage(msg);
-                        }
+
                     } else if (SearchDeviceActivity.running && funCode == 0x11) {
                         Intent intent = new Intent("SearchDeviceActivity");
                         intent.putExtra("funCode", funCode);
@@ -1837,6 +1886,12 @@ public class MQService extends Service {
                         intent.putExtra("rs485", rs485);
                         sendBroadcast(intent);
                     }
+                    if (countTimer2 != null) {
+                        Message msg = handler.obtainMessage();
+                        msg.obj = countTimer2;
+                        msg.what = 101;
+                        handler.sendMessage(msg);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1876,7 +1931,7 @@ public class MQService extends Service {
                 return;
             }
         }
-        CountTimer countTimer = new CountTimer(1000 * 60 * 5 * 6, 1000);
+        CountTimer countTimer = new CountTimer(1000 * 60 * 5*6, 1000);
         countTimer.setMacArress(macAddress);
         countTimers.add(countTimer);
     }
@@ -1976,20 +2031,19 @@ public class MQService extends Service {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            this.millisUntilFinished = millisUntilFinished;
+            this.millisUntilFinished = millisUntilFinished/1000;
             Log.e("millisUntilFinished", macArress + "->" + millisUntilFinished / 1000);
         }
 
         @Override
         public void onFinish() {
-            Log.e("millisUntilFinished", "-->" + millisUntilFinished / 1000);
+            Log.e("CountTimerFinished", "-->" + millisUntilFinished);
 
             String topicName = "qjjc/gateway/" + macArress + "/server_to_client";
-            getData(topicName, 0x11);
-
             Intent intent = new Intent("offline");
             intent.putExtra("macAddress", macArress);
             sendBroadcast(intent);
+            getData(topicName, 0x11);
         }
 
         public long getMillisUntilFinished() {
@@ -2033,6 +2087,13 @@ public class MQService extends Service {
         return flag;
     }
 
+    /**
+     *
+     * @param topicName 设备主题
+     * @param qos 消息服务质量
+     * @param bytes
+     * @return
+     */
     public boolean publish(String topicName, int qos, byte[] bytes) {
         boolean flag = false;
         if (client != null && client.isConnected()) {
@@ -2077,9 +2138,6 @@ public class MQService extends Service {
         return flag;
     }
 
-    public String getResult() {
-        return result;
-    }
 
     public void insert(Device device) {
         String deviceMac = device.getDeviceOnlyMac();
@@ -3324,17 +3382,7 @@ public class MQService extends Service {
         }
     }
 
-    public void updateDevice(String deviceMac, int vloce) {
-        Device device = deviceDao.findDeviceByMac(deviceMac);
-        if (device != null) {
-            device.setVlice2(vloce);
-            deviceDao.update(device);
-        }
-    }
 
-    public void update(Alerm alerm) {
-        deviceAlermDao.update(alerm);
-    }
 
     Handler.Callback mCallback = new Handler.Callback() {
         @Override

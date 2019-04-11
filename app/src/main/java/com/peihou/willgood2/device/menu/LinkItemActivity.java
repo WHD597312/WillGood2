@@ -592,12 +592,14 @@ public class LinkItemActivity extends BaseActivity {
                         return;
                     }
 
+
                     if (moniLink.getState() == 1) {
                         moniLink.setState(0);
                     } else {
                         moniLink.setState(1);
                     }
                     if (mqService != null) {
+                        returnData=1;
                         boolean success = mqService.sendMoniLink(topicName, moniLink,0x02);
                         countTimer.start();
                         if (success) {
@@ -653,6 +655,7 @@ public class LinkItemActivity extends BaseActivity {
                 }
             } else if (resultCode == 1001) {
                 Log.i("topicName","-->"+topicName);
+                returnData = 1;
                 MoniLink moniLink = (MoniLink) data.getSerializableExtra("moniLink");
                 if (moniLink != null) {
                     mqService.sendMoniLink(topicName, moniLink,0x01);

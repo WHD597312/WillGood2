@@ -631,11 +631,12 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
             intent.putExtra("restart", 1);
             startService(intent);
         }
-        if (!running && mqService != null) {
+        if (returnData==0 &&!running && mqService != null) {
             load = 1;
             mqService.connectMqtt(deviceMac);
             countTimer.start();
         }
+        returnData=0;
         running = true;
         plMemory = device.getPlMemory();
 
@@ -648,6 +649,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         load = 0;
     }
 
+    int returnData=0;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -657,11 +659,16 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 device.setLineJog(choices);
             }
         } else if (resultCode == 8000) {
-            plMemory = data.getIntExtra("plMemory", 0);
-            device.setPlMemory(plMemory);
-            deviceDao.update(device);
-            if (mqService != null) {
-                mqService.updateDevice(device);
+            int click=data.getIntExtra("click",0);
+            if (click==1){
+                plMemory = data.getIntExtra("plMemory", 0);
+                if (mqService != null) {
+                    device=mqService.getDeviceByMac(deviceMac);
+                    device.setPlMemory(plMemory);
+                    mqService.sendBasic(topicName,device);
+                    countTimer.start();
+                    returnData=1;
+                }
             }
         } else if (requestCode == 9000) {
             int voice = data.getIntExtra("voice", 0);

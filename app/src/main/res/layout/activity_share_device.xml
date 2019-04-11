@@ -17,8 +17,8 @@
 
         <ImageView
             android:id="@+id/img_back"
-            android:layout_width="@dimen/dp_40"
-            android:layout_height="@dimen/dp_40"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
             android:scaleType="centerInside"
             android:src="@mipmap/img_back" />
 
@@ -40,7 +40,6 @@
             android:text="设备1"
             android:textColor="@color/white"
             android:textSize="@dimen/sp_16"
-            android:layout_marginTop="@dimen/dp_20"
             android:background="@color/base_back"
             android:paddingLeft="@dimen/dp_12"
             />

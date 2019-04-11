@@ -72,6 +72,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
         }
     }
     int open=1;//1为打开掉电记忆，0为关闭掉电记忆
+    int click=0;//1为点击过，0没有点击过开关按钮
     @OnClick({R.id.img_back,R.id.img_open})
     public void onClick(View v){
         switch (v.getId()){
@@ -79,6 +80,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
                 if (type==1){
                     Intent intent=new Intent();
                     intent.putExtra("plMemory",plMemory);
+                    intent.putExtra("click",click);
                     setResult(8000,intent);
                 }else if (type==2){
                     Intent intent=new Intent();
@@ -89,6 +91,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
                 break;
             case R.id.img_open:
                 if (type==1){
+                    click=1;
                     if (open==1){
                         open=0;
                         img_open.setImageResource(R.mipmap.img_close);
@@ -141,6 +144,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
         if (type==1){
             Intent intent=new Intent();
             intent.putExtra("plMemory",plMemory);
+            intent.putExtra("click",click);
             setResult(8000,intent);
             finish();
         }else if (type==2){
