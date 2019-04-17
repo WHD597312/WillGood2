@@ -389,6 +389,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                         }
                         Intent plIntent = new Intent(DeviceItemActivity.this, PowerLostMomoryActivity.class);
                         plIntent.putExtra("plMemory", plMemory);
+                        plIntent.putExtra("deviceMac",deviceMac);
                         plIntent.putExtra("type", 1);
                         startActivityForResult(plIntent, 8000);
                         break;
@@ -632,9 +633,8 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
             startService(intent);
         }
         if (returnData==0 &&!running && mqService != null) {
-            load = 1;
-            mqService.connectMqtt(deviceMac);
-            countTimer.start();
+            device=deviceDao.findDeviceByMac(deviceMac);
+            setMode(device);
         }
         returnData=0;
         running = true;
@@ -647,6 +647,8 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         super.onStop();
         running = false;
         load = 0;
+        returnData=0;
+
     }
 
     int returnData=0;
@@ -660,15 +662,10 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
             }
         } else if (resultCode == 8000) {
             int click=data.getIntExtra("click",0);
+            returnData=1;
             if (click==1){
                 plMemory = data.getIntExtra("plMemory", 0);
-                if (mqService != null) {
-                    device=mqService.getDeviceByMac(deviceMac);
-                    device.setPlMemory(plMemory);
-                    mqService.sendBasic(topicName,device);
-                    countTimer.start();
-                    returnData=1;
-                }
+                device.setPlMemory(plMemory);
             }
         } else if (requestCode == 9000) {
             int voice = data.getIntExtra("voice", 0);
@@ -912,9 +909,9 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     int deviceLineNum = line2.getDeviceLineNum();
                     if (line2.getClick2() == 1) {
                         if (deviceLineNum <= 8) {
-                            preLines[deviceLineNum - 1] = 0;
+                            preLines[deviceLineNum - 1] = 1;
                         } else {
-                            lastLines[(deviceLineNum - 1) - 8] = 0;
+                            lastLines[(deviceLineNum - 1) - 8] = 1;
                         }
                     }
                 }

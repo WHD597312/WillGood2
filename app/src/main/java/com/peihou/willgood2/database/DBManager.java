@@ -73,6 +73,19 @@ public class DBManager {
         }
         return daoSession;
     }
+    public DaoSession getDaoSession2(){
+        if (daoSession==null){
+            synchronized (DBManager.class){
+                if (daoSession==null){
+                    if (daoMaster==null){
+                        daoMaster=getDaoMaster();
+                    }
+                    daoSession=daoMaster.newSession();
+                }
+            }
+        }
+        return daoSession;
+    }
     /**
      * 获取刻度数据库
      * @return

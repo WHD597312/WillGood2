@@ -148,7 +148,7 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
         @Override
         public boolean handleMessage(Message msg) {
             if (msg.what==1){
-                new DeviceTrajectoryAsync(LocationActivity.this).execute(params);
+                new DeviceTrajectoryAsync(LocationActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
             }else if (msg.what==1001){
                 String s= (String) msg.obj;
                 String[] ss=s.split("&");
@@ -907,6 +907,8 @@ public class LocationActivity extends BaseActivity implements EasyPermissions.Pe
                     MapStatusUpdate mapStatusUpdate2 = MapStatusUpdateFactory.newLatLng(new LatLng(latitude, longtitude));
                     mMap.setMapStatus(mapStatusUpdate2);
                     stopLocation();
+
+                    new DeviceTrajectoryAsync(LocationActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
                 }
             }
         }

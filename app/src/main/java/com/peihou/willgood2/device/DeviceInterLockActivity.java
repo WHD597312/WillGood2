@@ -117,6 +117,12 @@ public class DeviceInterLockActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null){
+            list.clear();
+            List<InterLock> list2=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
+            list.addAll(list2);
+            adapter.notifyDataSetChanged();
+        }
         running=true;
     }
 

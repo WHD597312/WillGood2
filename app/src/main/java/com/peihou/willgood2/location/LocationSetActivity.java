@@ -1,9 +1,11 @@
 package com.peihou.willgood2.location;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.CountDownTimer;
 import android.os.IBinder;
@@ -71,7 +73,8 @@ public class LocationSetActivity extends BaseActivity {
         return R.layout.activity_location_set;
     }
     Map<String, Object> params = new HashMap<>();
-
+    MessageReceiver receiver;
+    public static boolean running=false;
     @Override
     public void initView(View view) {
         topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
@@ -80,7 +83,11 @@ public class LocationSetActivity extends BaseActivity {
         tv_jog_auto.setText("清除运动轨迹");
         params.put("deviceId",deviceId);
         Intent service=new Intent(this,MQService.class);
+
         bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
+        receiver=new MessageReceiver();
+        IntentFilter filter=new IntentFilter("LocationSetActivity");
+        registerReceiver(receiver,filter);
         setLocationFre();
     }
     private void setLocationFre(){
@@ -119,6 +126,19 @@ public class LocationSetActivity extends BaseActivity {
     boolean checked=false;
     int choices=10;
     boolean success=false;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        running=true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        running=false;
+    }
+
     @OnClick({R.id.img_back,R.id.rl_bottom,R.id.btn_submit,R.id.linear_1,R.id.linear_2,R.id.linear_3,R.id.linear_4,R.id.linear_5})
     public void onClick(View v){
         switch (v.getId()){
@@ -222,11 +242,30 @@ public class LocationSetActivity extends BaseActivity {
             popupWindow2.dismiss();
         }
 
+        if (receiver!=null){
+            unregisterReceiver(receiver);
+        }
         if (bind){
             unbindService(connection);
         }
     }
 
+    class MessageReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String macAddress=intent.getStringExtra("macAddress");
+            try {
+                if (deviceMac.equals(macAddress)){
+                    int location=intent.getIntExtra("location",0);
+                    choices=location;
+                    setLocationFre();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     private boolean bind=false;
     MQService mqService;
     ServiceConnection connection=new ServiceConnection() {

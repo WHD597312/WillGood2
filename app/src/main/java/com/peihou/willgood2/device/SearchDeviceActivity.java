@@ -81,6 +81,7 @@ public class SearchDeviceActivity extends BaseActivity {
         grid_list.setAdapter(adapter);
         for (Device device : devices) {
             String name = device.getDeviceName();
+            Log.i("SearchDeviceActivity","-->"+name);
             strings.add(name);
         }
         et_search.addTextChangedListener(new TextWatcher() {
@@ -356,14 +357,14 @@ public class SearchDeviceActivity extends BaseActivity {
             String share = device.getShare();
             int choice = device.getChoice();
             boolean online = device.getOnline();
-
+            viewHolder.tv_name.setText(name);
             if (online) {
                 viewHolder.img_lamp.setImageResource(R.mipmap.lamp_open);
-                viewHolder.tv_name.setText(name);
+                viewHolder.tv_imei.setText(devicePassword);
 
             } else {
                 viewHolder.img_lamp.setImageResource(R.mipmap.lamp_close);
-                viewHolder.tv_name.setText("离线");
+                viewHolder.tv_imei.setText("离线");
 
             }
             viewHolder.img_device_choice.setVisibility(View.GONE);
@@ -410,7 +411,7 @@ public class SearchDeviceActivity extends BaseActivity {
                     }
                 }
             });
-            viewHolder.tv_imei.setText(devicePassword);
+
             if (TextUtils.isEmpty(share)) {
                 viewHolder.rl_item2.setImageResource(R.mipmap.device_back);
             } else {

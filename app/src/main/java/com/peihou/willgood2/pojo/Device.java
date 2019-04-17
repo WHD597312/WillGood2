@@ -83,6 +83,7 @@ public class Device implements Serializable {
     private String lines;//提交给服务端的开关路线
 
 
+
     public String getLines() {
         return lines;
     }
@@ -118,7 +119,6 @@ public class Device implements Serializable {
         this.imei = imei;
         this.share = share;
     }
-
 
 
 

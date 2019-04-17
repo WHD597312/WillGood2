@@ -147,10 +147,11 @@ public class LinkedSetActivity extends BaseActivity {
         slide_bar.setTypeface(Typeface.DEFAULT_BOLD);
 //        slide_bar.setValue(40);
 //        slide_bar.setLineRight(40);
-        if (type==0){
-            slide_bar.setLineLeft(-128);
-            slide_bar.setLineRight(99);
-        }
+//        if (type==0){
+//            slide_bar.setLineLeft(-128);
+//            slide_bar.setLineRight(99);
+//        }
+//        slide_bar.setRange(0,1000);
         slide_bar.setIndicatorTextDecimalFormat("0");
         slide_bar.setTickMarkTextColor(getResources().getColor(R.color.white));
 

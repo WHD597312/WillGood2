@@ -157,6 +157,13 @@ public class DemoActivity extends AppCompatActivity {
                         break;
                     case 25:
                         sendAlerm(topicName1,0x11);
+                        sendAlerm(topicName1,0x22);
+                        sendAlerm(topicName1,0x33);
+                        sendAlerm(topicName1,0x44);
+                        sendAlerm(topicName1,0x55);
+                        sendAlerm(topicName1,0x66);
+                        sendAlerm(topicName1,0x77);
+                        sendAlerm(topicName1,0x88);
                         break;
                     case 26:
                         send485(topicName1);
@@ -221,7 +228,7 @@ public class DemoActivity extends AppCompatActivity {
         }
     }
 
-    String topicName1="qjjc/gateway/8655330313815/client_to_server";
+    String topicName1="qjjc/gateway/865373040896594/server_to_client";
     String topicName2="qjjc/gateway/866289037318450/client_to_server";
     int state=1;
     int count=0;
@@ -634,7 +641,7 @@ public class DemoActivity extends AppCompatActivity {
             bytes[0] = (byte) 0x90;
             bytes[1] = 0x66;
             bytes[2] =0;
-            bytes[3] = 0x11;
+            bytes[3] = 0x16;
             bytes[4]= (byte) 224;
             bytes[5]=0;
             bytes[6]=125;
@@ -644,13 +651,13 @@ public class DemoActivity extends AppCompatActivity {
             bytes[10]=0x11;
             bytes[11]=0;
             bytes[12]= (byte) 163;
-            bytes[13]=0x22;
+            bytes[13]=0x11;
             bytes[14]=0;
             bytes[15]=4;
             bytes[16]=0x11;
             bytes[17]=0;
             bytes[18]= (byte) 256;
-            bytes[19]=0x22;
+            bytes[19]=0x11;
             bytes[20]=1;
             int sum = 0;
             for (int i = 0; i < bytes.length; i++) {

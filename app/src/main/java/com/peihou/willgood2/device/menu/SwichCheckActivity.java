@@ -50,6 +50,7 @@ import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.BitmapUtils;
 import com.peihou.willgood2.utils.GlideCircleTransform;
 import com.peihou.willgood2.utils.ToastUtil;
+import com.peihou.willgood2.utils.http.BaseWeakAsyncTask;
 import com.peihou.willgood2.utils.http.HttpUtils;
 import com.yancy.gallerypick.config.GalleryConfig;
 import com.yancy.gallerypick.config.GalleryPick;
@@ -96,7 +97,7 @@ public class SwichCheckActivity extends BaseActivity {
     public void initParms(Bundle parms) {
         deviceId = parms.getLong("deviceId");
         deviceMac = parms.getString("deviceMac");
-        list = (List<SwtichState>) parms.getSerializable("swtichStates");
+//        list = (List<SwtichState>) parms.getSerializable("swtichStates");
         voice = parms.getInt("voice");
     }
 
@@ -113,16 +114,18 @@ public class SwichCheckActivity extends BaseActivity {
 
         tv_title.setText("开关量检测");
         list_linked.setLayoutManager(new LinearLayoutManager(this));
-        if (list.size() != 8) {
-            list.add(new SwtichState(0, "开关量1", "", 0));
-            list.add(new SwtichState(0, "开关量2", "", 0));
-            list.add(new SwtichState(0, "开关量3", "", 0));
-            list.add(new SwtichState(0, "开关量4", "", 0));
-            list.add(new SwtichState(0, "开关量5", "", 0));
-            list.add(new SwtichState(0, "开关量6", "", 0));
-            list.add(new SwtichState(0, "开关量7", "", 0));
-            list.add(new SwtichState(0, "开关量8", "", 0));
-        }
+        params.put("deviceId",deviceId);
+        new GetSwichAsync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
+//        if (list.size() != 8) {
+//            list.add(new SwtichState(0, "开关量1", "", 0));
+//            list.add(new SwtichState(0, "开关量2", "", 0));
+//            list.add(new SwtichState(0, "开关量3", "", 0));
+//            list.add(new SwtichState(0, "开关量4", "", 0));
+//            list.add(new SwtichState(0, "开关量5", "", 0));
+//            list.add(new SwtichState(0, "开关量6", "", 0));
+//            list.add(new SwtichState(0, "开关量7", "", 0));
+//            list.add(new SwtichState(0, "开关量8", "", 0));
+//        }
         adapter = new MyAdapter(this, list);
         list_linked.setAdapter(adapter);
 
@@ -147,6 +150,63 @@ public class SwichCheckActivity extends BaseActivity {
                 finish();
                 break;
         }
+    }
+    class GetSwichAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, SwichCheckActivity> {
+
+        public GetSwichAsync(SwichCheckActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected Integer doInBackground(SwichCheckActivity activity, Map<String, Object>... maps) {
+            int code = 0;
+            Map<String, Object> params = maps[0];
+            String url = HttpUtils.ipAddress + "device/getSwitchName";
+            try {
+                String result = HttpUtils.requestPost(url, params);
+                if (TextUtils.isEmpty(result)) {
+                    result = HttpUtils.requestPost(url, params);
+                }
+                Log.i("GetSwichAsync","-->"+result);
+                if (!TextUtils.isEmpty(result)) {
+                    Log.i("GetSwichAsync", "-->" + result);
+                    JSONObject jsonObject = new JSONObject(result);
+                    code = jsonObject.getInt("returnCode");
+                    if (code == 100) {
+                        list.clear();
+                        JSONObject returnData = jsonObject.getJSONObject("returnData");
+                        Gson gson = new Gson();
+                        SwitchCheck switchCheck = gson.fromJson(returnData.toString() + "", SwitchCheck.class);
+                        if (switchCheck != null) {
+                            Class<SwitchCheck> clazz = (Class<SwitchCheck>) Class.forName("com.peihou.willgood2.pojo.SwitchCheck");
+                            for (int i = 1; i <= 8; i++) {
+                                Method method = clazz.getDeclaredMethod("getSwitchName" + i);
+                                Method method2 = clazz.getDeclaredMethod("getSwitchPic" + i);
+                                String switchName = (String) method.invoke(switchCheck);
+                                String switchPic = (String) method2.invoke(switchCheck);
+                                list.add(new SwtichState(0, switchName, switchPic, 0));
+                            }
+                        }
+                    }
+                }
+                params.put("deviceMac", deviceMac);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return code;
+        }
+
+        @Override
+        protected void onPostExecute(SwichCheckActivity activity, Integer code) {
+           if (code==100){
+               adapter.notifyDataSetChanged();
+           }
+            if (mqService != null) {
+                mqService.getData(topicName, 0x55);
+                countTimer.start();
+            }
+        }
+
     }
 
     @Override
@@ -209,10 +269,12 @@ public class SwichCheckActivity extends BaseActivity {
                 Glide.with(context).load(pic).error(R.mipmap.img_sa).transform(new GlideCircleTransform(getApplicationContext())).into(holder.img_sa);
             }
             if (state2 == 2) {
-                holder.tv_state.setText("异常");
+//                holder.tv_state.setText("异常");
+                holder.tv_state.setText("断开");
                 holder.img_state.setImageResource(R.mipmap.img_bad);
             } else if (state2 == 1) {
-                holder.tv_state.setText("正常");
+//                holder.tv_state.setText("正常");
+                holder.tv_state.setText("闭合");
                 holder.img_state.setImageResource(R.mipmap.img_right);
             } else if (state2 == 0) {
                 holder.tv_state.setText("无效");
@@ -289,11 +351,7 @@ public class SwichCheckActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder = (MQService.LocalBinder) service;
             mqService = binder.getService();
-            if (mqService != null) {
-                mqService.getData(topicName, 0x55);
-                countTimer.start();
 
-            }
         }
 
         @Override

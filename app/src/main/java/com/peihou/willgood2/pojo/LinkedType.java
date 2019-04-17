@@ -16,7 +16,6 @@ public class LinkedType implements Serializable {
     private int type;
     private String name;
     private int mcuVersion;
-    @Transient
     private int state;//联动开关状态
 
     public LinkedType(String macAddress, int type, String name, int mcuVersion, int state) {
@@ -75,13 +74,15 @@ public class LinkedType implements Serializable {
         this.id = id;
     }
 
-    @Generated(hash = 372523449)
-    public LinkedType(Long id, String macAddress, int type, String name, int mcuVersion) {
+    @Generated(hash = 1274164140)
+    public LinkedType(Long id, String macAddress, int type, String name, int mcuVersion,
+            int state) {
         this.id = id;
         this.macAddress = macAddress;
         this.type = type;
         this.name = name;
         this.mcuVersion = mcuVersion;
+        this.state = state;
     }
 
     @Generated(hash = 1974331412)

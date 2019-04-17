@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.peihou.willgood2.R;
@@ -34,31 +35,20 @@ public class AlermDialog3 extends Dialog {
         unbinder=ButterKnife.bind(this);
     }
 
-    @OnClick({R.id.img_point,R.id.tv_point,R.id.img_point2,R.id.tv_point2,R.id.btn_cancel,R.id.btn_ensure})
+    @OnClick({R.id.rl_3,R.id.rl_4,R.id.btn_cancel,R.id.btn_ensure})
     public void onClick(View v){
         switch (v.getId()){
-            case R.id.tv_point:
-                if (open==1)
+            case R.id.rl_3:
+                if (open==0){
                     break;
-                open=1;
-                setSwitch();
-                break;
-            case R.id.img_point:
-                if (open==1)
-                    break;
-                open=1;
-                setSwitch();
-                break;
-            case R.id.img_point2:
-                if (open==0)
-                    break;
+                }
                 open=0;
                 setSwitch();
                 break;
-            case R.id.tv_point2:
-                if (open==0)
+            case R.id.rl_4:
+                if (open==1)
                     break;
-                open=0;
+                open=1;
                 setSwitch();
                 break;
             case R.id.btn_cancel:
@@ -102,7 +92,7 @@ public class AlermDialog3 extends Dialog {
         et_1.setSelection(et_1.getText().length());
         setSwitch();
     }
-    int open=1;
+    int open=0;
 
     public int getOpen() {
         return open;

@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -21,6 +22,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -92,6 +94,7 @@ public class DeviceListActivity extends BaseActivity {
 
     Map<String, Object> params = new HashMap<>();
     MyApplication application;
+    @BindView(R.id.swipeRefresh) SwipeRefreshLayout swipeRefresh;
 
 
     @Override
@@ -170,15 +173,15 @@ public class DeviceListActivity extends BaseActivity {
         }
         adapter = new MyAdapter(list, this);
         grid_list.setAdapter(adapter);
-        grid_list.setOnScrollListener(new AbsListView.OnScrollListener() {
+        swipeRefresh.setColorSchemeResources(R.color.colorAccent);
+        swipeRefresh.setSize(SwipeRefreshLayout.LARGE);
+        swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.color_gray2);
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
+            public void onRefresh() {
+                params.clear();
+                params.put("userId", userId);
+                new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
             }
         });
     }
@@ -293,6 +296,10 @@ public class DeviceListActivity extends BaseActivity {
 
     class LoadDeviceListAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, DeviceListActivity> {
 
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
 
         public LoadDeviceListAsync(DeviceListActivity activity) {
             super(activity);
@@ -352,8 +359,10 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(DeviceListActivity activity, Integer code) {
+            swipeRefresh.setRefreshing(false);
             switch (code) {
                 case 100:
+
                     Log.i("subscribeAll", "--------");
                     list.clear();
                     list.addAll(devices);
@@ -436,7 +445,21 @@ public class DeviceListActivity extends BaseActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
+            if (!list.isEmpty()) {
+                popupmenuWindow3();
+                int n = list.size();
+                int total = 0;
+                if (0 < n && n <= 2) {
+                    total = 2000;
+                } else if (n > 2 && n <= 6) {
+                    total = 4000;
+                } else if (n > 6) {
+                    total = 6000;
+                }
+                CountTimer2 countTimer = new CountTimer2(total, 1000);
+                countTimer.start();
+                load = 0;
+            }
         }
 
         @Override
@@ -464,22 +487,7 @@ public class DeviceListActivity extends BaseActivity {
         protected void onPostExecute(DeviceListActivity deviceListActivity, List<String> list1) {
             Log.i("onPostExecute", "-->" + list.size());
 
-            if (!list.isEmpty()) {
-                popupmenuWindow3();
-                int n = list.size();
-                int total = 0;
-                if (0 < n && n <= 2) {
-                    total = 2000;
-                } else if (n > 2 && n <= 6) {
-                    total = 4000;
-                } else if (n > 6) {
-                    total = 6000;
-                }
 
-                CountTimer2 countTimer = new CountTimer2(total, 1000);
-                countTimer.start();
-                load = 0;
-            }
         }
     }
 
@@ -597,10 +605,8 @@ public class DeviceListActivity extends BaseActivity {
             list.clear();
             list.addAll(devices);
             adapter.notifyDataSetChanged();
-            countTimer.start();
-            onResult=0;
-            new LoadDataAysnc2(this).execute();
         }
+        onResult=0;
         running = true;
     }
 
@@ -611,7 +617,7 @@ public class DeviceListActivity extends BaseActivity {
             return;
         }
         if (popupWindow2 != null && popupWindow2.isShowing()) {
-            popupWindow2.dismiss();
+            ToastUtil.showShort(this,"请稍后");
             return;
         }
         if (mqService != null) {
@@ -740,6 +746,10 @@ public class DeviceListActivity extends BaseActivity {
             }
         }
 
+        if (mqService!=null){
+            mqService.clearCountTimer();
+            mqService.clearAllData();
+        }
         application.removeActiviies(list);
         Intent intent = new Intent(DeviceListActivity.this, LoginActivity.class);
         intent.putExtra("exit", 1);
@@ -759,6 +769,10 @@ public class DeviceListActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_exit:
+                if (popupWindow2!=null && popupWindow2.isShowing()){
+                    ToastUtil.showShort(this,"请稍后...");
+                    break;
+                }
                 exitLoginDialog();
                 break;
             case R.id.img_share:
@@ -1178,30 +1192,34 @@ public class DeviceListActivity extends BaseActivity {
     private PopupWindow popupWindow2;
 
     public void popupmenuWindow3() {
-        if (popupWindow2 != null && popupWindow2.isShowing()) {
-            return;
-        }
-        View view = View.inflate(this, R.layout.progress, null);
-        TextView tv_load = view.findViewById(R.id.tv_load);
-        tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2 == null) {
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        }
-        //添加弹出、弹入的动画
-        popupWindow2.setAnimationStyle(R.style.Popupwindow);
-        popupWindow2.setFocusable(false);
-        popupWindow2.setOutsideTouchable(false);
-        backgroundAlpha(0.6f);
-        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                backgroundAlpha(1.0f);
+        try {
+            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                return;
             }
-        });
+            View view = View.inflate(this, R.layout.progress, null);
+            TextView tv_load = view.findViewById(R.id.tv_load);
+            tv_load.setTextColor(getResources().getColor(R.color.white));
+            if (popupWindow2 == null) {
+                popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+            }
+            //添加弹出、弹入的动画
+            popupWindow2.setAnimationStyle(R.style.Popupwindow);
+            popupWindow2.setFocusable(false);
+            popupWindow2.setOutsideTouchable(false);
+            backgroundAlpha(0.6f);
+            popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    backgroundAlpha(1.0f);
+                }
+            });
 //        ColorDrawable dw = new ColorDrawable(0x30000000);
 //        popupWindow.setBackgroundDrawable(dw);
 //        popupWindow2.showAsDropDown(et_wifi, 0, -20);
-        popupWindow2.showAtLocation(grid_list, Gravity.CENTER, 0, 0);
+            popupWindow2.showAtLocation(grid_list, Gravity.CENTER, 0, 0);
+        } catch (Resources.NotFoundException e) {
+            e.printStackTrace();
+        }
         //添加按键事件监听
     }
 

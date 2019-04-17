@@ -11,7 +11,7 @@ MobSDK {
     SMSSDK {}
 }
 greendao {
-    schemaVersion 19
+    schemaVersion 23
     daoPackage 'com.peihou.willgood2.database.dao'
     targetGenDir 'src/main/java'
 }
@@ -27,7 +27,7 @@ android {
     }
     sourceSets {
         main {
-            jniLibs.srcDir 'libs'
+            jniLibs.srcDirs = ["libs"]
         }
     }
     compileSdkVersion 27
@@ -36,7 +36,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 5
-        versionName "5.8"
+        versionName "5.9.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         renderscriptSupportModeEnabled true

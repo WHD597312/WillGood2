@@ -137,27 +137,27 @@ public class AlermDialog2 extends Dialog {
             et_1.setText("湿度报警中,请注意");
             tv_2.setText("请输入报警数值,0~100%");
             et_2.setText(value);
-            et_2.setInputType(InputType.TYPE_CLASS_NUMBER);
+            et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
         }else if (mode==2){
             tv_title.setText("电压报警");
             et_1.setText("电压报警中,请注意");
             et_1.setHint("电压报警中,请注意");
-            tv_2.setText("请输入报警数值,0~50V");
-            et_2.setInputType(InputType.TYPE_CLASS_NUMBER);
+            tv_2.setText("请输入报警数值,0~1000V");
+            et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
             et_2.setText(value);
         } else if (mode==3){
             tv_title.setText("电流报警");
             et_1.setText("电流报警中,请注意");
             et_1.setHint("电流报警中,请注意");
-            tv_2.setText("请输入报警数值,0~50A");
+            tv_2.setText("请输入报警数值,0~1000A");
             et_2.setText(value);
-            et_2.setInputType(InputType.TYPE_CLASS_NUMBER);
+            et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
         }else if (mode==4){
             tv_title.setText("功率报警");
             et_1.setText("功率报警中,请注意");
             et_1.setHint("功率报警中,请注意");
             tv_2.setText("请输入报警数值,>=0W");
-            et_2.setInputType(InputType.TYPE_CLASS_NUMBER);
+            et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
             et_2.setText(value);
         }
         setSwitch();

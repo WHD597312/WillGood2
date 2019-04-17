@@ -43,6 +43,7 @@ import com.peihou.willgood2.pojo.Table;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.ToastUtil;
 import com.peihou.willgood2.utils.Utils;
+import com.peihou.willgood2.utils.http.BaseWeakAsyncTask;
 import com.peihou.willgood2.utils.http.HttpUtils;
 
 
@@ -93,7 +94,10 @@ public class MoniCheckActivity extends BaseActivity {
     public void initView(View view) {
         deviceAnalogDao=new DeviceAnalogDaoImpl(getApplicationContext());
         topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
-        tables=deviceAnalogDao.findDeviceAnalogs(deviceId);
+//        tables=deviceAnalogDao.findDeviceAnalogs(deviceId);
+        params.put("deviceId", deviceId);
+        params.put("deviceMac", deviceMac);
+        new AnalogCheckAcync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
         adapter=new MyAdapter(tables,this);
         table.setAdapter(adapter);
 
@@ -108,6 +112,12 @@ public class MoniCheckActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null){
+            List<Table> tables2=deviceAnalogDao.findDeviceAnalogs(deviceMac);
+            tables.clear();
+            tables.addAll(tables2);
+            adapter.notifyDataSetChanged();
+        }
         running=true;
     }
 
@@ -125,6 +135,98 @@ public class MoniCheckActivity extends BaseActivity {
                 break;
         }
     }
+    class AnalogCheckAcync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, MoniCheckActivity> {
+
+        public AnalogCheckAcync(MoniCheckActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected Integer doInBackground(MoniCheckActivity activity, Map<String, Object>... maps) {
+            int code = 0;
+            try {
+                Map<String, Object> params = maps[0];
+                String url = HttpUtils.ipAddress + "device/getAnalogName";
+                String result = HttpUtils.requestPost(url, params);
+                long deviceId = (long) params.get("deviceId");
+                String deviceMac = (String) params.get("deviceMac");
+                params.remove("deviceMac");
+                if (TextUtils.isEmpty(result))
+                    result = HttpUtils.requestPost(url, params);
+
+                if (!TextUtils.isEmpty(result)) {
+                    Log.i("getAnalogName", "->" + result);
+                    JSONObject jsonObject = new JSONObject(result);
+                    code = jsonObject.getInt("returnCode");
+                    if (code == 100) {
+                        tables.clear();
+                        JSONObject returnData = jsonObject.getJSONObject("returnData");
+                        String s = returnData.toString();
+                        Gson gson = new Gson();
+                        AnalogName analogName = gson.fromJson(s, AnalogName.class);
+                        Class<AnalogName> clazz = (Class<AnalogName>) Class.forName("com.peihou.willgood2.pojo.AnalogName");
+
+                        for (int i = 1; i <= 8; i++) {
+                            Method method = clazz.getDeclaredMethod("getAnalogName" + i);
+                            String name = (String) method.invoke(analogName);
+                            if (i <= 4) {
+                                Table table = deviceAnalogDao.findDeviceAnalog(deviceId, i);
+                                if (table == null) {
+                                    table = new Table(i, name, 0, 1, 0, "MA", deviceMac, deviceId);
+                                    deviceAnalogDao.insert(table);
+                                } else {
+                                    table.setName(name);
+                                    deviceAnalogDao.update(table);
+                                }
+                                tables.add(table);
+                            } else if (i > 4) {
+                                Table table = deviceAnalogDao.findDeviceAnalog(deviceId, i);
+                                if (table == null) {
+                                    table = new Table(i, name, 0, 1, 0, "V", deviceMac, deviceId);
+                                    deviceAnalogDao.insert(table);
+                                } else {
+                                    table.setName(name);
+                                    deviceAnalogDao.update(table);
+                                }
+                                tables.add(table);
+                            }
+                        }
+                    }
+                } else {
+                    List<Table> tables = deviceAnalogDao.findDeviceAnalogs(deviceId);
+                    if (tables.size() != 8) {
+                        deviceAnalogDao.deleteDeviceTables(deviceId);
+                        tables.add(new Table(1, "电流1", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(2, "电流2", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(3, "电流3", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(4, "电流4", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(5, "电压1", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(6, "电压2", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(7, "电压3", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(8, "电流4", 0, 1, 0, "V", deviceMac, deviceId));
+                        deviceAnalogDao.inserts(tables);
+                        MoniCheckActivity.this.tables.addAll(tables);
+                    }
+                    code = 100;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return code;
+        }
+
+        @Override
+        protected void onPostExecute(MoniCheckActivity activity, Integer integer) {
+            if (integer==100){
+                adapter.notifyDataSetChanged();
+                if (mqService!=null){
+                    mqService.getData(topicName,0x88);
+                    countTimer.start();
+                }
+            }
+        }
+    }
+
     ChangeDialog dialog;
 
     /**
@@ -362,10 +464,7 @@ public class MoniCheckActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder= (MQService.LocalBinder) service;
             mqService=binder.getService();
-            if (mqService!=null){
-                mqService.getData(topicName,0x88);
-                countTimer.start();
-            }
+
         }
 
         @Override

@@ -237,9 +237,24 @@ public class LinkItemActivity extends BaseActivity {
         }
         return moniLinks;
     }
+    private int result=0;
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null && returnData==0){
+            if (type == 5) {
+                List<MoniLink> moniLinks2 = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
+                moniLinks2.clear();
+                moniLinks.addAll(moniLinks2);
+                moniLinkAdapter.notifyDataSetChanged();
+            } else {
+
+                List<Linked> list2 = deviceLinkDao.findLinkeds(deviceMac, type);
+                list.clear();
+                list.addAll(list2);
+                adapter.notifyDataSetChanged();
+            }
+        }
         running = true;
     }
 
@@ -247,6 +262,7 @@ public class LinkItemActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         running = false;
+        returnData=0;
     }
 
     MQService mqService;
@@ -307,7 +323,7 @@ public class LinkItemActivity extends BaseActivity {
                             if (operate == 1) {
                                 mqService.starSpeech(deviceMac,"删除成功");
                             } else {
-                                mqService.starSpeech(deviceMac,"控制成功");
+                                mqService.starSpeech(deviceMac,"设置成功");
                             }
                             returnData=0;
                         }
@@ -599,8 +615,8 @@ public class LinkItemActivity extends BaseActivity {
                         moniLink.setState(1);
                     }
                     if (mqService != null) {
-                        returnData=1;
                         boolean success = mqService.sendMoniLink(topicName, moniLink,0x02);
+                        returnData=1;
                         countTimer.start();
                         if (success) {
                             list.set(position, moniLink);

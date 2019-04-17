@@ -47,7 +47,7 @@ public class Line2 {
         this.open = open;
     }
 
- 
+
     @Generated(hash = 1309823932)
     public Line2() {
     }

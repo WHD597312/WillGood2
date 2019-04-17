@@ -1,17 +1,25 @@
 package com.peihou.willgood2.device.menu;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.BaseActivity;
+import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.service.MQService;
 
 import butterknife.BindView;
@@ -48,10 +56,31 @@ public class PowerLostMomoryActivity extends BaseActivity {
         return R.layout.activity_power_lost_momory;
     }
 
+    public static boolean running=false;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        running=true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        running=false;
+    }
+
+    private String topicName;
     @Override
     public void initView(View view) {
+
+        topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
         Intent service=new Intent(this,MQService.class);
         bind=bindService(service,connection,Context.BIND_AUTO_CREATE);
+
+        receiver=new MessageEeceiver();
+        IntentFilter filter=new IntentFilter("PowerLostMomoryActivity");
+        registerReceiver(receiver,filter);
         if (type==1){
             open=plMemory;
             tv_name.setText("掉电记忆");
@@ -73,6 +102,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
     }
     int open=1;//1为打开掉电记忆，0为关闭掉电记忆
     int click=0;//1为点击过，0没有点击过开关按钮
+    int onClick=0;
     @OnClick({R.id.img_back,R.id.img_open})
     public void onClick(View v){
         switch (v.getId()){
@@ -101,6 +131,14 @@ public class PowerLostMomoryActivity extends BaseActivity {
                         img_open.setImageResource(R.mipmap.img_open);
                         plMemory=1;
                     }
+                    Device device=mqService.getDeviceByMac(deviceMac);
+                    if (device!=null){
+                        device.setPlMemory(plMemory);
+                        mqService.sendBasic(topicName,device);
+                        onClick=1;
+                        countTimer.start();
+                    }
+
                 }else {
                     if (open==1){
                         open=0;
@@ -117,11 +155,76 @@ public class PowerLostMomoryActivity extends BaseActivity {
         }
     }
 
+    CountTimer countTimer = new CountTimer(2000, 1000);
+
+    class CountTimer extends CountDownTimer {
+
+        /**
+         * @param millisInFuture    The number of millis in the future from the call
+         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+         *                          is called.
+         * @param countDownInterval The interval along the way to receive
+         *                          {@link #onTick(long)} callbacks.
+         */
+        public CountTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            popupmenuWindow3();
+        }
+
+        @Override
+        public void onFinish() {
+            if (popupWindow2 != null && popupWindow2.isShowing()) {
+                popupWindow2.dismiss();
+            }
+        }
+    }
+
+    private PopupWindow popupWindow2;
+
+    public void popupmenuWindow3() {
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
+            return;
+        }
+        View view = View.inflate(this, R.layout.progress, null);
+        TextView tv_load = view.findViewById(R.id.tv_load);
+        tv_load.setTextColor(getResources().getColor(R.color.white));
+        if (popupWindow2==null)
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        //添加弹出、弹入的动画
+        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+        popupWindow2.setFocusable(false);
+        popupWindow2.setOutsideTouchable(false);
+        backgroundAlpha(0.6f);
+        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                backgroundAlpha(1.0f);
+            }
+        });
+//        ColorDrawable dw = new ColorDrawable(0x30000000);
+//        popupWindow.setBackgroundDrawable(dw);
+//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+        popupWindow2.showAtLocation(tv_name, Gravity.CENTER, 0, 0);
+        //添加按键事件监听
+    }
+    //设置蒙版
+    private void backgroundAlpha(float f) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = f;
+        getWindow().setAttributes(lp);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (bind){
             unbindService(connection);
+        }
+        if (receiver!=null){
+            unregisterReceiver(receiver);
         }
     }
 
@@ -139,6 +242,30 @@ public class PowerLostMomoryActivity extends BaseActivity {
 
         }
     };
+    MessageEeceiver receiver;
+    class MessageEeceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String macAddress=intent.getStringExtra("macAddress");
+            if (macAddress.equals(deviceMac)){
+                plMemory=intent.getIntExtra("plMemory",0);
+                if (type==1){
+                    if (onClick==1){
+                        onClick=0;
+                        mqService.starSpeech(deviceMac,"设置成功");
+                    }
+                    if (plMemory==0){
+                        open=0;
+                        img_open.setImageResource(R.mipmap.img_close);
+                    }else if (plMemory==1){
+                        open=1;
+                        img_open.setImageResource(R.mipmap.img_open);
+                    }
+                }
+            }
+        }
+    }
     @Override
     public void onBackPressed() {
         if (type==1){

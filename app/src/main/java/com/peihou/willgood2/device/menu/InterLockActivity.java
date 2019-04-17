@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -151,7 +152,9 @@ public class InterLockActivity extends BaseActivity {
 
         if (mqService!=null){
             mqService.updateDeviceInterLock(interLocks);
+            mqService.updateLines(deviceMac);
         }
+
     }
 
     @Override
@@ -228,6 +231,16 @@ public class InterLockActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null){
+            lockLineList.clear();
+            List<Line2> lockLineList2 = deviceLineDao.findDeviceOnlineLines(deviceMac);
+            lockLineList.addAll(lockLineList2);
+            interLocks.clear();
+            List<InterLock> interLocks2=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
+            interLocks.addAll(interLocks2);
+            lockLineAdapter.notifyDataSetChanged();
+            lockAdapter.notifyDataSetChanged();
+        }
         running = true;
     }
 
@@ -256,11 +269,16 @@ public class InterLockActivity extends BaseActivity {
                         boolean online2=intent.getBooleanExtra("online",false);
                         online=online2;
                         if (click==1){
+
                             if (interLock==2)
                                 interLock = 0;
                         }
+
                         if (click==1){
-//                        mqService.starSpeech("控制成功");
+                            mqService.starSpeech(deviceMac,"设置成功");
+                            click=0;
+                        }else if (click==2){
+                            mqService.starSpeech(deviceMac,"解除成功");
                             click=0;
                         }
                         List<InterLock> interLocks2=mqService.getDeviceVisityInterLock(deviceMac);
@@ -455,7 +473,7 @@ public class InterLockActivity extends BaseActivity {
                         }
                         if (mqService != null) {
                             boolean success = mqService.sendInterLine(topicName, mcuVersion, interLines);
-                            click=1;
+                            click=2;
                             countTimer.start();
                         }
                     }

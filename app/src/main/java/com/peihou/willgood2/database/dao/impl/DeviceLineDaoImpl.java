@@ -19,7 +19,9 @@ import java.util.Map;
 
 public class DeviceLineDaoImpl {
     private Line2Dao lineDao;
+    private Context context;
     public DeviceLineDaoImpl(Context context) {
+        this.context=context;
         DBManager dbManager=DBManager.getInstance(context);//获取数据库管理者单例对象
         DaoSession session=dbManager.getDaoSession();//获取数据库会话对象
         lineDao=session.getLine2Dao();
@@ -81,6 +83,7 @@ public class DeviceLineDaoImpl {
      * @return
      */
     public Line2 findDeviceLine(String deviceMac,int deviceLineNum){
+//        Line2Dao lineDao=DBManager.getInstance(context).getDaoSession2().getLine2Dao();
         WhereCondition whereCondition=lineDao.queryBuilder().and(Line2Dao.Properties.DeviceMac.eq(deviceMac),Line2Dao.Properties.DeviceLineNum.eq(deviceLineNum));
         return lineDao.queryBuilder().where(whereCondition).unique();
     }

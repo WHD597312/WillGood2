@@ -27,6 +27,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.custom.AlermDialog;
@@ -34,6 +35,7 @@ import com.peihou.willgood2.custom.AlermDialog2;
 import com.peihou.willgood2.custom.AlermDialog3;
 import com.peihou.willgood2.database.dao.impl.DeviceAlermDaoImpl;
 import com.peihou.willgood2.pojo.Alerm;
+import com.peihou.willgood2.pojo.AlermName;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.TenTwoUtil;
 import com.peihou.willgood2.utils.ToastUtil;
@@ -43,6 +45,7 @@ import com.peihou.willgood2.utils.http.HttpUtils;
 
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +64,6 @@ import butterknife.OnClick;
  */
 public class AlermActivity extends BaseActivity {
 
-
     @BindView(R.id.list_alerm)
     RecyclerView list_alerm;//报警视图列表
     private List<Alerm> list = new ArrayList<>();
@@ -75,6 +77,7 @@ public class AlermActivity extends BaseActivity {
     public static boolean running = false;
     boolean online;
 
+    private Map<String,Object> params=new HashMap<>();
     @Override
     public void initParms(Bundle parms) {
         deviceId = parms.getLong("deviceId");
@@ -90,7 +93,6 @@ public class AlermActivity extends BaseActivity {
         return R.layout.activity_alerm;
     }
 
-    Map<String, Object> params = new HashMap<>();
 
     @Override
     public void initView(View view) {
@@ -99,13 +101,17 @@ public class AlermActivity extends BaseActivity {
         userId = preferences.getInt("userId", 0);
         deviceAlermDao = new DeviceAlermDaoImpl(getApplicationContext());
         list_alerm.setLayoutManager(new LinearLayoutManager(this));
-        list = deviceAlermDao.findDeviceAlerms(deviceId);
+//        list = deviceAlermDao.findDeviceAlerms(deviceId);
 
-
+        params.put("deviceId",deviceId);
+        params.put("deviceMac",deviceMac);
+        new AlermAsync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
         topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
         Log.i("topicName","-->"+topicName);
+
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         adapter = new MyAdapter(this, list);
+
         list_alerm.setAdapter(adapter);
         Intent service = new Intent(this, MQService.class);
         bind = bindService(service, connection, Context.BIND_AUTO_CREATE);
@@ -119,13 +125,21 @@ public class AlermActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null){
+            List<Alerm> alerms=deviceAlermDao.findDeviceAlerms(deviceMac);
+            list.clear();
+            list.addAll(alerms);
+            adapter.notifyDataSetChanged();
+        }
         running = true;
+        click=0;
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         running = false;
+        click=0;
     }
 
     class UpdateAlermAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, AlermActivity> {
@@ -162,9 +176,12 @@ public class AlermActivity extends BaseActivity {
                     if (code == 100) {
                         if (params.containsKey("alarmName")) {
                             String alarmName = (String) params.get("alarmName");
-                            Alerm alerm = list.get(updatePosition - 4);
+                            Alerm alerm = list.get(updatePosition - 3);
                             alerm.setContent(alarmName);
-                            list.set(updatePosition - 4, alerm);
+                            if (mqService != null) {
+                                deviceAlermDao.update(alerm);
+                            }
+                            list.set(updatePosition - 3, alerm);
                         }
                         once=-1;
                         if (params.containsKey("deviceAlarmBroadcast")) {
@@ -350,7 +367,7 @@ public class AlermActivity extends BaseActivity {
 
     int userId;
     SharedPreferences preferences;
-    int notify = 0;//0为不提醒语音播报,1为提醒语音播报
+    int notify = 1;//0为不提醒语音播报,1为提醒语音播报
 
     @OnClick({R.id.img_back, R.id.img_log})
     public void onClick(View view) {
@@ -421,7 +438,8 @@ public class AlermActivity extends BaseActivity {
                         boolean online2 = intent.getBooleanExtra("online", false);
                         online = online2;
                         if (click == 1) {
-                            mqService.starSpeech(macAddress,"控制成功");
+                            mqService.starSpeech(macAddress,"设置成功");
+                            click=0;
                         }
                         for (int i = 0; i < alerms.size(); i++) {
                             list.set(i, alerms.get(i));
@@ -441,9 +459,9 @@ public class AlermActivity extends BaseActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder = (MQService.LocalBinder) service;
+
             mqService = binder.getService();
-            mqService.getData(topicName, 0x66);
-            countTimer.start();
+
         }
 
         @Override
@@ -451,6 +469,109 @@ public class AlermActivity extends BaseActivity {
 
         }
     };
+    class AlermAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, AlermActivity> {
+
+        public AlermAsync(AlermActivity activity) {
+            super(activity);
+        }
+
+        @Override
+        protected Integer doInBackground(AlermActivity activity, Map<String, Object>... maps) {
+            int code = 0;
+            Map<String, Object> params = maps[0];
+            try {
+                String deviceMac = (String) params.get("deviceMac");
+                long deviceId = (long) params.get("deviceId");
+                params.remove("deviceMac");
+                String url = HttpUtils.ipAddress + "device/getAlarmName";
+                String result = HttpUtils.requestPost(url, params);
+                Log.i("AlermAsync","-->"+result);
+                if (!TextUtils.isEmpty(result)) {
+                    Log.i("getAlarmName", "->" + result);
+                    JSONObject jsonObject = new JSONObject(result);
+                    code = jsonObject.getInt("returnCode");
+                    if (code == 100) {
+                        list.clear();
+                        String returnData = jsonObject.getJSONObject("returnData").toString();
+                        Gson gson = new Gson();
+                        AlermName alermName = gson.fromJson(returnData, AlermName.class);
+                        int deviceAlarmBroadcast = alermName.getDeviceAlarmBroadcast();
+                        int deviceAlarmFlag = alermName.getDeviceAlarmFlag();
+                        Class<AlermName> clazz = (Class<AlermName>) Class.forName("com.peihou.willgood2.pojo.AlermName");
+                        for (int i = 1; i <= 8; i++) {
+                            Method method = clazz.getDeclaredMethod("getDeviceAlarmName" + i);
+                            String content = (String) method.invoke(alermName);
+                            String name = "";
+                            if (i == 1) {
+                                name = "来电报警";
+                            } else if (i == 2) {
+                                name = "断电报警";
+                            } else if (i == 3) {
+                                name = "温度报警";
+                            } else if (i == 4) {
+                                name = "湿度报警";
+                            } else if (i == 5) {
+                                name = "电压报警";
+                            } else if (i == 6) {
+                                name = "电流报警";
+                            } else if (i == 7) {
+                                name = "功率报警";
+                            } else if (i == 8) {
+                                name = "开关量报警";
+                            }
+                            Alerm alerm = deviceAlermDao.findDeviceAlerm(deviceId, i - 1);
+                            if (alerm == null) {
+                                alerm = new Alerm(name, i - 1, content, false, deviceId, deviceMac, 0);
+                                alerm.setDeviceAlarmBroadcast(deviceAlarmBroadcast);
+                                alerm.setDeviceAlarmFlag(deviceAlarmFlag);
+                                list.add(alerm);
+                                deviceAlermDao.insert(alerm);
+                            } else {
+                                alerm.setContent(content);
+                                alerm.setDeviceAlarmBroadcast(deviceAlarmBroadcast);
+                                alerm.setDeviceAlarmFlag(deviceAlarmFlag);
+                                alerm.setState(0);
+                                list.add(alerm);
+                                deviceAlermDao.update(alerm);
+                            }
+                        }
+                    } else {
+                        List<Alerm> list2 = deviceAlermDao.findDeviceAlerms(deviceId);
+                        if (list2.size() != 8) {
+                            deviceAlermDao.deleteDeviceAlerms(deviceId);
+                            list2.add(new Alerm("来电报警", 0, "设备已来电!", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("断电报警", 1, "设备已断电,请及时处理", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("温度报警", 2, "温度报警,请注意", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("湿度报警", 3, "湿度报警,请注意", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("电压报警", 4, "电压报警,请注意", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("电流报警", 5, "电流报警,请注意", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("功率报警", 6, "功率报警,请注意", false, deviceId, deviceMac, 0));
+                            list2.add(new Alerm("开关量报警", 7, "开关量报警,请注意", false, deviceId, deviceMac, 50));
+                            deviceAlermDao.insertDeviceAlerms(list2);
+                            list.addAll(list2);
+                            code=100;
+
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return code;
+        }
+
+        @Override
+        protected void onPostExecute(AlermActivity activity, Integer code) {
+            if (code==100){
+                Alerm alerm=list.get(0);
+                once=alerm.getDeviceAlarmBroadcast();
+                notify=alerm.getDeviceAlarmFlag();
+                adapter.notifyDataSetChanged();
+                mqService.getData(topicName, 0x66);
+                countTimer.start();
+            }
+        }
+    }
 
 
     int click = 0;
@@ -478,16 +599,10 @@ public class AlermActivity extends BaseActivity {
             if (viewType == 0) {
                 View view = View.inflate(context, R.layout.item_alerm0, null);
                 return new ViewHolder0(view);
-            } else if (viewType == 1) {
+            }else if (viewType == 1) {
                 View view = View.inflate(context, R.layout.item_alerm1, null);
                 return new ViewHolder1(view);
             } else if (viewType == 2) {
-                View view = View.inflate(context, R.layout.item_alerm2, null);
-                return new ViewHolder2(view);
-            } else if (viewType == 3) {
-                View view = View.inflate(context, R.layout.item_alerm3, null);
-                return new ViewHolder3(view);
-            } else if (viewType == 4) {
                 View view = View.inflate(context, R.layout.item_alerm, null);
                 return new ViewHolder(view);
             }
@@ -496,7 +611,10 @@ public class AlermActivity extends BaseActivity {
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder2, final int position) {
-            if (position == 1) {
+            if (position==0){
+                TextView tv_way=holder2.itemView.findViewById(R.id.tv_way);
+                tv_way.setText("报警方式");
+            } else if (position == 1) {
                 ViewHolder1 holder = (ViewHolder1) holder2;
 //                int once=2;//1时，为三次，2时为循环，0时是0次
                 if (once == 0) {
@@ -577,39 +695,46 @@ public class AlermActivity extends BaseActivity {
                         }
                     }
                 });
-            } else if (position == 2) {
-                ViewHolder2 holder = (ViewHolder2) holder2;
-                holder.img_switch.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (notify == 0) {
-                            notify = 1;
-                        } else if (notify == 1) {
-                            notify = 0;
-                        }
-                        params.clear();
-                        params.put("deviceId", deviceId);
-                        params.put("deviceAlarmFlag", notify);
-                        params.put("position", position);
-                        try {
-                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (TimeoutException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                if (notify == 1) {
-                    holder.img_switch.setImageResource(R.mipmap.img_open);
-                } else {
-                    holder.img_switch.setImageResource(R.mipmap.img_close);
-                }
+            }else if (position==2){
+                TextView tv_way=holder2.itemView.findViewById(R.id.tv_way);
+                tv_way.setText("报警类型");
+            }
+//            else if (position == 2) {
+//                ViewHolder2 holder = (ViewHolder2) holder2;
+//                holder.itemView.setVisibility(View.GONE);
+//                holder.img_switch.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        if (notify == 0) {
+//                            notify = 1;
+//                        } else if (notify == 1) {
+//                            notify = 0;
+//                        }
+//                        params.clear();
+//                        params.put("deviceId", deviceId);
+//                        params.put("deviceAlarmFlag", notify);
+//                        params.put("position", position);
+//                        try {
+//                            new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        } catch (ExecutionException e) {
+//                            e.printStackTrace();
+//                        } catch (TimeoutException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                });
+//                if (notify == 1) {
+//                    holder.img_switch.setImageResource(R.mipmap.img_open);
+//                } else {
+//                    holder.img_switch.setImageResource(R.mipmap.img_close);
+//                }
+//
+//            }
+            else if (position > 2) {
 
-            } else if (position > 3) {
-                final Alerm alerm = list.get(position-4);
+                final Alerm alerm = list.get(position-3);
                 String name = alerm.getName();
                 String content = alerm.getContent();
                 int state = alerm.getState();
@@ -637,9 +762,9 @@ public class AlermActivity extends BaseActivity {
                         int alermState=data[0];
                         int states[]=TenTwoUtil.changeToTwo(alermState);
                         if (alerm.getState() == 1) {
-                            states[position-4]=0;
+                            states[position-3]=0;
                         } else {
-                            states[position - 4] = 1;
+                            states[position - 3] = 1;
                         }
                         data[0] = TenTwoUtil.changeToTen2(states);
                         if (mqService != null) {
@@ -658,11 +783,11 @@ public class AlermActivity extends BaseActivity {
                     @Override
                     public void onClick(View v) {
                         updatePosition = position;
-                        if (position < 6) {
-                            setAlermDialog(position - 4);
-                        } else if (position >= 6 && position < 11) {
-                            setAlermDialog2(position - 6);
-                        } else if (position == 11) {
+                        if (position < 5) {
+                            setAlermDialog(position - 3);
+                        } else if (position >= 5 && position < 10) {
+                            setAlermDialog2(position - 5);
+                        } else if (position == 10) {
                             setAlermDialog3();
                         }
                     }
@@ -672,15 +797,17 @@ public class AlermActivity extends BaseActivity {
 
         @Override
         public int getItemCount() {
-            return list.size() + 4;
+            return list.size() + 3;
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position < 4) {
-                return position;
-            } else {
-                return 4;
+            if (position==0 || position==2){
+                return 0;
+            }else if (position==1){
+                return 1;
+            }else {
+                return 2;
             }
         }
     }
@@ -713,7 +840,7 @@ public class AlermActivity extends BaseActivity {
                     try {
                         params.clear();
                         params.put("deviceId", deviceId);
-                        params.put("deviceAlarmNum", updatePosition - 3);
+                        params.put("deviceAlarmNum", updatePosition - 2);
                         params.put("alarmName", content);
                         new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                     } catch (Exception e) {
@@ -792,7 +919,7 @@ public class AlermActivity extends BaseActivity {
                             s += 50;
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            int alermValue = (int) (s) * 10;
+                            int alermValue = (int)( s * 10);
                             int data []=mqService.getAlermData();
                             data[1] = alermValue / 256;
                             data[2] = alermValue % 256;
@@ -812,7 +939,7 @@ public class AlermActivity extends BaseActivity {
                         if (s >= 0 && s <= 100) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            int alermValue = (int) (s) * 10;
+                            int alermValue = (int) (s * 10);
                             int data []=mqService.getAlermData();
                             data[4] = alermValue / 256;
                             data[5] = alermValue % 256;
@@ -829,10 +956,10 @@ public class AlermActivity extends BaseActivity {
                             return;
                         }
                     } else if (type == 2) {
-                        if (s >= 0 && s <= 50) {
+                        if (s >= 0 && s <= 1000) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            int alermValue = (int) (s);
+                            int alermValue = (int) (s*10);
                             int data []=mqService.getAlermData();
                             data[7] = alermValue / 256;
                             data[8] = alermValue % 256;
@@ -849,10 +976,10 @@ public class AlermActivity extends BaseActivity {
                             return;
                         }
                     } else if (type == 3) {
-                        if (s >= 0 && s <= 50) {
+                        if (s >= 0 && s <= 1000) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            int alermValue = (int) (s) * 10;
+                            int alermValue = (int) (s * 10);
                             int data []=mqService.getAlermData();
                             data[10] = alermValue / 256;
                             data[11] = alermValue % 256;
@@ -872,7 +999,7 @@ public class AlermActivity extends BaseActivity {
                         if (s >= 0) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            int alermValue = (int) (s) * 10;
+                            int alermValue = (int) (s * 10);
                             int data []=mqService.getAlermData();
                             data[13] = alermValue / 256;
                             data[14] = alermValue % 256;
@@ -891,7 +1018,7 @@ public class AlermActivity extends BaseActivity {
                     }
                     params.clear();
                     params.put("deviceId", deviceId);
-                    params.put("deviceAlarmNum", updatePosition - 3);
+                    params.put("deviceAlarmNum", updatePosition - 2);
                     params.put("alarmName", content);
                     new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                 } catch (Exception e) {
@@ -958,7 +1085,7 @@ public class AlermActivity extends BaseActivity {
                         mqService.sendAlerm(topicName, mcuVersion, data);
                         params.clear();
                         params.put("deviceId", deviceId);
-                        params.put("deviceAlarmNum", updatePosition - 3);
+                        params.put("deviceAlarmNum", updatePosition - 2);
                         params.put("alarmName", content);
                         new UpdateAlermAsync(AlermActivity.this).execute(params).get(3, TimeUnit.SECONDS);
                     } catch (Exception e) {

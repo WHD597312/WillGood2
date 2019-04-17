@@ -118,6 +118,7 @@ public class TimerTaskActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.img_add:
+                result=1;
                 Intent intent=new Intent(this,AddTimeActivity.class);
                 intent.putExtra("deviceId",deviceId);
                 intent.putExtra("deviceMac",deviceMac);
@@ -150,6 +151,13 @@ public class TimerTaskActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null && returnData==0){
+            timerTasks.clear();
+            List<TimerTask> timerTasks2=timerTaskDao.findDeviceTimeTask(deviceMac);
+            timerTasks.addAll(timerTasks2);
+            adapter.notifyDataSetChanged();
+        }
+
         running=true;
     }
 
@@ -157,6 +165,7 @@ public class TimerTaskActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         running=false;
+        returnData=0;
     }
 
 
@@ -241,14 +250,14 @@ public class TimerTaskActivity extends BaseActivity {
                         online=online2;
                         if (mqService!=null){
                             if (returnData==1){
-                                if (mqService!=null){
-                                    returnData=0;
-                                    if (operate==1){
-                                        mqService.starSpeech(deviceMac,"删除成功");
-                                    }else {
-                                        mqService.starSpeech(deviceMac,"控制成功");
-                                    }
+                                returnData=0;
+                                if (operate==1){
+                                    mqService.starSpeech(deviceMac,"删除成功");
+
+                                }else {
+                                    mqService.starSpeech(deviceMac,"设置成功");
                                 }
+
                             }
                             List<TimerTask> timerTasks2 = mqService.getTimerTask(deviceMac);
                             timerTasks.clear();
@@ -281,6 +290,7 @@ public class TimerTaskActivity extends BaseActivity {
     };
 
     int returnData;
+    int result=0;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -293,6 +303,7 @@ public class TimerTaskActivity extends BaseActivity {
                     countTimer.start();
                 }
             }
+
         }
     }
 
@@ -389,22 +400,22 @@ public class TimerTaskActivity extends BaseActivity {
                         if (weeks[i]==1){
                             if (i==0){
                                 mon="一";
-                                s=s+mon+"        ";
+                                s=s+mon+"      ";
                             }else if (i==1){
                                 tue="二";
-                                s=s+tue+"        ";
+                                s=s+tue+"      ";
                             }else if (i==2){
                                 wen="三";
-                                s=s+wen+"        ";
+                                s=s+wen+"      ";
                             }else if (i==3){
                                 thr="四";
-                                s=s+thr+"        ";
+                                s=s+thr+"      ";
                             }else if (i==4){
                                 fri="五";
-                                s=s+fri+"        ";
+                                s=s+fri+"      ";
                             }else if (i==5){
                                 sat="六";
-                                s=s+sat+"        ";
+                                s=s+sat+"      ";
                             }else if (i==6){
                                 sun="日";
                                 s=s+sun;

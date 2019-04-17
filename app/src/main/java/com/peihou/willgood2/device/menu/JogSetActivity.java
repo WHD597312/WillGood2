@@ -373,6 +373,8 @@ public class JogSetActivity extends BaseActivity {
                     }
                 } else {
                     if (macAddress.equals(deviceMac)) {
+                        boolean online2 = intent.getBooleanExtra("online", false);
+                        online = online2;
                         double lineJog = intent.getDoubleExtra("lineJog", 0);
                         if (intent.hasExtra("lineJog")){
                             choices = lineJog;
@@ -384,13 +386,11 @@ public class JogSetActivity extends BaseActivity {
                                     msg.obj = lineJog;
                                     click = 0;
                                     handler.sendMessage(msg);
-                                }else {
-                                    setChoices(choices);
                                 }
+                            }else {
+                                setChoices(choices);
                             }
                         }
-                        boolean online2 = intent.getBooleanExtra("online", false);
-                        online = online2;
                     }
                 }
             } catch (Exception e) {
@@ -404,7 +404,7 @@ public class JogSetActivity extends BaseActivity {
         public boolean handleMessage(Message msg) {
             if (msg.what == 1) {
                 if (mqService != null) {
-                    mqService.starSpeech(deviceMac,"控制成功");
+                    mqService.starSpeech(deviceMac,"设置成功");
                     Intent intent = new Intent();
                     double lineJog = (double) msg.obj;
                     intent.putExtra("jog", lineJog);

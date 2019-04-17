@@ -27,9 +27,12 @@
             android:text="来电报警"
             android:textColor="#939393"
             android:textSize="@dimen/sp_14"
+            android:singleLine="true"
+            android:layout_toRightOf="@+id/tv_name"
             android:layout_toLeftOf="@+id/img_open"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/dp_10"
+            android:gravity="center_vertical|end"
             />
 
         <ImageView

@@ -124,6 +124,24 @@ public class LinkedControlActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mqService!=null){
+            List<LinkedType> linkedTypes= deviceLinkedTypeDao.findLinkdType(deviceMac);
+            Collections.sort(linkedTypes, new Comparator<LinkedType>() {
+                @Override
+                public int compare(LinkedType o1, LinkedType o2) {
+                    if (o1.getType()>o2.getType()){
+                        return 1;
+                    }else if (o1.getType()<o2.getType()){
+                        return -1;
+                    }
+                    return 0;
+                }
+            });
+            list.clear();
+            list.addAll(linkedTypes);
+            adapter.notifyDataSetChanged();
+        }
+        click=0;
         running=true;
     }
 
@@ -131,6 +149,7 @@ public class LinkedControlActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         running=false;
+        click=0;
     }
 
     private void updateLinkedType(){
@@ -139,6 +158,7 @@ public class LinkedControlActivity extends BaseActivity {
             LinkedType linkedType=list.get(i);
             linkedType.setState(0);
             list.set(i,linkedType);
+            deviceLinkedTypeDao.update(linkedType);
         }
     }
     @OnClick({R.id.img_back})
@@ -227,7 +247,7 @@ public class LinkedControlActivity extends BaseActivity {
                                 }
                             });
                             if (click==1){
-                                mqService.starSpeech(deviceMac,"控制成功");
+                                mqService.starSpeech(deviceMac,"设置成功");
                                 click=0;
                             }
                             list.clear();
