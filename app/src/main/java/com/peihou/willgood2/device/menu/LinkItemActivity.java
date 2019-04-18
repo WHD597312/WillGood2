@@ -116,7 +116,7 @@ public class LinkItemActivity extends BaseActivity {
             case R.id.img_back:
                 if (mqService!=null){
                     if (type==5){
-                        List<MoniLink> moniLinks=mqService.getMoniLink(deviceMac,type,moniNum);
+                        List<MoniLink> moniLinks=deviceMoniLinkDaoDao.findMoniLinks2(deviceMac);
                         if (!moniLinks.isEmpty()){
                             List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
                             mqService.updateMoniLinks(moniLinkList);
@@ -205,7 +205,7 @@ public class LinkItemActivity extends BaseActivity {
     public void onBackPressed() {
         if (mqService!=null){
             if (type==5){
-                List<MoniLink> moniLinks=mqService.getMoniLink(deviceMac,type,moniNum);
+                List<MoniLink> moniLinks=deviceMoniLinkDaoDao.findMoniLinks2(deviceMac);
                 if (!moniLinks.isEmpty()){
                     List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
                     mqService.updateMoniLinks(moniLinkList);
@@ -286,7 +286,29 @@ public class LinkItemActivity extends BaseActivity {
                 } else if (type == 5) {
                     funCode = 0x39;
                 }
-                mqService.getData(topicName, funCode);
+                if (funCode==0x39){
+                    int state=0;
+                    if (analog==0){
+                        state=0x11;
+                    }else if (analog==1){
+                        state=0x22;
+                    }else if (analog==2){
+                        state=0x33;
+                    }else if (analog==3){
+                        state=0x44;
+                    }else if (analog==4){
+                        state=0x55;
+                    }else if (analog==5){
+                        state=0x66;
+                    }else if (analog==6){
+                        state=0x77;
+                    }else if (analog==7){
+                        state=0x88;
+                    }
+                    mqService.getData(topicName,funCode,state);
+                }else {
+                    mqService.getData(topicName, funCode);
+                }
                 countTimer.start();
             }
         }
@@ -320,11 +342,13 @@ public class LinkItemActivity extends BaseActivity {
                     if (macAddress.equals(deviceMac) && linkType == type) {
                         int operate = intent.getIntExtra("operate", 0);
                         if (returnData==1){
-                            if (operate == 1) {
-                                mqService.starSpeech(deviceMac,"删除成功");
-                            } else {
-                                mqService.starSpeech(deviceMac,"设置成功");
+
+                            if (operate==0){
+                                mqService.starSpeech(deviceMac,3);
+                            }else if (operate==1){
+                                mqService.starSpeech(deviceMac,7);
                             }
+
                             returnData=0;
                         }
                         if (intent.hasExtra("linkTypeNum") && intent.hasExtra("moniType")) {
@@ -471,6 +495,7 @@ public class LinkItemActivity extends BaseActivity {
             } else {
                 tv_lines.setText("");
             }
+            String ss="";
             if (type == 2) {
                 if (condition == 1) {
                     c = "断开";
@@ -478,10 +503,18 @@ public class LinkItemActivity extends BaseActivity {
                     c = "闭合";
                 }
                 if (conditionState == 1) {
-                    c = c + "  开";
+                    c = c + "  开启";
                 } else {
-                    c = c + "  关";
+                    c = c + "  关闭";
                 }
+
+                if (triType==1){
+                    ss=" 单次";
+                }else if (triType==0){
+                    ss=" 循环";
+                }
+                c=c+ss;
+
             } else {
                 if (triState == 1) {
                     c = "高于" + "  " + condition;
@@ -489,10 +522,16 @@ public class LinkItemActivity extends BaseActivity {
                     c = "低于" + "  " + condition;
                 }
                 if (conditionState == 1) {
-                    c = c + "  开";
+                    c = c + "  开启";
                 } else {
-                    c = c + "  关";
+                    c = c + "  关闭";
                 }
+                if (triType==1){
+                    ss=" 单次";
+                }else if (triType==0){
+                    ss=" 循环";
+                }
+                c=c+ss;
             }
 
 
@@ -569,6 +608,7 @@ public class LinkItemActivity extends BaseActivity {
             int controlState = moniLink.getControlState();
             String lines = moniLink.getLines();
             int state = moniLink.getState();
+            int triType=moniLink.getTriType();
 
             TextView tv_condition = holder.itemView.findViewById(R.id.tv_condition);
             TextView tv_linked = holder.itemView.findViewById(R.id.tv_linked);
@@ -587,10 +627,18 @@ public class LinkItemActivity extends BaseActivity {
                 c = "低于" + "  " + contition;
             }
             if (controlState == 1) {
-                c = c + "  开";
+                c = c + "  开启";
             } else {
-                c = c + "  关";
+                c = c + "  关闭";
             }
+            String ss="";
+            if (triType==1){
+                ss=" 单次";
+            }else if (triType==0){
+                ss=" 循环";
+            }
+            c=c+ss;
+
 
             ImageView img_open = holder.itemView.findViewById(R.id.img_open);
 

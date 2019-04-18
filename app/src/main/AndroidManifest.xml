@@ -43,6 +43,11 @@
     <uses-permission android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.DEVICE_POWER"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
 
     <application
@@ -111,7 +116,8 @@
         <service
             android:name=".service.MQService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            />
 
         <activity android:name=".login.LoginActivity">
             <intent-filter>

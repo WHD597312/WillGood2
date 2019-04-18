@@ -196,14 +196,14 @@ public class MoniCheckActivity extends BaseActivity {
                     List<Table> tables = deviceAnalogDao.findDeviceAnalogs(deviceId);
                     if (tables.size() != 8) {
                         deviceAnalogDao.deleteDeviceTables(deviceId);
-                        tables.add(new Table(1, "电流1", 0, 1, 0, "MA", deviceMac, deviceId));
-                        tables.add(new Table(2, "电流2", 0, 1, 0, "MA", deviceMac, deviceId));
-                        tables.add(new Table(3, "电流3", 0, 1, 0, "MA", deviceMac, deviceId));
-                        tables.add(new Table(4, "电流4", 0, 1, 0, "MA", deviceMac, deviceId));
-                        tables.add(new Table(5, "电压1", 0, 1, 0, "V", deviceMac, deviceId));
-                        tables.add(new Table(6, "电压2", 0, 1, 0, "V", deviceMac, deviceId));
-                        tables.add(new Table(7, "电压3", 0, 1, 0, "V", deviceMac, deviceId));
-                        tables.add(new Table(8, "电流4", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(1, "模拟电流1", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(2, "模拟电流2", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(3, "模拟电流3", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(4, "模拟电流4", 0, 1, 0, "MA", deviceMac, deviceId));
+                        tables.add(new Table(5, "模拟电压1", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(6, "模拟电压2", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(7, "模拟电压3", 0, 1, 0, "V", deviceMac, deviceId));
+                        tables.add(new Table(8, "模拟电压4", 0, 1, 0, "V", deviceMac, deviceId));
                         deviceAnalogDao.inserts(tables);
                         MoniCheckActivity.this.tables.addAll(tables);
                     }

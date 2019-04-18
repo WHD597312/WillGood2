@@ -157,13 +157,6 @@ public class DemoActivity extends AppCompatActivity {
                         break;
                     case 25:
                         sendAlerm(topicName1,0x11);
-                        sendAlerm(topicName1,0x22);
-                        sendAlerm(topicName1,0x33);
-                        sendAlerm(topicName1,0x44);
-                        sendAlerm(topicName1,0x55);
-                        sendAlerm(topicName1,0x66);
-                        sendAlerm(topicName1,0x77);
-                        sendAlerm(topicName1,0x88);
                         break;
                     case 26:
                         send485(topicName1);
@@ -228,8 +221,8 @@ public class DemoActivity extends AppCompatActivity {
         }
     }
 
-    String topicName1="qjjc/gateway/865373040896594/server_to_client";
-    String topicName2="qjjc/gateway/866289037318450/client_to_server";
+    String topicName1="qjjc/gateway/8655330313815/client_to_server";
+    String topicName2="qjjc/gateway/865373040894557/client_to_server";
     int state=1;
     int count=0;
     int ss=1;

@@ -275,10 +275,10 @@ public class InterLockActivity extends BaseActivity {
                         }
 
                         if (click==1){
-                            mqService.starSpeech(deviceMac,"设置成功");
+                            mqService.starSpeech(deviceMac,3);
                             click=0;
                         }else if (click==2){
-                            mqService.starSpeech(deviceMac,"解除成功");
+                            mqService.starSpeech(deviceMac,7);
                             click=0;
                         }
                         List<InterLock> interLocks2=mqService.getDeviceVisityInterLock(deviceMac);

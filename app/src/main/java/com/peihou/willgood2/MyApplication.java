@@ -36,6 +36,7 @@ public class MyApplication extends Application {
     private List<Activity> activities;
     private List<Fragment> fragments;
     private static Context mContext;
+    public static int floating=0;
 
 
     public static Context getContext(){

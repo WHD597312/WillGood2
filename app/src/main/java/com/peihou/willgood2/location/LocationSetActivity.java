@@ -139,6 +139,7 @@ public class LocationSetActivity extends BaseActivity {
         running=false;
     }
 
+    int click=0;
     @OnClick({R.id.img_back,R.id.rl_bottom,R.id.btn_submit,R.id.linear_1,R.id.linear_2,R.id.linear_3,R.id.linear_4,R.id.linear_5})
     public void onClick(View v){
         switch (v.getId()){
@@ -152,6 +153,8 @@ public class LocationSetActivity extends BaseActivity {
                 if (mqService!=null){
                     success=mqService.sendLocation(topicName,mcuVersion,choices);
                     if (success){
+                        click=1;
+
                         countTimer.start();
                     }else {
                         ToastUtil.showShort(this,"提交失败");
@@ -259,6 +262,12 @@ public class LocationSetActivity extends BaseActivity {
                 if (deviceMac.equals(macAddress)){
                     int location=intent.getIntExtra("location",0);
                     choices=location;
+                    if (click==1){
+                        click=0;
+                        if(mqService!=null){
+                            mqService.starSpeech(deviceMac,3);
+                        }
+                    }
                     setLocationFre();
                 }
             } catch (Exception e) {

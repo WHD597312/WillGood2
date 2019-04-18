@@ -44,7 +44,8 @@
         android:layout_alignRight="@+id/tv_1"
         android:background="#F5F5F5"
         android:paddingLeft="@dimen/dp_10"
-        android:inputType="number"
+        android:maxLength="20"
+        android:singleLine="true"
         />
     <TextView
         android:id="@+id/tv_2"

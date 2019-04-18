@@ -1506,7 +1506,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
 
                         Log.i("line2", "-->" + lines2);
                         onKey = -1;
-                        mqService.starSpeech(deviceMac, "关闭成功");
+                        mqService.starSpeech(deviceMac, 1);
                         operateLog.clear();
                         operateLog.put("deviceMac", deviceMac);
                         operateLog.put("deviceControll", 2);
@@ -1519,7 +1519,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 case 102:
                     if (mqService != null) {
                         click = 0;
-                        mqService.starSpeech(deviceMac, "开启成功");
+                        mqService.starSpeech(deviceMac, 0);
                         String lines2 = "";
                         if (onKey == 0) {
                             lines2 = checkLine;
@@ -1541,7 +1541,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 case 103:
                     if (mqService != null) {
                         click = 0;
-                        mqService.starSpeech(deviceMac, "控制成功");
+                        mqService.starSpeech(deviceMac, 2);
                     }
                     break;
             }

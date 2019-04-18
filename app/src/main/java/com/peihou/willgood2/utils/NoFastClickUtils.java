@@ -16,15 +16,16 @@ public class NoFastClickUtils {
         lastClickTime = curClickTime;
         return flag;
     }
-    private static final int MIN_CLICK_DELAY_TIME2 = 1000;
+    private static final int MIN_CLICK_DELAY_TIME2 = 500;
+    private static long lastClickTime2;
 
     public static boolean isFastClick2() {
         boolean flag = false;
         long curClickTime = System.currentTimeMillis();
-        if ((curClickTime - lastClickTime) >= MIN_CLICK_DELAY_TIME) {
+        if ((curClickTime - lastClickTime2) >= MIN_CLICK_DELAY_TIME2) {
             flag = true;
         }
-        lastClickTime = curClickTime;
+        lastClickTime2 = curClickTime;
         return flag;
     }
 

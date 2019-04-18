@@ -68,38 +68,15 @@
             />
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rl_share"
-        android:layout_below="@+id/rl_body"
+    <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:overScrollMode="never"
-        android:scrollbars="none"
-        android:layout_marginLeft="@dimen/dp_11"
-        android:layout_marginRight="@dimen/dp_11"
-        />
-    <android.support.v7.widget.RecyclerView
-        android:visibility="gone"
-        android:id="@+id/rl_operate"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:layout_below="@+id/rl_body"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:overScrollMode="never"
-        android:scrollbars="none"
         android:layout_marginLeft="@dimen/dp_11"
         android:layout_marginRight="@dimen/dp_11"
         android:layout_marginTop="@dimen/dp_20"
-        />
-    <android.support.v7.widget.RecyclerView
-        android:visibility="gone"
-        android:id="@+id/rl_operate2"
-        android:layout_below="@+id/rl_body"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:overScrollMode="never"
-        android:scrollbars="none"
-        android:layout_marginLeft="@dimen/dp_11"
-        android:layout_marginRight="@dimen/dp_11"
-        android:layout_marginTop="@dimen/dp_20"
-        />
+        >
+    </LinearLayout>
 </RelativeLayout>

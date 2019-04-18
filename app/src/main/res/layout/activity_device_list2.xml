@@ -53,9 +53,8 @@
             android:layout_alignParentRight="true"
             />
     </RelativeLayout>
-    <android.support.v4.widget.SwipeRefreshLayout
+    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
         android:layout_below="@+id/rl_head"
-        android:layout_above="@+id/img_all_close"
         android:id="@+id/swipeRefresh"
         android:layout_marginLeft="@dimen/dp_11"
         android:layout_marginRight="@dimen/dp_11"
@@ -72,7 +71,7 @@
             android:listSelector="@android:color/transparent"
 
             />
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 
     <ImageView
         android:id="@+id/img_add_device"

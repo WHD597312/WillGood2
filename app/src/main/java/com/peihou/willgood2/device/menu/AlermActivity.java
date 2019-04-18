@@ -438,7 +438,7 @@ public class AlermActivity extends BaseActivity {
                         boolean online2 = intent.getBooleanExtra("online", false);
                         online = online2;
                         if (click == 1) {
-                            mqService.starSpeech(macAddress,"设置成功");
+                            mqService.starSpeech(macAddress,3);
                             click=0;
                         }
                         for (int i = 0; i < alerms.size(); i++) {

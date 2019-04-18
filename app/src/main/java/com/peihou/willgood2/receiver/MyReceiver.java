@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.peihou.willgood2.utils.ToastUtil;
@@ -50,7 +51,7 @@ public class MyReceiver extends BroadcastReceiver {
             } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
 //                Log.d(TAG, "[MyReceiver] 接收到推送下来的通知");
                 int notifactionId = bundle.getInt(JPushInterface.EXTRA_NOTIFICATION_ID);
-//                JPushInterface.clearNotificationById(context,notifactionId);//清除通知
+                JPushInterface.clearNotificationById(context,notifactionId);//清除通知
 //                String title =bundle.getString(JPushInterface.EXTRA_ALERT);
 //                Intent speech=new Intent("SpeechReceiverAlerm");
 //                Log.i("SpeechReceiverAlerm",title);
@@ -85,7 +86,19 @@ public class MyReceiver extends BroadcastReceiver {
 
 
     }
-
+    PowerManager.WakeLock wakeLock;
+    private void acquireWakeLock(Context context) {
+        if (null == wakeLock) {
+            PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK
+                    | PowerManager.ON_AFTER_RELEASE, getClass()
+                    .getCanonicalName());
+            if (null != wakeLock) {
+                Log.i(TAG, "call acquireWakeLock");
+                wakeLock.acquire();
+            }
+        }
+    }
 
     // 打印所有的 intent extra 数据
     private static String printBundle(Bundle bundle) {

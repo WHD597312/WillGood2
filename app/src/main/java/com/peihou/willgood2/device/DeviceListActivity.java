@@ -42,12 +42,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
+import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.AppUpdateDialog;
 import com.peihou.willgood2.custom.ChangeDialog;
 import com.peihou.willgood2.custom.ExitLoginDialog;
+import com.peihou.willgood2.custom.MyHeadRefreshView;
+import com.peihou.willgood2.custom.MyLoadMoreView;
 import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.login.LoginActivity;
 import com.peihou.willgood2.pojo.Device;
@@ -94,7 +98,8 @@ public class DeviceListActivity extends BaseActivity {
 
     Map<String, Object> params = new HashMap<>();
     MyApplication application;
-    @BindView(R.id.swipeRefresh) SwipeRefreshLayout swipeRefresh;
+    @BindView(R.id.swipeRefresh)
+    PullToRefreshLayout swipeRefresh;
 
 
     @Override
@@ -173,17 +178,22 @@ public class DeviceListActivity extends BaseActivity {
         }
         adapter = new MyAdapter(list, this);
         grid_list.setAdapter(adapter);
-        swipeRefresh.setColorSchemeResources(R.color.colorAccent);
-        swipeRefresh.setSize(SwipeRefreshLayout.LARGE);
-        swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.color_gray2);
-        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        swipeRefresh.setHeaderView(new MyHeadRefreshView(this));
+        swipeRefresh.setFooterView(new MyLoadMoreView(this));
+        swipeRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
-            public void onRefresh() {
+            public void refresh() {
+                swipeRefresh.finishRefresh();
+            }
+
+            @Override
+            public void loadMore() {
                 params.clear();
                 params.put("userId", userId);
                 new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
             }
         });
+
     }
 
     /**
@@ -359,7 +369,7 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(DeviceListActivity activity, Integer code) {
-            swipeRefresh.setRefreshing(false);
+            swipeRefresh.finishLoadMore();
             switch (code) {
                 case 100:
 
@@ -456,7 +466,7 @@ public class DeviceListActivity extends BaseActivity {
                 } else if (n > 6) {
                     total = 6000;
                 }
-                CountTimer2 countTimer = new CountTimer2(total, 1000);
+                CountTimer2 countTimer = new CountTimer2(3000, 1000);
                 countTimer.start();
                 load = 0;
             }
@@ -474,7 +484,6 @@ public class DeviceListActivity extends BaseActivity {
                         mqService.addCountTimer(macAddress);
                         Log.i("deviceMac", "-->" + macAddress);
                         mqService.getData(topicName, 0x11);
-                        Thread.currentThread().sleep(500);
                     }
                 }
             } catch (Exception e) {
@@ -514,6 +523,9 @@ public class DeviceListActivity extends BaseActivity {
                     for (int i = 0; i < list.size(); i++) {
                         Device device2 = list.get(i);
                         if (device2 != null && macAddress.equals(device2.getDeviceOnlyMac())) {
+                            if (popupWindow2!=null && popupWindow2.isShowing()){
+                                popupWindow2.dismiss();
+                            }
                             device2.setOnline(false);
                             deviceDao.update(device2);
                             device2.setChoice(0);
@@ -557,7 +569,7 @@ public class DeviceListActivity extends BaseActivity {
                             if (popupWindow2 != null && popupWindow2.isShowing()) {
                                 popupWindow2.dismiss();
                             }
-                            mqService.starSpeech(device.getDeviceOnlyMac(), "开启成功");
+                            mqService.starSpeech(device.getDeviceOnlyMac(), 0);
                             operateLog.clear();
                             operateLog.put("deviceMac", device.getDeviceOnlyMac());
                             operateLog.put("deviceControll", 1);
@@ -577,7 +589,7 @@ public class DeviceListActivity extends BaseActivity {
                             operateLog.put("deviceLine", device.getLines());
                             operateLog.put("userId", userId);
                             new AddOperationLogAsync(DeviceListActivity.this).execute(operateLog);
-                            mqService.starSpeech(device.getDeviceOnlyMac(), "关闭成功");
+                            mqService.starSpeech(device.getDeviceOnlyMac(), 1);
                             onClick = 0;
                         }
                         int deviceState = device.getDeviceState();
@@ -599,6 +611,13 @@ public class DeviceListActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.canDrawOverlays(this)) {
+                MyApplication.floating=0;
+            } else {
+                MyApplication.floating=1;
+            }
+        }
         Log.i("devicehhhhhhhhhhhh","-->"+onResult);
         if (!running && mqService!=null && onResult==0){
             List<Device> devices=mqService.getDevices();
@@ -1410,12 +1429,14 @@ public class DeviceListActivity extends BaseActivity {
     private void requestOverlayPermission() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (!Settings.canDrawOverlays(this)) {
+                MyApplication.floating=0;
                 changeDialog();
             } else {
-
+                MyApplication.floating=1;
             }
         }
     }
+
 
     private void changeDialog() {
         if (dialog != null && dialog.isShowing()) {
@@ -1442,6 +1463,7 @@ public class DeviceListActivity extends BaseActivity {
                 dialog.dismiss();
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + getPackageName()));
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivityForResult(intent, REQUEST_OVERLAY);
             }
         });
@@ -1453,6 +1475,7 @@ public class DeviceListActivity extends BaseActivity {
         });
         dialog.show();
     }
+
 
     class ViewHolder {
         @BindView(R.id.img_device_choice)

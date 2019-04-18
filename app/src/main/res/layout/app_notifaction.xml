@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/app_image"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"
+        android:src="@mipmap/logo"
+        android:scaleType="centerInside"
+        />
+
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="迈科智联"
+        android:layout_toRightOf="@+id/app_image"
+        android:layout_alignTop="@+id/app_image"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="@dimen/dp_5"
+        />
+    <TextView
+        android:id="@+id/app_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="你有一条报警信息，请及时处理"
+        android:layout_toRightOf="@+id/app_image"
+        android:layout_alignBottom="@+id/app_image"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="@dimen/dp_5"
+
+        />
+   <TextClock
+       android:id="@+id/app_timer"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentRight="true"
+       android:text="222"
+       android:layout_centerVertical="true"
+       android:layout_marginRight="@dimen/dp_20"
+       android:textColor="@color/white"
+       />
+</RelativeLayout>

@@ -253,7 +253,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
                 if (type==1){
                     if (onClick==1){
                         onClick=0;
-                        mqService.starSpeech(deviceMac,"设置成功");
+                        mqService.starSpeech(deviceMac,3);
                     }
                     if (plMemory==0){
                         open=0;

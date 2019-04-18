@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
+import com.jwenfeng.library.pulltorefresh.PullToRefreshLayout;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.pojo.OperatorLog;
@@ -40,8 +42,8 @@ public class AlermLogActivity extends BaseActivity {
 
     @BindView(R.id.list_log) RecyclerView list_log;
     private List<OperatorLog> list=new ArrayList<>();
+    @BindView(R.id.refersh_operate) PullToRefreshLayout refersh_operate;
     MyAdapter adapter;
-
     String deviceMac;
     int userId;
     @Override
@@ -57,6 +59,7 @@ public class AlermLogActivity extends BaseActivity {
     }
 
     Map<String,Object> params=new HashMap<>();
+    private int operate=1;
     @Override
     public void initView(View view) {
 
@@ -65,7 +68,19 @@ public class AlermLogActivity extends BaseActivity {
         list_log.setAdapter(adapter);
         params.put("userId",userId);
         params.put("deviceLogType",2);
-        params.put("pageNum",1);
+        params.put("pageNum",operate);
+        refersh_operate.setRefreshListener(new BaseRefreshListener() {
+            @Override
+            public void refresh() {
+                refersh_operate.finishRefresh();
+            }
+
+            @Override
+            public void loadMore() {
+                params.put("pageNum",operate++);
+                new AlermAsync(AlermLogActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+            }
+        });
         new AlermAsync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
     }
     @OnClick({R.id.img_back,R.id.img_log})
@@ -157,6 +172,7 @@ public class AlermLogActivity extends BaseActivity {
         }
     }
 
+    int  logAlerm=0;
     class AlermAsync extends BaseWeakAsyncTask<Map<String,Object>,Void,Integer,AlermLogActivity> {
 
         public AlermAsync(AlermLogActivity deviceRecordActivity) {
@@ -175,12 +191,18 @@ public class AlermLogActivity extends BaseActivity {
                     code=jsonObject.getInt("returnCode");
                     if (code==100){
                         JSONObject returnData=jsonObject.getJSONObject("returnData");
-                        JSONArray deviceOperationLogList=returnData.getJSONArray("deviceOperationLogList");
-                        for (int i = 0; i <deviceOperationLogList.length() ; i++) {
-                            String s=deviceOperationLogList.getJSONObject(i).toString();
-                            Gson gson=new Gson();
-                            OperatorLog operatorLog=gson.fromJson(s,OperatorLog.class);
-                            list.add(operatorLog);
+                        logAlerm=returnData.getInt("logSum");
+                        if (list.size()<=logAlerm){
+                            JSONArray deviceOperationLogList=returnData.getJSONArray("deviceOperationLogList");
+                            for (int i = 0; i <deviceOperationLogList.length() ; i++) {
+                                String s=deviceOperationLogList.getJSONObject(i).toString();
+                                Gson gson=new Gson();
+                                OperatorLog operatorLog=gson.fromJson(s,OperatorLog.class);
+                                list.add(operatorLog);
+                            }
+                        }
+                        if (logAlerm==0){
+                            list.clear();
                         }
                     }
                 }
@@ -192,6 +214,7 @@ public class AlermLogActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(AlermLogActivity deviceRecordActivity, Integer integer) {
+            refersh_operate.finishLoadMore();
             if (integer==100){
                adapter.notifyDataSetChanged();
             }

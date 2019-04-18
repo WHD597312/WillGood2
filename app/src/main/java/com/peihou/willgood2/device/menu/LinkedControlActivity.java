@@ -247,7 +247,7 @@ public class LinkedControlActivity extends BaseActivity {
                                 }
                             });
                             if (click==1){
-                                mqService.starSpeech(deviceMac,"设置成功");
+                                mqService.starSpeech(deviceMac,3);
                                 click=0;
                             }
                             list.clear();

@@ -251,13 +251,11 @@ public class TimerTaskActivity extends BaseActivity {
                         if (mqService!=null){
                             if (returnData==1){
                                 returnData=0;
-                                if (operate==1){
-                                    mqService.starSpeech(deviceMac,"删除成功");
-
-                                }else {
-                                    mqService.starSpeech(deviceMac,"设置成功");
+                                if (operate==0){
+                                    mqService.starSpeech(deviceMac,3);
+                                }else if (operate==1){
+                                    mqService.starSpeech(deviceMac,7);
                                 }
-
                             }
                             List<TimerTask> timerTasks2 = mqService.getTimerTask(deviceMac);
                             timerTasks.clear();

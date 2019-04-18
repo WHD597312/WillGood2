@@ -52,13 +52,19 @@
             android:textColor="#4b4b4b"
             />
     </RelativeLayout>
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/list_log"
+    <com.jwenfeng.library.pulltorefresh.PullToRefreshLayout
+        android:id="@+id/refersh_operate"
         android:layout_marginTop="@dimen/dp_12"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_below="@+id/rl_head"
-        android:cacheColorHint="#00ffffff"
-        android:overScrollMode="never"
-        />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:cacheColorHint="#00ffffff"
+            android:overScrollMode="never"
+            />
+    </com.jwenfeng.library.pulltorefresh.PullToRefreshLayout>
 </RelativeLayout>

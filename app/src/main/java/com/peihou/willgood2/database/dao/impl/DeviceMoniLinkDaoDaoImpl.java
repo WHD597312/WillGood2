@@ -98,6 +98,9 @@ public class DeviceMoniLinkDaoDaoImpl {
         );
         return deviceMoniLinkDao.queryBuilder().where(whereCondition).list();
     }
+    public List<MoniLink> findMoniLinks2(String deviceMac){
+        return deviceMoniLinkDao.queryBuilder().where(MoniLinkDao.Properties.DeviceMac.eq(deviceMac)).list();
+    }
 
 
     /**

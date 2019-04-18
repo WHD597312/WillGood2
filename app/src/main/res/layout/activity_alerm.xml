@@ -47,6 +47,7 @@
             android:layout_marginRight="@dimen/dp_15"
             android:src="@mipmap/img_log"
             android:scaleType="centerInside"
+            android:visibility="gone"
             />
     </RelativeLayout>
     <android.support.v7.widget.RecyclerView

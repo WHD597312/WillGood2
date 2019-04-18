@@ -404,7 +404,7 @@ public class JogSetActivity extends BaseActivity {
         public boolean handleMessage(Message msg) {
             if (msg.what == 1) {
                 if (mqService != null) {
-                    mqService.starSpeech(deviceMac,"设置成功");
+                    mqService.starSpeech(deviceMac,3);
                     Intent intent = new Intent();
                     double lineJog = (double) msg.obj;
                     intent.putExtra("jog", lineJog);

@@ -439,7 +439,7 @@ public class DeviceInterLockActivity extends BaseActivity {
                             list.addAll(interLocks2);
                             if (click==1){
                                 handler.sendEmptyMessage(0);
-                                mqService.starSpeech(macAddress,"控制成功");
+                                mqService.starSpeech(macAddress,2);
                                 click=0;
                             }
                             adapter.notifyDataSetChanged();

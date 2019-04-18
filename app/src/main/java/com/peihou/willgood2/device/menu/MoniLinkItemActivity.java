@@ -155,7 +155,7 @@ public class MoniLinkItemActivity extends BaseActivity {
                             int[]moniLinkSwitch2=intent.getIntArrayExtra("moniLinkSwitch");
                             if (click==1){
                                 click=0;
-                                mqService.starSpeech(deviceMac,"设置成功");
+                                mqService.starSpeech(deviceMac,3);
                             }
                             for (int i = 0; i <moniLinkSwitch2.length ; i++) {
                                 int x=moniLinkSwitch2[i];
