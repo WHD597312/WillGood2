@@ -482,7 +482,7 @@ public class LinkItemActivity extends BaseActivity {
             if (type==2){
                 name = linked.getName();
             }else {
-                name = linked.getName()+"("+(position+1);
+                name = linked.getName()+"("+(position+1)+")";
             }
             String lines = linked.getLines();
             int condition = linked.getCondition();

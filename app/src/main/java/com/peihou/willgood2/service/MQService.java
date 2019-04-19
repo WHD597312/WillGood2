@@ -1839,7 +1839,11 @@ public class MQService extends Service {
                         Message msg2 = handler.obtainMessage();
                         msg2.what = 10003;
                         msg2.arg1 = type;
-                        msg2.arg2 = data[5];
+                        if (type==7){
+                            msg2.arg2 = data[5];
+                        }else {
+                            msg2.arg2 = 0;
+                        }
                         handler.sendMessage(msg2);
                         if (alerm.getDeviceAlarmBroadcast() == 1 || alerm.getDeviceAlarmBroadcast() == 2) {
                             String cotent = alerm.getContent();
@@ -2374,15 +2378,15 @@ public class MQService extends Service {
 
                 alermDialog4.getWindow().setAttributes(params);
             } else {
-                WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-                params.screenOrientation = Configuration.ORIENTATION_PORTRAIT;
-                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-                alermDialog4.getWindow().setAttributes(params);
+//                WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+//                params.screenOrientation = Configuration.ORIENTATION_PORTRAIT;
+//                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+//                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+//                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+//                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+//                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+//                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+                alermDialog4.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
             }
             alermDialog4.setCanceledOnTouchOutside(false);
             alermDialog4.setOnNegativeClickListener(new AlermDialog4.OnNegativeClickListener() {
@@ -3573,7 +3577,10 @@ public class MQService extends Service {
     private PowerManager pm;
     private PowerManager.WakeLock wl;
 
-    int channelId = 0x22222;
+    private static final int PUSH_NOTIFICATION_ID = (0x001);
+    private static final String PUSH_CHANNEL_ID = "PUSH_NOTIFY_ID";
+    private static final String PUSH_CHANNEL_NAME = "PUSH_NOTIFY_NAME";
+
 
     private void wakeAndUnlock(boolean b, int type) {
         if (b) {
@@ -3599,8 +3606,14 @@ public class MQService extends Service {
                 //获取NotificationManager实例
                 mNotificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel(PUSH_CHANNEL_ID, PUSH_CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
+                    if (mNotificationManager != null) {
+                        mNotificationManager.createNotificationChannel(channel);
+                    }
+                }
 
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(),PUSH_CHANNEL_ID);
                 builder.setSmallIcon(R.mipmap.logo)
                         .setContentTitle("迈克智联")
                         .setContentText("你有一条报警信息,请及时处理")
@@ -3608,6 +3621,8 @@ public class MQService extends Service {
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)// 设置为public后，通知栏将在锁屏界面显示
                         .setWhen(System.currentTimeMillis())
                         .setAutoCancel(true);
+               Notification notification =builder.build();
+                notification.flags = Notification.FLAG_AUTO_CANCEL;
                 mNotificationManager.notify(1, builder.build());
 
             }
@@ -3656,7 +3671,10 @@ public class MQService extends Service {
                 int type = msg.arg1;
                 wakeAndUnlock(true, 0);
                 int arg2 = msg.arg2;
-                String line = "线路" + arg2;
+                String line = "";
+                if (arg2!=0){
+                    line="线路:"+arg2;
+                }
                 setAlermDialog(type, line);
             } else if (msg.what == 10004) {
                 int arg1 = msg.arg1;

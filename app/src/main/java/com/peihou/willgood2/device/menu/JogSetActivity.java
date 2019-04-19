@@ -130,9 +130,14 @@ public class JogSetActivity extends BaseActivity {
             cb3.setChecked(false);
             cb4.setChecked(false);
             cb5.setChecked(true);
+        }else {
+            cb.setChecked(false);
+            cb2.setChecked(false);
+            cb3.setChecked(false);
+            cb4.setChecked(false);
+            cb5.setChecked(false);
         }
         tv_jog_value.setText(choices + "");
-
     }
     boolean checked = false;
     int click = 0;

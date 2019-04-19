@@ -251,7 +251,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         menus.add(new DeviceMenu(6, "互锁模式", R.mipmap.img_menu_hs));
         menus.add(new DeviceMenu(7, "点动控制", R.mipmap.img_menu_jog));
         menus.add(new DeviceMenu(8, "掉电记忆", R.mipmap.img_menu_pd));
-        menus.add(new DeviceMenu(9, "485接口", R.mipmap.img_menu_pd));
+        menus.add(new DeviceMenu(9, "485接口", R.mipmap.img_menu_485));
         menus.add(new DeviceMenu(10, "控制语音", R.mipmap.img_menu_voice));
 
         Collections.sort(menus, new Comparator<DeviceMenu>() {
@@ -1240,15 +1240,16 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
             }
 
             if (jog) {
-                if (seconds > 0) {
-                    holder.tv_line_value.setVisibility(View.VISIBLE);
-                    String s = seconds + "";
-                    char s2 = s.charAt(s.indexOf(".") + 1);
-                    if (s2 == '0') {
-                        s = s.substring(0, s.indexOf("."));
-                    }
-                    holder.tv_line_value.setText("" + s);
-                }
+                holder.tv_line_value.setVisibility(View.GONE);
+//                if (seconds > 0) {
+//                    holder.tv_line_value.setVisibility(View.VISIBLE);
+//                    String s = seconds + "";
+//                    char s2 = s.charAt(s.indexOf(".") + 1);
+//                    if (s2 == '0') {
+//                        s = s.substring(0, s.indexOf("."));
+//                    }
+//                    holder.tv_line_value.setText("" + s);
+//                }
             } else {
                 holder.tv_line_value.setVisibility(View.GONE);
             }

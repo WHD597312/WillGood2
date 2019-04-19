@@ -74,28 +74,28 @@ public class AlermDialog4 extends Dialog {
 
         if (mode==0){
             tv_title.setText("来电报警");
-            tv_content.setText(line+":来电报警，请注意");
+            tv_content.setText(line+"来电报警，请注意");
         }else if (mode==1){
            tv_title.setText("断电报警");
-            tv_content.setText(line+":断电报警，请注意");
+            tv_content.setText(line+"断电报警，请注意");
         }else if (mode==2){
             tv_title.setText("温度报警");
-            tv_content.setText(line+":温度报警，请注意");
+            tv_content.setText(line+"温度报警，请注意");
         }else if (mode==3){
             tv_title.setText("湿度报警");
-            tv_content.setText(line+":湿度报警，请注意");
+            tv_content.setText(line+"湿度报警，请注意");
         }else if (mode==4){
             tv_title.setText("电压报警");
-            tv_content.setText(line+":电压报警，请注意");
+            tv_content.setText(line+"电压报警，请注意");
         }else if (mode==5){
             tv_title.setText("电流报警");
-            tv_content.setText(line+":电流报警，请注意");
+            tv_content.setText(line+"电流报警，请注意");
         }else if (mode==6){
             tv_title.setText("功率报警");
-            tv_content.setText(line+":功率报警，请注意");
+            tv_content.setText(line+"功率报警，请注意");
         }else if (mode==7){
             tv_title.setText("开关量报警");
-            tv_content.setText(line+":开关量报警，请注意");
+            tv_content.setText(line+"开关量报警，请注意");
         }
     }
     private int inputType;

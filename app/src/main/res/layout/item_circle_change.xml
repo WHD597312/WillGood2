@@ -31,6 +31,7 @@
         android:layout_alignRight="@id/img_line"
         android:layout_alignTop="@id/img_line"
         android:layout_alignBottom="@id/img_line"
+        android:visibility="gone"
         />
     <TextView
         android:id="@+id/tv_line"
