@@ -35,12 +35,12 @@ public class Utils {
      * @return
      */
     public static boolean isNumeric(String str){
-        Pattern pattern = Pattern.compile("-?[0-9]+.*[0-9]");
-        Matcher isNum = pattern.matcher(str);
-        if( !isNum.matches() ){
-            return false;
+        try {
+            double num=Double.parseDouble(str);//把字符串强制转换为数字
+            return true;//如果是数字，返回True
+        } catch (Exception e) {
+            return false;//如果抛出异常，返回False
         }
-        return true;
     }
     public static String week(int i){
         String s="";

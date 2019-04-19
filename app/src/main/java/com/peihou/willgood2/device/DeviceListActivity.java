@@ -56,6 +56,7 @@ import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.login.LoginActivity;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.receiver.MQTTMessageReveiver;
+import com.peihou.willgood2.receiver.UtilsJPush;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.DisplayUtil;
@@ -80,6 +81,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.jpush.android.api.JPushInterface;
 import pl.droidsonroids.gif.GifDrawable;
 import pl.droidsonroids.gif.GifImageView;
 
@@ -148,6 +150,7 @@ public class DeviceListActivity extends BaseActivity {
         preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         userId = preferences.getInt("userId", 0);
 
+        UtilsJPush.resumeJpush(this);
         Intent intent = getIntent();
         if (intent.hasExtra("login")) {
             int login = intent.getIntExtra("login", 0);
@@ -369,7 +372,9 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(DeviceListActivity activity, Integer code) {
-            swipeRefresh.finishLoadMore();
+            if (swipeRefresh!=null){
+                swipeRefresh.finishLoadMore();
+            }
             switch (code) {
                 case 100:
 
@@ -669,6 +674,7 @@ public class DeviceListActivity extends BaseActivity {
         if (bind) {
             unbindService(connection);
         }
+
         handler.removeCallbacksAndMessages(null);
     }
 
@@ -765,6 +771,7 @@ public class DeviceListActivity extends BaseActivity {
             }
         }
 
+        UtilsJPush.stopJpush(this);
         if (mqService!=null){
             mqService.clearCountTimer();
             mqService.clearAllData();

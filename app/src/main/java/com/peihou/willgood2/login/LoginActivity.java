@@ -22,6 +22,7 @@ import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.device.DeviceListActivity;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.pojo.UserInfo;
+import com.peihou.willgood2.receiver.UtilsJPush;
 import com.peihou.willgood2.utils.Mobile;
 import com.peihou.willgood2.utils.ToastUtil;
 import com.peihou.willgood2.utils.http.BaseWeakAsyncTask;
@@ -86,7 +87,9 @@ public class LoginActivity extends BaseActivity {
                 if (exit==1){
                     sharedPreferences.edit().remove("password").commit();
                     password="";
+                    UtilsJPush.stopJpush(this);
                 }else if (exit==0){
+                    UtilsJPush.resumeJpush(this);
                     int userId=sharedPreferences.getInt("userId",0);
                     Intent intent=new Intent(LoginActivity.this,DeviceListActivity.class);
                     intent.putExtra("login",1);
@@ -168,11 +171,13 @@ public class LoginActivity extends BaseActivity {
                         params.put("phone",phone);
                         params.put("password",password);
                         login=1;
+                        UtilsJPush.resumeJpush(this);
                         new LoginAsync(LoginActivity.this).execute(params).get(3,TimeUnit.SECONDS);
                     } else if (state==1){
                         params.put("phone",phone);
                         params.put("registerType",0);
                         params.put("password",password);
+                        UtilsJPush.resumeJpush(this);
                         new RegisterAsync(LoginActivity.this).execute(params).get(3,TimeUnit.SECONDS);
                     }
                 }catch (Exception e){

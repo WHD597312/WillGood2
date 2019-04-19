@@ -306,6 +306,7 @@ public class LinkItemActivity extends BaseActivity {
                         state=0x88;
                     }
                     mqService.getData(topicName,funCode,state);
+                    Log.i("topicNamesss","-->"+topicName);
                 }else {
                     mqService.getData(topicName, funCode);
                 }
@@ -477,7 +478,12 @@ public class LinkItemActivity extends BaseActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             final Linked linked = list.get(position);
             final int state = linked.getState();
-            String name = linked.getName();
+            String name="";
+            if (type==2){
+                name = linked.getName();
+            }else {
+                name = linked.getName()+"("+(position+1);
+            }
             String lines = linked.getLines();
             int condition = linked.getCondition();
             int triType = linked.getTriType();
@@ -498,9 +504,9 @@ public class LinkItemActivity extends BaseActivity {
             String ss="";
             if (type == 2) {
                 if (condition == 1) {
-                    c = "断开";
+                    c = "开关量断开";
                 } else {
-                    c = "闭合";
+                    c = "开关量闭合";
                 }
                 if (conditionState == 1) {
                     c = c + "  开启";
@@ -602,7 +608,7 @@ public class LinkItemActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             final MoniLink moniLink = list.get(position);
-            String name = moniLink.getName();
+            String name = moniLink.getName()+"("+(position+1)+")";
             int contition = moniLink.getContition();
             int triState = moniLink.getTriState();
             int controlState = moniLink.getControlState();

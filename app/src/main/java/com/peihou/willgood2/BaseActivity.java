@@ -1,12 +1,15 @@
 package com.peihou.willgood2;
 
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -68,6 +71,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 
 
 
+//            getWindow().addFlags(
+//
+//                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD|
+//
+//                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON|
+//
+//                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
             setContentView(mContextView);
             unbinder=ButterKnife.bind(this);

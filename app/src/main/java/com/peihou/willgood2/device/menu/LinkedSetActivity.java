@@ -241,7 +241,7 @@ public class LinkedSetActivity extends BaseActivity {
                     }
                     touch=touch==1?0:1;
 //                    updateLines(deviceMac);
-                    MoniLink moniLink = new MoniLink(moniType, analog, value, condition, preLines, lastLines, controlState, touch, 1, deviceMac, 0);
+                    MoniLink moniLink = new MoniLink(moniType, num, value, condition, preLines, lastLines, controlState, touch, 1, deviceMac, 0);
                     Intent intent = new Intent();
                     intent.putExtra("moniLink", moniLink);
                     setResult(1001, intent);

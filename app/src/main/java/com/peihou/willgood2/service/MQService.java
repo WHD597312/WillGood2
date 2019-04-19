@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -38,13 +39,6 @@ import android.widget.Toast;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.DistanceUtil;
 import com.google.gson.Gson;
-import com.iflytek.cloud.ErrorCode;
-import com.iflytek.cloud.InitListener;
-import com.iflytek.cloud.SpeechConstant;
-import com.iflytek.cloud.SpeechError;
-import com.iflytek.cloud.SpeechSynthesizer;
-import com.iflytek.cloud.SpeechUtility;
-import com.iflytek.cloud.SynthesizerListener;
 import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.AlermDialog;
@@ -109,6 +103,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -133,6 +128,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import javax.net.ssl.SSLContext;
 
 public class MQService extends Service {
 
@@ -183,10 +180,10 @@ public class MQService extends Service {
         super.onCreate();
 
         // 初始化即创建语音配置对象，只有初始化后才可以使用MSC的各项服务
-        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=5c73ac21");
-
-        mTts = SpeechSynthesizer.createSynthesizer(this,
-                mTtsInitListener);
+//        SpeechUtility.createUtility(this, SpeechConstant.APPID + "=5c73ac21");
+//
+//        mTts = SpeechSynthesizer.createSynthesizer(this,
+//                mTtsInitListener);
 
         mediaPlayer = new MediaPlayer();
         Log.i(TAG, "onCreate");
@@ -470,7 +467,7 @@ public class MQService extends Service {
                         Log.i("topicNamehhhhhhhhh", "-->" + topicName);
                         if (topicName.contains("client_to_server")) {
 //                            if (NoFastClickUtils.isFastClick2()) {
-                            new LoadAsyncTask(MQService.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
+                            new LoadAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);
 //                            }
                         } else if (topicName.contains("lwt")) {
                             String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
@@ -607,22 +604,15 @@ public class MQService extends Service {
         return deviceDao.findAllDevice();
     }
 
+    int moniSize=0;
     /**
      * 处理mqtt接收到的消息
      */
-    class LoadAsyncTask extends BaseWeakAsyncTask<Map<String, Object>, Void, Object, MQService> {
-        public LoadAsyncTask(MQService mqService) {
-            super(mqService);
-        }
+    class LoadAsyncTask extends AsyncTask<Map<String, Object>, Void, Object> {
 
 
         @Override
-        protected void onPostExecute(MQService mqService, Object o) {
-
-        }
-
-        @Override
-        protected Object doInBackground(MQService mqService, Map<String, Object>... maps) {
+        protected Object doInBackground(Map<String, Object>... maps) {
 
             Map params = maps[0];
             String topicName = (String) params.get("topicName");
@@ -1182,21 +1172,22 @@ public class MQService extends Service {
                                 } else {
                                     lines = "";
                                 }
-                                List<Linked> linkeds = deviceLinkDao.findLinkeds(macAddress, type);
-                                int size = linkeds.size()+1;
+
+
                                 String name = "";
                                 if (type == 0) {
-                                    name = "温度" + size;
+                                    name = "温度";
                                 } else if (type == 1) {
-                                    name = "湿度" + size;
+                                    name = "湿度";
                                 } else if (type == 2) {
                                     switchLine = data[9];
                                 } else if (type == 3) {
-                                    name = "电流" + size;
+                                    name = "电流" ;
                                 } else if (type == 4) {
-                                    name = "电压" + size;
+                                    name = "电压";
                                 }
                                 if (type == 2) {
+
                                     operateState = 0;
                                     name = "开关量" + switchLine;
                                     linked = new Linked(macAddress, type, name, condition, conditionState, 1, preLines, lastLines, triType);
@@ -1207,6 +1198,7 @@ public class MQService extends Service {
                                     linked = new Linked(macAddress, type, name, condition, triState, conditionState, 1, preLines, lastLines, triType);
                                     linked.setVisitity(1);
                                 }
+
                                 linked.setLines(lines);
                                 deviceLinkDao.insert(linked);
                             } else {
@@ -1239,20 +1231,19 @@ public class MQService extends Service {
                                 } else {
                                     lines = "";
                                 }
-                                List<Linked> linkeds = deviceLinkDao.findLinkeds(macAddress, type);
-                                int size = linkeds.size()+1;
                                 String name = "";
                                 if (type == 0) {
-                                    name = "温度" + size;
+                                    name = "温度";
                                 } else if (type == 1) {
-                                    name = "湿度" + size;
+                                    name = "湿度";
                                 } else if (type == 2) {
                                     switchLine = data[9];
                                 } else if (type == 3) {
-                                    name = "电流" + size;
+                                    name = "电流";
                                 } else if (type == 4) {
-                                    name = "电压" + size;
+                                    name = "电压";
                                 }
+
                                 linked.setName(name);
                                 linked.setLines(lines);
                                 linked.setCondition(condition);
@@ -1283,9 +1274,9 @@ public class MQService extends Service {
                         int lastLine = data[6];
                         int triType2 = data[7];
                         int state = data[8];
-                        Log.i("statesssssssssssss","-->"+state);
-                        if (state==3){
-                            Log.i("statesssssssssssss","-->sssssss");
+                        Log.i("statesssssssssssss", "-->" + state);
+                        if (state == 3) {
+                            Log.i("statesssssssssssss", "-->sssssss");
                             return null;
                         }
                         int type = -1;
@@ -1362,8 +1353,8 @@ public class MQService extends Service {
                             deviceMoniLinkDaoDao.deletes(macAddress);
                             operateState = 1;
                         } else {
-                            List<MoniLink> moniLinks=deviceMoniLinkDaoDao.findMoniLinks(macAddress,type,num);
-                            int size=moniLinks.size()+1;
+                            List<MoniLink> moniLinks = deviceMoniLinkDaoDao.findMoniLinks(macAddress, type, num);
+
                             lines.clear();
                             lines = deviceLineDao.findDeviceLines(macAddress);
                             int[] pre = TenTwoUtil.changeToTwo(preLine);
@@ -1393,14 +1384,13 @@ public class MQService extends Service {
                             } else {
                                 lines = "";
                             }
-                            name=name+"("+size+")";
-                            if (moniLink == null && state!=3) {
+                            if (moniLink == null && state==1) {
                                 moniLink = new MoniLink(name, type, num, contition, triState, preLine, lastLine, controlState, triType, state, controlType, macAddress, mcuVersion);
                                 moniLink.setLines(lines);
                                 moniLink.setVisitity(1);
                                 deviceMoniLinkDaoDao.insert(moniLink);
                                 operateState = 0;
-                            } else if (moniLink!=null && state!=3){
+                            } else if (moniLink != null && state ==1) {
                                 moniLink.setName(name);
                                 moniLink.setLines(lines);
                                 moniLink.setState(state);
@@ -1799,27 +1789,35 @@ public class MQService extends Service {
                         if (alermType == 0x11) {
                             deviceControll = 1;
                             type = 0;
+//                            content="设备已来电！";
                         } else if (alermType == 0x22) {
                             deviceControll = 2;
                             type = 1;
+//                            content="设备已断电!";
                         } else if (alermType == 0x33) {
                             deviceControll = 3;
                             type = 2;
+//                            content="温度报警,请注意";
                         } else if (alermType == 0x44) {
                             deviceControll = 4;
                             type = 3;
+//                            content="湿度报警,请注意";
                         } else if (alermType == 0x55) {
                             deviceControll = 5;
                             type = 4;
+//                            content="电压报警,请注意";
                         } else if (alermType == 0x66) {
                             deviceControll = 6;
                             type = 5;
+//                            content="电流报警,请注意";
                         } else if (alermType == 0x77) {
                             deviceControll = 7;
                             type = 6;
+//                            content="功率报警,请注意";
                         } else if (alermType == 0x88) {
                             deviceControll = 8;
                             type = 7;
+//                            content="开关量报警,请注意";
                         }
                         List<Alerm> list = deviceAlermDao.findDeviceAlerms(macAddress);
 
@@ -1841,6 +1839,7 @@ public class MQService extends Service {
                         Message msg2 = handler.obtainMessage();
                         msg2.what = 10003;
                         msg2.arg1 = type;
+                        msg2.arg2 = data[5];
                         handler.sendMessage(msg2);
                         if (alerm.getDeviceAlarmBroadcast() == 1 || alerm.getDeviceAlarmBroadcast() == 2) {
                             String cotent = alerm.getContent();
@@ -1860,7 +1859,7 @@ public class MQService extends Service {
                                 operateLog.put("deviceLogType", 2);
                                 operateLog.put("deviceLine", line);
                                 operateLog.put("userId", userId);
-                                new AddOperationLogAsync(MQService.this).execute(operateLog);
+                                handler.sendEmptyMessage(10006);
                             }
                         }
                     } else if (funCode == 0xaa) {
@@ -2282,7 +2281,7 @@ public class MQService extends Service {
      * @param moniLinks
      */
     public void updateMoniLinks(List<MoniLink> moniLinks) {
-        for(MoniLink moniLink:moniLinks){
+        for (MoniLink moniLink : moniLinks) {
             moniLink.setVisitity(0);
             deviceMoniLinkDaoDao.update(moniLink);
         }
@@ -2358,14 +2357,32 @@ public class MQService extends Service {
     WindowManager.LayoutParams param;
     NotificationManager mNotificationManager;
 
-    private void setAlermDialog(int mode) {
+    private void setAlermDialog(int mode, String line) {
         try {
             final AlermDialog4 alermDialog4 = new AlermDialog4(MQService.this);
+            alermDialog4.setLine(line);
             alermDialog4.setMode(mode);
-            if (Build.VERSION.SDK_INT>=26) {//8.0新特性
-                alermDialog4.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-            }else{
-                alermDialog4.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+            if (Build.VERSION.SDK_INT >= 26) {//8.0新特性
+                WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+                params.screenOrientation = Configuration.ORIENTATION_PORTRAIT;
+                params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+
+                alermDialog4.getWindow().setAttributes(params);
+            } else {
+                WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+                params.screenOrientation = Configuration.ORIENTATION_PORTRAIT;
+                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+                params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+                alermDialog4.getWindow().setAttributes(params);
             }
             alermDialog4.setCanceledOnTouchOutside(false);
             alermDialog4.setOnNegativeClickListener(new AlermDialog4.OnNegativeClickListener() {
@@ -2386,6 +2403,7 @@ public class MQService extends Service {
                         mediaPlayer.reset();
                     }
                     alermDialog4.dismiss();
+
                 }
             });
 
@@ -2393,6 +2411,7 @@ public class MQService extends Service {
                 alermDialog4.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
+                        soundCount = 3;
                         if (mediaPlayer != null) {
                             mediaPlayer.setLooping(false);
                             mediaPlayer.reset();
@@ -2424,25 +2443,25 @@ public class MQService extends Service {
         }
     }
 
-    /**
-     * 初始化语音合成监听。
-     */
-    private InitListener mTtsInitListener = new InitListener() {
-        @SuppressLint("ShowToast")
-        @Override
-        public void onInit(int code) {
-            Log.d(TAG, "InitListener init() code = " + code);
-            if (code != ErrorCode.SUCCESS) {
-                // showTip("初始化失败,错误码：" + code);
-//                Toast.makeText(getApplicationContext(), "初始化失败,错误码：" + code,
-//                        Toast.LENGTH_SHORT).show();
-            } else {
-                // 初始化成功，之后可以调用startSpeaking方法
-                // 注：有的开发者在onCreate方法中创建完合成对象之后马上就调用startSpeaking进行合成，
-                // 正确的做法是将onCreate中的startSpeaking调用移至这里
-            }
-        }
-    };
+//    /**
+//     * 初始化语音合成监听。
+//     */
+//    private InitListener mTtsInitListener = new InitListener() {
+//        @SuppressLint("ShowToast")
+//        @Override
+//        public void onInit(int code) {
+//            Log.d(TAG, "InitListener init() code = " + code);
+//            if (code != ErrorCode.SUCCESS) {
+//                // showTip("初始化失败,错误码：" + code);
+////                Toast.makeText(getApplicationContext(), "初始化失败,错误码：" + code,
+////                        Toast.LENGTH_SHORT).show();
+//            } else {
+//                // 初始化成功，之后可以调用startSpeaking方法
+//                // 注：有的开发者在onCreate方法中创建完合成对象之后马上就调用startSpeaking进行合成，
+//                // 正确的做法是将onCreate中的startSpeaking调用移至这里
+//            }
+//        }
+//    };
 
     class SpeechReceiver extends BroadcastReceiver {
 
@@ -2480,8 +2499,7 @@ public class MQService extends Service {
      *
      * @Description:
      */
-    private SpeechSynthesizer mTts;// 语音合成
-
+//    private SpeechSynthesizer mTts;// 语音合成
     public void starSpeech(String deviceMac, int type) {
 
         // 2.合成参数设置，详见《科大讯飞MSC API手册(Android)》SpeechSynthesizer 类
@@ -2510,42 +2528,42 @@ public class MQService extends Service {
 
     }
 
-    private SynthesizerListener mSynListener = new SynthesizerListener() {
-        @Override
-        public void onSpeakBegin() {
-
-        }
-
-        @Override
-        public void onBufferProgress(int i, int i1, int i2, String s) {
-
-        }
-
-        @Override
-        public void onSpeakPaused() {
-
-        }
-
-        @Override
-        public void onSpeakResumed() {
-
-        }
-
-        @Override
-        public void onSpeakProgress(int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onCompleted(SpeechError speechError) {
-            Log.i(TAG, "onCompleted:" + speechError.getErrorCode());
-        }
-
-        @Override
-        public void onEvent(int i, int i1, int i2, Bundle bundle) {
-
-        }
-    };
+//    private SynthesizerListener mSynListener = new SynthesizerListener() {
+//        @Override
+//        public void onSpeakBegin() {
+//
+//        }
+//
+//        @Override
+//        public void onBufferProgress(int i, int i1, int i2, String s) {
+//
+//        }
+//
+//        @Override
+//        public void onSpeakPaused() {
+//
+//        }
+//
+//        @Override
+//        public void onSpeakResumed() {
+//
+//        }
+//
+//        @Override
+//        public void onSpeakProgress(int i, int i1, int i2) {
+//
+//        }
+//
+//        @Override
+//        public void onCompleted(SpeechError speechError) {
+//            Log.i(TAG, "onCompleted:" + speechError.getErrorCode());
+//        }
+//
+//        @Override
+//        public void onEvent(int i, int i1, int i2, Bundle bundle) {
+//
+//        }
+//    };
 
 
     /**
@@ -2593,19 +2611,20 @@ public class MQService extends Service {
     }
 
 
-    public void getData(String topicName,int funCode,int state){
+    public void getData(String topicName, int funCode, int state) {
         try {
-            byte[] bytes=new byte[16];
-            bytes[0]= (byte) 0x90;
-            bytes[1]= (byte) funCode;
-            bytes[2]=0;
-            bytes[8]= (byte) state;
-            int sum=0;
-            for (int i = 0; i <bytes.length; i++) {
-                sum+=bytes[i];
+            byte[] bytes = new byte[16];
+            bytes[0] = (byte) 0x90;
+            bytes[1] = 0x39;
+            bytes[3] = 0x0a;
+            bytes[8] = 3;
+            bytes[9] = (byte) state;
+            int sum = 0;
+            for (int i = 0; i < bytes.length; i++) {
+                sum += bytes[i];
             }
-            bytes[14]= (byte) (sum%256);
-            bytes[15]=0x09;
+            bytes[14] = (byte) (sum % 256);
+            bytes[15] = 0x09;
             boolean success = publish(topicName, 1, bytes);
             if (!success) {
                 publish(topicName, 1, bytes);
@@ -2615,6 +2634,7 @@ public class MQService extends Service {
         }
 
     }
+
     /**
      * 基础设置 0x11
      *
@@ -2889,13 +2909,13 @@ public class MQService extends Service {
                     controlType = 0x44;
                 }
             } else if (type == 1) {
-                if (num == 4) {
+                if (num == 0) {
                     controlType = 0x55;
-                } else if (num == 5) {
+                } else if (num == 1) {
                     controlType = 0x66;
-                } else if (num == 6) {
+                } else if (num == 2) {
                     controlType = 0x77;
-                } else if (num == 7) {
+                } else if (num == 3) {
                     controlType = 0x88;
                 }
             }
@@ -3554,9 +3574,11 @@ public class MQService extends Service {
     private PowerManager.WakeLock wl;
 
     int channelId = 0x22222;
-    private void wakeAndUnlock(boolean b) {
+
+    private void wakeAndUnlock(boolean b, int type) {
         if (b) {
 
+//            Log.i("wakeAndUnlock","-->"+content);
             pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
             boolean isOpen = pm.isScreenOn();
             if (!isOpen) {
@@ -3568,37 +3590,25 @@ public class MQService extends Service {
                 //点亮屏幕
                 wl.acquire();
 
-                //得到键盘锁管理器对象
-                km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-                kl = km.newKeyguardLock("unLock");
+//                //得到键盘锁管理器对象
+//                km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+//                kl = km.newKeyguardLock("unLock");
 
-                //解锁
-                kl.disableKeyguard();
+//                //解锁
+//                kl.disableKeyguard();
                 //获取NotificationManager实例
                 mNotificationManager =
                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                NotificationCompat.Builder builder;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {//8.0系统之上
-                    NotificationChannel channel = new NotificationChannel(String.valueOf(channelId), "chanel_name", NotificationManager.IMPORTANCE_HIGH);
-                    mNotificationManager.createNotificationChannel(channel);
-                    builder = new NotificationCompat.Builder(getApplicationContext(), String.valueOf(channelId));
-                    //或者
-                    //builder = new Notification.Builder(context);
-                    //builder.setChannelId(String.valueOf(channelId)); //创建通知时指定channelId
-                } else {
-                    builder = new NotificationCompat.Builder(getApplicationContext());
-                }
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
-                builder.setContentText("你有一条报警信息,请及时处理")
-                        .setSmallIcon(R.mipmap.logo)
+                builder.setSmallIcon(R.mipmap.logo)
+                        .setContentTitle("迈克智联")
+                        .setContentText("你有一条报警信息,请及时处理")
                         .setDefaults(Notification.DEFAULT_ALL)
-                        .setCustomContentView(new RemoteViews(getPackageName(),R.layout.app_notifaction))
+                        .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)// 设置为public后，通知栏将在锁屏界面显示
+                        .setWhen(System.currentTimeMillis())
                         .setAutoCancel(true);
-
-
-
-
-                mNotificationManager.notify(0, builder.build());
+                mNotificationManager.notify(1, builder.build());
 
             }
 
@@ -3612,11 +3622,20 @@ public class MQService extends Service {
 
     }
 
+    String content2 = "ssssssssssssssssssss";
+    String alermsArray[] = {"来电报警!", "断电报警!", "温度报警,请注意", "湿度报警,请注意", "电压报警,请注意", "电流报警请注意", "功率报警请注意", "开关量报警请注意"};
+    String alerm0 = "来电报警!";
+//    String alerm=alermsArray[0];
+//    String alerm0=alermsArray[0];
+//    String alerm0=alermsArray[0];
+//    String alerm0=alermsArray[0];
+//    String alerm0=alermsArray[0];
+//    String alerm0=alermsArray[0];
+
     Handler.Callback mCallback = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
 //
-            wakeAndUnlock(true);
             PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
 
@@ -3635,7 +3654,10 @@ public class MQService extends Service {
                 ToastUtil.showShort(MQService.this, ss);
             } else if (msg.what == 10003) {
                 int type = msg.arg1;
-                setAlermDialog(type);
+                wakeAndUnlock(true, 0);
+                int arg2 = msg.arg2;
+                String line = "线路" + arg2;
+                setAlermDialog(type, line);
             } else if (msg.what == 10004) {
                 int arg1 = msg.arg1;
                 int arg2 = msg.arg2;
@@ -3664,6 +3686,8 @@ public class MQService extends Service {
                 CountTimer countTimer = new CountTimer(1000 * 60 * 5 * 6, 1000);
                 countTimer.setMacArress(macAddress);
                 countTimers.add(countTimer);
+            } else if (msg.what == 10006) {
+                new AddOperationLogAsync(MQService.this).execute(operateLog);
             }
 //            } else if (msg.what == 10005) {
 //                Log.i("tttttttttttttttttttttt", "llllllllllllllllll");
@@ -3679,9 +3703,11 @@ public class MQService extends Service {
      * @param type 0 打开 1关闭 2控制 3设置 4来电报警 5其他报警,6,关闭报警,7,删除
      */
     int soundCount = 0;
+    int soundType = 0;
 
     public void startVoice(int type) {
         try {
+            soundType = type;
             mediaPlayer.reset();
             if (type == 0) {
                 AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.open);
@@ -3719,24 +3745,25 @@ public class MQService extends Service {
                     public void onCompletion(MediaPlayer mp) {
                         try {
                             if (soundCount == 3) {
+                                soundCount = 3;
                                 return;
-                            } else if (soundCount < 3) {
+                            } else if (soundCount < 3 && soundType == 4) {
                                 mediaPlayer.reset();
                                 AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_com);
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
+                                file.close();
                                 soundCount++;
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                     }
                 });
-                if (soundCount == 3) {
-                    file.close();
-                }
+
+                file.close();
+
             } else if (type == 5) {
                 AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
@@ -3748,13 +3775,15 @@ public class MQService extends Service {
                     public void onCompletion(MediaPlayer mp) {
                         try {
                             if (soundCount == 3) {
+                                soundCount = 3;
                                 return;
-                            } else if (soundCount < 3) {
+                            } else if (soundCount < 3 && soundType == 5) {
                                 mediaPlayer.reset();
                                 AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_other);
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
+                                file.close();
                                 soundCount++;
                             }
                         } catch (Exception e) {
@@ -3763,9 +3792,9 @@ public class MQService extends Service {
 
                     }
                 });
-                if (soundCount == 3) {
-                    file.close();
-                }
+
+                file.close();
+
 
             } else if (type == 6) {
                 AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
@@ -3778,13 +3807,14 @@ public class MQService extends Service {
                     public void onCompletion(MediaPlayer mp) {
                         try {
                             if (soundCount == 3) {
-                                return;
-                            } else if (soundCount < 3) {
+                                soundCount = 3;
+                            } else if (soundCount < 3 && soundType == 6) {
                                 mediaPlayer.reset();
                                 AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_close);
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
+                                file.close();
                                 soundCount++;
                             }
                         } catch (Exception e) {
@@ -3793,9 +3823,7 @@ public class MQService extends Service {
 
                     }
                 });
-                if (soundCount == 3) {
-                    file.close();
-                }
+
             } else if (type == 7) {
                 AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.delete);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
@@ -3838,7 +3866,7 @@ public class MQService extends Service {
         }
     }
 
-    Handler handler = new WeakRefHandler(mCallback);
+    Handler handler = new Handler(mCallback);
 
     class AddOperationLogAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, MQService> {
 

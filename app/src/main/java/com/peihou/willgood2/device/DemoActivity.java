@@ -473,11 +473,11 @@ public class DemoActivity extends AppCompatActivity {
     public boolean sendMoniLinkSwitch(String topicName) {
         try {
             byte[] bytes = new byte[12];
-            bytes[0] = (byte) 0x30;
+            bytes[0] = (byte) 0x3c;
             bytes[1] = 0x3a;
-            bytes[2] = (byte) 0;
+            bytes[2] = (byte) 1;
             bytes[3] = 0x06;
-            int x = 224;
+            int x = 0xC0;
             bytes[4] = (byte) x;
             int sum = 0;
             for (int i = 0; i < bytes.length; i++) {

@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.peihou.willgood2.service.MQService;
+import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.ToastUtil;
 
 import org.json.JSONException;
@@ -29,7 +31,13 @@ public class MyReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
+        boolean running2= ServiceUtils.isServiceRunning(context,"com.peihou.willgood2.service.MQService");
+        Log.i("BaseActivity","-->"+running2);
+        if (!running2){
+            Intent service=new Intent(context, MQService.class);
+            service.putExtra("restart",1);
+            context.startService(service);
+        }
         try {
 
             Bundle bundle = intent.getExtras();
@@ -51,7 +59,7 @@ public class MyReceiver extends BroadcastReceiver {
             } else if (JPushInterface.ACTION_NOTIFICATION_RECEIVED.equals(intent.getAction())) {
 //                Log.d(TAG, "[MyReceiver] 接收到推送下来的通知");
                 int notifactionId = bundle.getInt(JPushInterface.EXTRA_NOTIFICATION_ID);
-                JPushInterface.clearNotificationById(context,notifactionId);//清除通知
+//                JPushInterface.clearNotificationById(context,notifactionId);//清除通知
 //                String title =bundle.getString(JPushInterface.EXTRA_ALERT);
 //                Intent speech=new Intent("SpeechReceiverAlerm");
 //                Log.i("SpeechReceiverAlerm",title);
@@ -61,8 +69,9 @@ public class MyReceiver extends BroadcastReceiver {
 
             } else if (JPushInterface.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
                 Log.d(TAG, "[MyReceiver] 用户点击打开了通知");
-
-
+                Log.d(TAG, "[MyReceiver] 接收到推送下来的通知");
+                int notifactionId = bundle.getInt(JPushInterface.EXTRA_NOTIFICATION_ID);
+//                JPushInterface.clearNotificationById(context,notifactionId);//清除通知
                 //打开自定义的Activity
                 //Intent i = new Intent(context,ContentActivity.class);
                 //i.putExtras(bundle);
