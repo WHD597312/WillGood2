@@ -59,6 +59,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:name"
+        android:persistent="true"
+        android:killAfterRestore="true"
         >
 
         <provider
@@ -117,6 +119,12 @@
                 <action android:name="cn.jpush.android.intent.PUSH_TIME" />
             </intent-filter>
         </service>
+        <!-- since 3.1.0 Required SDK 核心功能-->
+        <provider
+            android:authorities="com.peihou.willgood2.DownloadProvider"
+            android:name="cn.jpush.android.service.DownloadProvider"
+            android:exported="true"
+            />
         <receiver
             android:name=".receiver.MQTTMessageReveiver"
             android:enabled="true"

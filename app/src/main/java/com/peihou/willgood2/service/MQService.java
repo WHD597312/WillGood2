@@ -221,7 +221,7 @@ public class MQService extends Service {
                 connect(1);
             }
         }
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     public class LocalBinder extends Binder {
