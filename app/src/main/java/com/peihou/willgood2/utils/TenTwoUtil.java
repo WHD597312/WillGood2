@@ -24,7 +24,7 @@ public class TenTwoUtil {
 		return result;
 	}
 
-	public static int changeToTen2(int[] x){
+	public static int 	changeToTen2(int[] x){
 		int result =0;
 		for (int i =0; i <8; i++) {
 			result+=x[i]<<(7-i);

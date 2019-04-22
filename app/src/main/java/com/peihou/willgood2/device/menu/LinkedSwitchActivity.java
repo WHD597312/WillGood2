@@ -152,6 +152,7 @@ public class LinkedSwitchActivity extends BaseActivity {
         switch (view.getId()){
             case R.id.img_back:
 //                updateLines(deviceMac);
+                setResult(1002);
                 finish();
                 break;
             case R.id.img_ensure:
@@ -274,6 +275,7 @@ public class LinkedSwitchActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        setResult(1002);
         super.onBackPressed();
 //        updateLines(deviceMac);
     }

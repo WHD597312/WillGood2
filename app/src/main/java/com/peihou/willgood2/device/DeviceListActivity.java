@@ -506,7 +506,7 @@ public class DeviceListActivity extends BaseActivity {
     }
 
 
-    class MessageReceiver extends BroadcastReceiver {
+    class   MessageReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -851,7 +851,6 @@ public class DeviceListActivity extends BaseActivity {
                     ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
-
                 oneKey = 1;
                 choices = 0;
                 success = false;
@@ -1225,9 +1224,9 @@ public class DeviceListActivity extends BaseActivity {
             View view = View.inflate(this, R.layout.progress, null);
             TextView tv_load = view.findViewById(R.id.tv_load);
             tv_load.setTextColor(getResources().getColor(R.color.white));
-            if (popupWindow2 == null) {
-                popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-            }
+
+            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
             //添加弹出、弹入的动画
             popupWindow2.setAnimationStyle(R.style.Popupwindow);
             popupWindow2.setFocusable(false);
@@ -1538,11 +1537,13 @@ public class DeviceListActivity extends BaseActivity {
                     if (updateDeviceType == 0) {
                         Device device = list.get(updateDevicePosition);
                         device.setDeviceName(updateDeviceName);
+                        deviceDao.update(device);
                         list.set(updateDevicePosition, device);
                         adapter.notifyDataSetChanged();
                     } else if (updateDeviceType == 2) {
                         Device device = list.get(updateDevicePosition);
                         device.setDevicePassword(updateDeviceName);
+                        deviceDao.update(device);
                         list.set(updateDevicePosition, device);
                         adapter.notifyDataSetChanged();
                     }

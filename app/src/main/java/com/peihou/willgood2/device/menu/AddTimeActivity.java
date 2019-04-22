@@ -205,6 +205,7 @@ public class AddTimeActivity extends BaseActivity {
         switch (view.getId()) {
             case R.id.img_back:
 //                updateLines(deviceMac);
+                setResult(1002);
                 finish();
                 break;
             case R.id.img_add:
@@ -374,6 +375,7 @@ public class AddTimeActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        setResult(1002);
         super.onBackPressed();
 //        updateLines(deviceMac);
     }

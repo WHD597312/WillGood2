@@ -107,6 +107,15 @@ public class SwichCheckActivity extends BaseActivity {
         return R.layout.activity_linked_control;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mqService != null) {
+            mqService.getData(topicName, 0x55);
+            countTimer.start();
+        }
+    }
+
     private String topicName;
 
     @Override
@@ -396,7 +405,7 @@ public class SwichCheckActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2 == null)
+
             popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);

@@ -1,6 +1,7 @@
 package com.peihou.willgood2;
 
 
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -280,6 +281,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         LogUtil.e(TAG + "--->onResume()");
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //移除标记为id的通知 (只是针对当前Context下的所有Notification)
+        notificationManager.cancel(1);
     }
 
     @Override

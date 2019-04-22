@@ -124,48 +124,38 @@ public class LinkedControlActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (mqService!=null){
             List<LinkedType> linkedTypes= deviceLinkedTypeDao.findLinkdType(deviceMac);
-            Collections.sort(linkedTypes, new Comparator<LinkedType>() {
-                @Override
-                public int compare(LinkedType o1, LinkedType o2) {
-                    if (o1.getType()>o2.getType()){
-                        return 1;
-                    }else if (o1.getType()<o2.getType()){
-                        return -1;
-                    }
-                    return 0;
-                }
-            });
             list.clear();
             list.addAll(linkedTypes);
             adapter.notifyDataSetChanged();
+            mqService.getData(topicName, 0x33);
+            countTimer.start();
         }
         click=0;
         running=true;
+        returnData=0;
     }
 
+    int returnData=0;
     @Override
     protected void onStop() {
         super.onStop();
         running=false;
         click=0;
+        returnData=0;
     }
 
-    private void updateLinkedType(){
-        List<LinkedType> list=deviceLinkedTypeDao.findLinkdType(deviceMac);
-        for (int i = 0; i <list.size() ; i++) {
-            LinkedType linkedType=list.get(i);
-            linkedType.setState(0);
-            list.set(i,linkedType);
-            deviceLinkedTypeDao.update(linkedType);
-        }
-    }
+
     @OnClick({R.id.img_back})
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
-                updateLinkedType();
                 finish();
                 break;
         }
@@ -174,7 +164,6 @@ public class LinkedControlActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        updateLinkedType();
     }
 
     @Override
@@ -351,14 +340,14 @@ public class LinkedControlActivity extends BaseActivity {
                         intent.putExtra("deviceId",deviceId);
                         intent.putExtra("deviceMac",deviceMac);
                         intent.putExtra("online",online);
-                        startActivity(intent);
+                        startActivityForResult(intent,1000);
                     }else {
                         Intent intent=new Intent(LinkedControlActivity.this,LinkItemActivity.class);
                         intent.putExtra("type",type);
                         intent.putExtra("deviceId",deviceId);
                         intent.putExtra("deviceMac",deviceMac);
                         intent.putExtra("online",online);
-                        startActivity(intent);
+                        startActivityForResult(intent,1000);
                     }
                 }
             });
@@ -368,8 +357,16 @@ public class LinkedControlActivity extends BaseActivity {
         public int getItemCount() {
             return list.size();
         }
-
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode==1002){
+            returnData=2;
+        }
+    }
+
     class ViewHolderTop extends RecyclerView.ViewHolder{
         public ViewHolderTop(View itemView) {
             super(itemView);
@@ -435,7 +432,7 @@ public class LinkedControlActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null)
+
             popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);

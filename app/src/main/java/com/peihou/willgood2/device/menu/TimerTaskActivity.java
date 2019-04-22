@@ -108,13 +108,6 @@ public class TimerTaskActivity extends BaseActivity {
     public void onClick(View view){
         switch (view.getId()){
             case R.id.img_back:
-                if (mqService!=null){
-                    List<TimerTask> timerTasks=mqService.getTimerTask(deviceMac);
-                    if (!timerTasks.isEmpty()){
-                        List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
-                        mqService.updateTimerTasks(timerTasks2);
-                    }
-                }
                 finish();
                 break;
             case R.id.img_add:
@@ -138,27 +131,34 @@ public class TimerTaskActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if (mqService!=null){
-            List<TimerTask> timerTasks=mqService.getTimerTask(deviceMac);
-            if (!timerTasks.isEmpty()){
-                List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
-                mqService.updateTimerTasks(timerTasks2);
-            }
-        }
         super.onBackPressed();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (mqService!=null && returnData==0){
-            timerTasks.clear();
-            List<TimerTask> timerTasks2=timerTaskDao.findDeviceTimeTask(deviceMac);
-            timerTasks.addAll(timerTasks2);
-            adapter.notifyDataSetChanged();
-        }
+
 
         running=true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mqService!=null && returnData==0){
+            timerTasks.clear();
+            adapter.notifyDataSetChanged();
+            List<TimerTask> timerTasks=mqService.getTimerTask(deviceMac);
+            if (!timerTasks.isEmpty()){
+                List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
+                mqService.updateTimerTasks(timerTasks2);
+            }
+            mqService.getData(topicName,0x22);
+            countTimer.start();
+//            List<TimerTask> timerTasks2=timerTaskDao.findDeviceTimeTask(deviceMac);
+//            timerTasks.addAll(timerTasks2);
+//
+        }
     }
 
     @Override
@@ -276,6 +276,11 @@ public class TimerTaskActivity extends BaseActivity {
             MQService.LocalBinder binder= (MQService.LocalBinder) service;
             mqService=binder.getService();
             if (mqService!=null) {
+                List<TimerTask> timerTasks=mqService.getTimerTask(deviceMac);
+                if (!timerTasks.isEmpty()){
+                    List<TimerTask> timerTasks2=updateTimerTasks(timerTasks);
+                    mqService.updateTimerTasks(timerTasks2);
+                }
                 mqService.getData(topicName,0x22);
                 countTimer.start();
             }
@@ -301,7 +306,8 @@ public class TimerTaskActivity extends BaseActivity {
                     countTimer.start();
                 }
             }
-
+        }else if (resultCode==1002){
+            returnData=2;
         }
     }
 
@@ -498,8 +504,8 @@ public class TimerTaskActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null)
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

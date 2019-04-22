@@ -97,6 +97,7 @@ public class MoniLinkItemActivity extends BaseActivity {
     public void onClick(View v){
         switch (v.getId()){
             case R.id.img_back:
+                setResult(1002);
                 finish();
                 break;
         }
@@ -109,9 +110,25 @@ public class MoniLinkItemActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (mqService!=null){
+            mqService.getData(topicName,0x3a);
+            countTimer.start();
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         running=false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(1002);
+        super.onBackPressed();
+
     }
 
     @Override
@@ -318,7 +335,7 @@ public class MoniLinkItemActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load=view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null)
+
             popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);

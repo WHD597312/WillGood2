@@ -114,21 +114,7 @@ public class LinkItemActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_back:
-                if (mqService!=null){
-                    if (type==5){
-                        List<MoniLink> moniLinks=deviceMoniLinkDaoDao.findMoniLinks2(deviceMac);
-                        if (!moniLinks.isEmpty()){
-                            List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
-                            mqService.updateMoniLinks(moniLinkList);
-                        }
-                    }else {
-                        List<Linked> list=mqService.getLinkeds(deviceMac,type);
-                        if (!list.isEmpty()){
-                            List<Linked> linkeds=updateLinkeds(list);
-                            mqService.updateLinkeds(linkeds);
-                        }
-                    }
-                }
+                setResult(1002);
                 finish();
                 break;
             case R.id.img_add:
@@ -203,21 +189,7 @@ public class LinkItemActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        if (mqService!=null){
-            if (type==5){
-                List<MoniLink> moniLinks=deviceMoniLinkDaoDao.findMoniLinks2(deviceMac);
-                if (!moniLinks.isEmpty()){
-                    List<MoniLink> moniLinkList=updateMoniLink(moniLinks);
-                    mqService.updateMoniLinks(moniLinkList);
-                }
-            }else {
-                List<Linked> list=mqService.getLinkeds(deviceMac,type);
-                if (!list.isEmpty()){
-                    List<Linked> linkeds=updateLinkeds(list);
-                    mqService.updateLinkeds(linkeds);
-                }
-            }
-        }
+        setResult(1002);
         super.onBackPressed();
     }
     private List<Linked> updateLinkeds(List<Linked> linkeds){
@@ -241,21 +213,68 @@ public class LinkItemActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (mqService!=null && returnData==0){
-            if (type == 5) {
-                List<MoniLink> moniLinks2 = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
-                moniLinks2.clear();
-                moniLinks.addAll(moniLinks2);
-                moniLinkAdapter.notifyDataSetChanged();
-            } else {
+        running = true;
+    }
 
-                List<Linked> list2 = deviceLinkDao.findLinkeds(deviceMac, type);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mqService!=null && returnData==0) {
+            if (type == 5) {
+                moniLinks.clear();
+                moniLinkAdapter.notifyDataSetChanged();
+                List<MoniLink> moniLinks2 = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
+                if (!moniLinks2.isEmpty()) {
+                    List<MoniLink> moniLinkList = updateMoniLink(moniLinks2);
+                    mqService.updateMoniLinks(moniLinkList);
+                }
+                int state=0;
+                if (analog==0){
+                    state=0x11;
+                }else if (analog==1){
+                    state=0x22;
+                }else if (analog==2){
+                    state=0x33;
+                }else if (analog==3){
+                    state=0x44;
+                }else if (analog==4){
+                    state=0x55;
+                }else if (analog==5){
+                    state=0x66;
+                }else if (analog==6){
+                    state=0x77;
+                }else if (analog==7){
+                    state=0x88;
+                }
+                mqService.getData(topicName,0x39,state);
+                countTimer.start();
+            } else {
                 list.clear();
-                list.addAll(list2);
                 adapter.notifyDataSetChanged();
+                List<Linked> list2 = mqService.getLinkeds(deviceMac, type);
+                if (!list2.isEmpty()) {
+                    List<Linked> linkeds = updateLinkeds(list2);
+                    mqService.updateLinkeds(linkeds);
+                }
+                int funCode=0;
+                if (type == 0) {
+                    funCode = 0x34;
+                } else if (type == 1) {
+                    funCode = 0x35;
+                } else if (type == 2) {
+                    funCode = 0x36;
+                } else if (type == 3) {
+                    funCode = 0x37;
+                } else if (type == 4) {
+                    funCode = 0x38;
+                } else if (type == 5) {
+                    funCode = 0x39;
+                }
+                mqService.getData(topicName, funCode);
+                countTimer.start();
             }
         }
-        running = true;
+
     }
 
     @Override
@@ -272,6 +291,20 @@ public class LinkItemActivity extends BaseActivity {
             MQService.LocalBinder binder = (MQService.LocalBinder) service;
             mqService = binder.getService();
             if (mqService != null) {
+                    if (type==5){
+                        List<MoniLink> moniLinks2=deviceMoniLinkDaoDao.findMoniLinks(deviceMac,moniType,moniNum);
+                        if (!moniLinks2.isEmpty()){
+                            List<MoniLink> moniLinkList=updateMoniLink(moniLinks2);
+                            mqService.updateMoniLinks(moniLinkList);
+                        }
+                    }else {
+                        List<Linked> list2=mqService.getLinkeds(deviceMac,type);
+                        if (!list2.isEmpty()){
+                            List<Linked> linkeds=updateLinkeds(list2);
+                            mqService.updateLinkeds(linkeds);
+                        }
+                    }
+
                 int funCode = 0;
                 if (type == 0) {
                     funCode = 0x34;
@@ -701,7 +734,8 @@ public class LinkItemActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (mqService != null) {
+
+
             if (resultCode == 1000) {
                 int funCode = 0;
                 if (type == 0) {
@@ -718,7 +752,7 @@ public class LinkItemActivity extends BaseActivity {
                 returnData = 1;
                 Linked linked = (Linked) data.getSerializableExtra("linked");
                 Log.i("topicName","-->"+topicName);
-                if (linked != null) {
+                if (mqService!=null && linked != null) {
                     mqService.sendLinkedSet(topicName, linked,0x01);
                     add = 1;
                     countTimer.start();
@@ -727,13 +761,15 @@ public class LinkItemActivity extends BaseActivity {
                 Log.i("topicName","-->"+topicName);
                 returnData = 1;
                 MoniLink moniLink = (MoniLink) data.getSerializableExtra("moniLink");
-                if (moniLink != null) {
+                if (moniLink != null && mqService!=null) {
                     mqService.sendMoniLink(topicName, moniLink,0x01);
                     add = 1;
                     countTimer.start();
                 }
+            }else if (resultCode==1002){
+                returnData=2;
             }
-        }
+
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -780,8 +816,8 @@ public class LinkItemActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null)
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);

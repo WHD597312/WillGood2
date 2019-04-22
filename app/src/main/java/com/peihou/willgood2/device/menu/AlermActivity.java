@@ -125,14 +125,21 @@ public class AlermActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        click=0;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (mqService!=null){
             List<Alerm> alerms=deviceAlermDao.findDeviceAlerms(deviceMac);
             list.clear();
             list.addAll(alerms);
             adapter.notifyDataSetChanged();
+            mqService.getData(topicName, 0x66);
+            countTimer.start();
         }
         running = true;
-        click=0;
     }
 
     @Override
@@ -277,8 +284,8 @@ public class AlermActivity extends BaseActivity {
         View view = View.inflate(this, R.layout.progress, null);
         TextView tv_load = view.findViewById(R.id.tv_load);
         tv_load.setTextColor(getResources().getColor(R.color.white));
-        if (popupWindow2==null)
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+        popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         //添加弹出、弹入的动画
         popupWindow2.setAnimationStyle(R.style.Popupwindow);
         popupWindow2.setFocusable(false);
@@ -929,6 +936,7 @@ public class AlermActivity extends BaseActivity {
                                 data[3] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            click=1;
                             countTimer.start();
 
                         } else {
@@ -949,6 +957,7 @@ public class AlermActivity extends BaseActivity {
                                 data[6] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            click=1;
                             countTimer.start();
 
                         } else {
@@ -969,6 +978,7 @@ public class AlermActivity extends BaseActivity {
                                 data[9] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            click=1;
                             countTimer.start();
 
                         } else {
@@ -989,6 +999,7 @@ public class AlermActivity extends BaseActivity {
                                 data[12] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            click=1;
                             countTimer.start();
 
                         } else {
@@ -1009,6 +1020,7 @@ public class AlermActivity extends BaseActivity {
                                 data[15] = 0x22;
                             }
                             mqService.sendAlerm(topicName, mcuVersion, data);
+                            click=1;
                             countTimer.start();
 
                         } else {
@@ -1083,6 +1095,7 @@ public class AlermActivity extends BaseActivity {
                         int[] data=mqService.getAlermData();
                         data[16] = open;
                         mqService.sendAlerm(topicName, mcuVersion, data);
+                        click=1;
                         params.clear();
                         params.put("deviceId", deviceId);
                         params.put("deviceAlarmNum", updatePosition - 2);
