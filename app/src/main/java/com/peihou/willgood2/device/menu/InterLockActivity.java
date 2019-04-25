@@ -232,6 +232,7 @@ public class InterLockActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         if (mqService!=null){
+            mqService.connectMqtt(deviceMac);
             lockLineList.clear();
             List<Line2> lockLineList2 = deviceLineDao.findDeviceOnlineLines(deviceMac);
             lockLineList.addAll(lockLineList2);

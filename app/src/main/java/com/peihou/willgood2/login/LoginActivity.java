@@ -2,7 +2,9 @@ package com.peihou.willgood2.login;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
@@ -22,6 +24,7 @@ import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.device.DeviceListActivity;
 import com.peihou.willgood2.pojo.Device;
 import com.peihou.willgood2.pojo.UserInfo;
+import com.peihou.willgood2.receiver.MQTTMessageReveiver;
 import com.peihou.willgood2.receiver.UtilsJPush;
 import com.peihou.willgood2.utils.Mobile;
 import com.peihou.willgood2.utils.ToastUtil;
@@ -66,6 +69,7 @@ public class LoginActivity extends BaseActivity {
     }
 
     public void initView(View view) {
+
         tv_login.setTextSize(22);
         tv_register.setTextSize(16);
         tv_login.getPaint().setFakeBoldText(true);
@@ -77,6 +81,11 @@ public class LoginActivity extends BaseActivity {
         password=sharedPreferences.getString("password","");
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override

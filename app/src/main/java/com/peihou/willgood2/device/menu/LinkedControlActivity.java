@@ -124,6 +124,7 @@ public class LinkedControlActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        running=true;
     }
 
     @Override
@@ -134,11 +135,12 @@ public class LinkedControlActivity extends BaseActivity {
             list.clear();
             list.addAll(linkedTypes);
             adapter.notifyDataSetChanged();
+            mqService.connectMqtt(deviceMac);
             mqService.getData(topicName, 0x33);
             countTimer.start();
         }
         click=0;
-        running=true;
+
         returnData=0;
     }
 

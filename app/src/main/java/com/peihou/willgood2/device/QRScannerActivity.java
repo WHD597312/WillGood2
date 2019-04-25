@@ -188,6 +188,12 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
     }
 
 
+    @Override
+    public void onBackPressed() {
+        setResult(1002);
+        super.onBackPressed();
+    }
+
     int deviceModel=0;
     String imei;
     String password;
@@ -196,6 +202,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.back:
+                setResult(1002);
                 finish();
                 break;
             case R.id.img_book:
@@ -350,6 +357,8 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                             deviceDao.update(device);
                             insert=0;
                         }
+                    }else if (code==1003){
+
                     }
                 }
             }catch (Exception e){
@@ -371,6 +380,12 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                     break;
                 case 10007:
                     ToastUtil.showShort(QRScannerActivity.this,"对不起您的设备初始码错误，请重置后重新添加");
+                    break;
+                case 10013:
+                    ToastUtil.showShort(QRScannerActivity.this,"该设备你已添加!");
+                    break;
+                case 10014:
+                    ToastUtil.showShort(QRScannerActivity.this,"该设备已被他人添加!");
                     break;
                 default:
                     ToastUtil.showShort(QRScannerActivity.this,"添加失败");
@@ -886,7 +901,7 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                 } else {
                     if (popupWindow2 != null && popupWindow2.isShowing()) {
                         isMatching=false;
-                        wifiName="";
+//                        wifiName="";
                         if (gifDrawable != null && gifDrawable.isPlaying()) {
                             gifDrawable.stop();
 

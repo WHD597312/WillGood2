@@ -118,10 +118,12 @@ public class DeviceInterLockActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         if (mqService!=null){
+            mqService.connectMqtt(deviceMac);
             list.clear();
             List<InterLock> list2=deviceInterLockDao.findDeviceVisityInterLock(deviceMac);
             list.addAll(list2);
             adapter.notifyDataSetChanged();
+
         }
         running=true;
     }

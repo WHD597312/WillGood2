@@ -96,7 +96,6 @@ public class DeviceListActivity extends BaseActivity {
     MyAdapter adapter;//设备列表的适配器
     List<Device> list = new ArrayList<>();//设备列表集合
     DeviceDaoImpl deviceDao;//设备表操控者
-    private Device device;//替代设备数据表的一个设备
 
     Map<String, Object> params = new HashMap<>();
     MyApplication application;
@@ -115,31 +114,30 @@ public class DeviceListActivity extends BaseActivity {
         return R.layout.activity_device_list2;
     }
 
-    MQTTMessageReveiver reveiver;
+
     MQService mqService;
     boolean bind = false;
     MessageReceiver messageReceiver;
     int userId;
     SharedPreferences preferences;
-
+    MQTTMessageReveiver reveiver;
     private int load = 0;
-
+    int refresh=0;
     @Override
     public void initView(View view) {
         application = (MyApplication) getApplication();
         deviceDao = new DeviceDaoImpl(getApplicationContext());
         list = deviceDao.findAllDevice();
 
-        requestOverlayPermission();
+//        requestOverlayPermission();
+
+
         reveiver = new MQTTMessageReveiver();
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction("mqttmessage2");
+//        filter.addAction(Intent.ACTION_TIME_TICK);
         this.registerReceiver(reveiver, filter);
-        if (list != null && list.size() > 0) {
-            device = new Device();
-        }
-
         messageReceiver = new MessageReceiver();
         IntentFilter intentFilter = new IntentFilter("DeviceListActivity");
         intentFilter.addAction("offline");
@@ -176,7 +174,7 @@ public class DeviceListActivity extends BaseActivity {
                 load = 1;
                 params.clear();
                 params.put("userId", userId);
-                new LoadDeviceListAsync(this).execute(params);
+                new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
             }
         }
         adapter = new MyAdapter(list, this);
@@ -193,6 +191,7 @@ public class DeviceListActivity extends BaseActivity {
             public void loadMore() {
                 params.clear();
                 params.put("userId", userId);
+                refresh=1;
                 new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
             }
         });
@@ -377,12 +376,13 @@ public class DeviceListActivity extends BaseActivity {
             }
             switch (code) {
                 case 100:
-
-                    Log.i("subscribeAll", "--------");
+                    Log.i("topicNames","-->"+topicNames.size());
+                    Log.i("subscribeAll", "--------"+mqService);
                     list.clear();
                     list.addAll(devices);
                     adapter.notifyDataSetChanged();
-                    new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
+                    handler.sendEmptyMessage(100);
+
                     break;
                 default:
                     break;
@@ -397,10 +397,10 @@ public class DeviceListActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder = (MQService.LocalBinder) service;
             mqService = binder.getService();
-            if (mqService != null && load == 1) {
-                Log.i("subscribeAll", "--------");
-
+            if (mqService!=null){
+                mqService.setUserId(userId);
             }
+
         }
 
         @Override
@@ -460,9 +460,7 @@ public class DeviceListActivity extends BaseActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if (!list.isEmpty()) {
-                popupmenuWindow3();
-                int n = list.size();
+            if (!list.isEmpty()) { int n = list.size();
                 int total = 0;
                 if (0 < n && n <= 2) {
                     total = 2000;
@@ -473,7 +471,7 @@ public class DeviceListActivity extends BaseActivity {
                 }
                 CountTimer2 countTimer = new CountTimer2(3000, 1000);
                 countTimer.start();
-                load = 0;
+
             }
         }
 
@@ -481,12 +479,13 @@ public class DeviceListActivity extends BaseActivity {
         protected List<String> doInBackground(DeviceListActivity deviceListActivity, List<String>... lists) {
             try {
                 if (mqService != null) {
-                    mqService.subscribeAll(DeviceListActivity.this.list);
+                    List<Device> devices=deviceDao.findAllDevice();
+                    mqService.subscribeAll(devices);
                     List<String> topicNames = lists[0];
                     for (String topicName : topicNames) {
                         String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
-                        Log.i("LoadDataAsync", "-->" + topicName);
-                        mqService.addCountTimer(macAddress);
+                        Log.i("subscribeAll", "-->" + topicName);
+//                        mqService.addCountTimer(macAddress);
                         Log.i("deviceMac", "-->" + macAddress);
                         mqService.getData(topicName, 0x11);
                     }
@@ -606,6 +605,10 @@ public class DeviceListActivity extends BaseActivity {
                         break;
                     }
                 }
+            }else if (what==100){
+                Log.i("handler","-->"+mqService);
+                popupmenuWindow3();
+                new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
             }
             return true;
         }
@@ -616,23 +619,34 @@ public class DeviceListActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (!Settings.canDrawOverlays(this)) {
-                MyApplication.floating=0;
-            } else {
-                MyApplication.floating=1;
-            }
-        }
-        Log.i("devicehhhhhhhhhhhh","-->"+onResult);
-        if (!running && mqService!=null && onResult==0){
+        requestOverlayPermission();
+//        Log.i("devicehhhhhhhhhhhh","-->"+onResult);
+//        if (!running && mqService!=null && onResult==0){
+//            List<Device> devices=mqService.getDevices();
+//            list.clear();
+//            list.addAll(devices);
+//            adapter.notifyDataSetChanged();
+//        }
+
+        running = true;
+    }
+    int reload=0;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mqService!=null && onResult==0){
             List<Device> devices=mqService.getDevices();
             list.clear();
             list.addAll(devices);
             adapter.notifyDataSetChanged();
+//            popupmenuWindow3();
+            countTimer.start();
+            new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
+
         }
         onResult=0;
-        running = true;
     }
+
 
     @Override
     public void onBackPressed() {
@@ -668,13 +682,14 @@ public class DeviceListActivity extends BaseActivity {
         if (reveiver != null) {
             unregisterReceiver(reveiver);
         }
+
+
         if (messageReceiver != null) {
             unregisterReceiver(messageReceiver);
         }
         if (bind) {
             unbindService(connection);
         }
-
         handler.removeCallbacksAndMessages(null);
     }
 
@@ -686,7 +701,6 @@ public class DeviceListActivity extends BaseActivity {
         if (resultCode == 100) {
             onResult = 1;
             Device device = (Device) data.getSerializableExtra("device");
-
             if (device != null) {
                 if (mqService != null) {
                     countTimer.start();
@@ -697,7 +711,7 @@ public class DeviceListActivity extends BaseActivity {
                     mqService.subscribe(topicName, 1);
                     mqService.subscribe(tioncName2, 1);
                     mqService.getData(topicName3, 0x11);
-                    mqService.addCountTimer(deviceMac);
+//                    mqService.addCountTimer(deviceMac);
                 }
                 int insert=data.getIntExtra("insert",0);
                 if (insert==1){
@@ -705,7 +719,10 @@ public class DeviceListActivity extends BaseActivity {
                     adapter.notifyDataSetChanged();
                 }
             }
+        }else if (resultCode==1002){
+            onResult=1;
         }
+
     }
 
     class UnbindDeviceAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, DeviceListActivity> {
@@ -734,7 +751,7 @@ public class DeviceListActivity extends BaseActivity {
                             mqService.revoveOfflineDevice(macAddress);
                             mqService.deleteDevice(macAddress);
                             mqService.revoveOfflineDevice(macAddress);
-                            mqService.revoveCountTimer(macAddress);
+//                            mqService.revoveCountTimer(macAddress);
 
                         }
                     }
@@ -773,7 +790,7 @@ public class DeviceListActivity extends BaseActivity {
 
         UtilsJPush.stopJpush(this);
         if (mqService!=null){
-            mqService.clearCountTimer();
+//            mqService.clearCountTimer();
             mqService.clearAllData();
         }
         application.removeActiviies(list);
@@ -906,7 +923,7 @@ public class DeviceListActivity extends BaseActivity {
                 if (mqService != null) {
                     mqService.clearAllData();
                     mqService.cancelAllsubscibe();
-                    mqService.clearCountTimer();
+//                    mqService.clearCountTimer();
                 }
                 if (popupWindow != null && popupWindow.isShowing()) {
                     popupWindow.dismiss();
@@ -1575,7 +1592,7 @@ public class DeviceListActivity extends BaseActivity {
                             mqService.revoveOfflineDevice(macAddress);
                             mqService.deleteDevice(macAddress);
                             mqService.revoveOfflineDevice(macAddress);
-                            mqService.revoveCountTimer(macAddress);
+//                            mqService.revoveCountTimer(macAddress);
                         }
 //                        list.remove(updateDevicePosition);
                     }

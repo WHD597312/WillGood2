@@ -2,6 +2,8 @@ package com.peihou.willgood2;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -53,6 +55,7 @@ public class MyApplication extends Application {
         JPushInterface.setDebugMode(true);
         JPushInterface.init(this);
         disableAPIDialog();
+        createNotificationChannel();
         String registrationID=JPushInterface.getRegistrationID(this);
         Log.i("registrationIDqqq","-->"+registrationID);
         MobSDK.init(this);
@@ -103,8 +106,22 @@ public class MyApplication extends Application {
             }
         });
     }
-
-
+    private static final String PUSH_CHANNEL_ID = "PUSH_NOTIFY_ID";
+    private static final String PUSH_CHANNEL_NAME = "PUSH_NOTIFY_NAME";
+    //需要创建 NotificationChannel
+    private void createNotificationChannel(){
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        //判断是不是 Android8.0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel(
+                    //字符串类型的 Channel id
+                    PUSH_CHANNEL_ID,
+                    //字符串类型的 Channel name
+                    PUSH_CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            manager.createNotificationChannel(channel);
+        }
+    }
     public void addActivity(Activity activity){
         if (!activities.contains(activity)){
             activities.add(activity);

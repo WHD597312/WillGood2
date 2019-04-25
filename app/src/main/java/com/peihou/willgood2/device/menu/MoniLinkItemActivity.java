@@ -113,6 +113,7 @@ public class MoniLinkItemActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (mqService!=null){
+            mqService.connectMqtt(deviceMac);
             mqService.getData(topicName,0x3a);
             countTimer.start();
         }

@@ -218,7 +218,7 @@ public class LinkItemActivity extends BaseActivity {
 
     @Override
     protected void onResume() {
-        super.onResume();
+        super.onResume();;
         if (mqService!=null && returnData==0) {
             if (type == 5) {
                 moniLinks.clear();
@@ -246,6 +246,8 @@ public class LinkItemActivity extends BaseActivity {
                 }else if (analog==7){
                     state=0x88;
                 }
+                mqService.connectMqtt(deviceMac);
+
                 mqService.getData(topicName,0x39,state);
                 countTimer.start();
             } else {
@@ -267,9 +269,9 @@ public class LinkItemActivity extends BaseActivity {
                     funCode = 0x37;
                 } else if (type == 4) {
                     funCode = 0x38;
-                } else if (type == 5) {
-                    funCode = 0x39;
                 }
+                mqService.connectMqtt(deviceMac);
+
                 mqService.getData(topicName, funCode);
                 countTimer.start();
             }

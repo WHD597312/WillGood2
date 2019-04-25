@@ -126,12 +126,14 @@ public class AlermActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         click=0;
+        running = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (mqService!=null){
+            mqService.connectMqtt(deviceMac);
             List<Alerm> alerms=deviceAlermDao.findDeviceAlerms(deviceMac);
             list.clear();
             list.addAll(alerms);
@@ -139,7 +141,6 @@ public class AlermActivity extends BaseActivity {
             mqService.getData(topicName, 0x66);
             countTimer.start();
         }
-        running = true;
     }
 
     @Override

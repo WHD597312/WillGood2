@@ -549,10 +549,12 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     @Override
     public void onBackPressed() {
 //        updateLines(deviceMac);
+        int a=10;
+        int b=0;
         if (!TextUtils.isEmpty(search)) {
-
             startActivity(new Intent(this, DeviceListActivity.class));
         } else {
+            setResult(1002);
             super.onBackPressed();
         }
     }
@@ -627,10 +629,14 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     protected void onStart() {
         super.onStart();
         boolean running2 = ServiceUtils.isServiceRunning(this, "com.peihou.willgood2.service.MQService");
-        if (!running2) {
-            Intent intent = new Intent(this, MQService.class);
-            intent.putExtra("restart", 1);
-            startService(intent);
+        if (!running2){
+            Intent intent=new Intent(this, MQService.class);
+            intent.putExtra("restart",1);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            }else {
+                startService(intent);
+            }
         }
         if (returnData==0 &&!running && mqService != null) {
             device=deviceDao.findDeviceByMac(deviceMac);
@@ -805,6 +811,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     startActivity(new Intent(this, DeviceListActivity.class));
                     break;
                 }
+                setResult(1002);
                 finish();
                 break;
             case R.id.img_book:

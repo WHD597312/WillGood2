@@ -286,7 +286,9 @@ public class SearchDeviceActivity extends BaseActivity {
         getWindow().setAttributes(lp);
     }
 
-    CountDownTimer timer = new CountTimer(2000, 1000);
+
+
+    CountDownTimer countTimer = new CountTimer(2000, 1000);
 
     class CountTimer extends CountDownTimer {
 
@@ -303,7 +305,7 @@ public class SearchDeviceActivity extends BaseActivity {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            popupmenuWindow3();
+//            popupmenuWindow3();
         }
 
         @Override

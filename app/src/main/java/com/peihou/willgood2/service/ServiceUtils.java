@@ -18,7 +18,7 @@ public class ServiceUtils {
 		ActivityManager myManager = (ActivityManager) context
 				.getSystemService(Context.ACTIVITY_SERVICE);
 		ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
-				.getRunningServices(200);
+				.getRunningServices(1000);
 		for (int i = 0; i < runningService.size(); i++) {
 			if (runningService.get(i).service.getClassName().toString()
 					.equals(ServiceName)) {

@@ -45,6 +45,7 @@ import com.weigan.loopview.OnItemSelectedListener;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -209,6 +210,21 @@ public class AddTimeActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.img_add:
+                Calendar calendar=Calendar.getInstance();
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month-1);
+                calendar.set(Calendar.DAY_OF_MONTH, day);
+                calendar.set(Calendar.HOUR_OF_DAY,hour);
+                calendar.set(Calendar.MINUTE,min);
+                Date date=calendar.getTime();
+                long time=date.getTime();
+                Calendar calendar2=Calendar.getInstance();
+                Date date2=calendar2.getTime();
+                long timer2=date2.getTime();
+                if (time<timer2){
+                    ToastUtil.showShort(this,"请设置合理的定时时间");
+                    break;
+                }
                 TimerTask timerTask = null;
                 int preLine = 0;
                 int lastLine = 0;

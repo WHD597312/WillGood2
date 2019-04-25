@@ -40,14 +40,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_5"
             android:gravity="center"
-            android:text="发布版本：V5.4" />
+            android:text="发布版本：V5.9.5" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_5"
             android:gravity="center"
-            android:text="发布时间:2019-4-4" />
+            android:text="发布时间:2019-4-25" />
 
         <RelativeLayout
             android:layout_width="match_parent"

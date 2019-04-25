@@ -112,6 +112,7 @@ public class MoniCheckActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        running=true;
     }
 
     @Override
@@ -123,11 +124,13 @@ public class MoniCheckActivity extends BaseActivity {
             tables.addAll(tables2);
             adapter.notifyDataSetChanged();
             if (mqService!=null){
+                mqService.connectMqtt(deviceMac);
+
                 mqService.getData(topicName,0x88);
                 countTimer.start();
             }
         }
-        running=true;
+
     }
 
     @Override

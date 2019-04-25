@@ -60,7 +60,6 @@
         android:theme="@style/AppTheme"
         tools:replace="android:name"
         android:persistent="true"
-        android:killAfterRestore="true"
         >
 
         <provider
@@ -106,19 +105,6 @@
                 <category android:name="com.peihou.willgood2" />
             </intent-filter>
         </receiver>
-        <!-- Required SDK 核心功能-->
-        <!-- 可配置android:process参数将PushService放在其他进程中 -->
-        <service
-            android:name="cn.jpush.android.service.PushService"
-            android:process=":pushcore"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="cn.jpush.android.intent.REGISTER" />
-                <action android:name="cn.jpush.android.intent.REPORT" />
-                <action android:name="cn.jpush.android.intent.PushService" />
-                <action android:name="cn.jpush.android.intent.PUSH_TIME" />
-            </intent-filter>
-        </service>
         <!-- since 3.1.0 Required SDK 核心功能-->
         <provider
             android:authorities="com.peihou.willgood2.DownloadProvider"
@@ -126,40 +112,35 @@
             android:exported="true"
             />
         <receiver
-            android:name="cn.jpush.android.service.PushReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter android:priority="1000">
-                <action android:name="cn.jpush.android.intent.NOTIFICATION_RECEIVED_PROXY" />   <!--Required  显示通知栏 -->
-                <category android:name="com.peihou.willgood2" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.USER_PRESENT" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-            <!-- Optional -->
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-
-                <data android:scheme="com.peihou.willgood2" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
             android:name=".receiver.MQTTMessageReveiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <!--<action android:name="android.intent.action.TIME_TICK"></action>-->
                 <action android:name="mqttmessage" />
             </intent-filter>
         </receiver>
-
+        <!-- Required SDK 核心功能-->
+        <!-- 可配置android:process参数将PushService放在其他进程中 -->
+        <!--<service-->
+            <!--android:name="cn.jpush.android.service.PushService"-->
+            <!--android:process=":pushcore"-->
+            <!--android:exported="false">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="cn.jpush.android.intent.REGISTER" />-->
+                <!--<action android:name="cn.jpush.android.intent.REPORT" />-->
+                <!--<action android:name="cn.jpush.android.intent.PushService" />-->
+                <!--<action android:name="cn.jpush.android.intent.PUSH_TIME" />-->
+            <!--</intent-filter>-->
+        <!--</service>-->
         <service
             android:name=".service.MQService"
             android:enabled="true"
             android:exported="true"
-            />
+           />
+
+
 
         <activity android:name=".login.LoginActivity">
             <intent-filter>

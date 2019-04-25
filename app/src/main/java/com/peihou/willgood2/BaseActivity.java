@@ -142,7 +142,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!running2){
             Intent intent=new Intent(this, MQService.class);
             intent.putExtra("restart",1);
-            startService(intent);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            }else {
+                startService(intent);
+            }
         }
     }
 
