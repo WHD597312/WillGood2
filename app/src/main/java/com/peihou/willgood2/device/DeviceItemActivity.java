@@ -489,12 +489,14 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     }
 
 
-    List<Line2> list2 = new ArrayList<>();
 
+    List<Line2> list2 = new ArrayList<>();
     private void setMode(Device device) {
         try {
             choicedLines = 0;
             list.clear();
+            list2.clear();
+
             if (mqService != null) {
                 list2 = mqService.getDeviceOnlineLiens(deviceMac);
             }
@@ -632,11 +634,12 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
         if (!running2){
             Intent intent=new Intent(this, MQService.class);
             intent.putExtra("restart",1);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent);
-            }else {
-                startService(intent);
-            }
+            startService(intent);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                startForegroundService(intent);
+//            }else {
+//                startService(intent);
+//            }
         }
         if (returnData==0 &&!running && mqService != null) {
             device=deviceDao.findDeviceByMac(deviceMac);
@@ -851,7 +854,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     device.setLastlinesjog(0);
                     device.setDeviceState(0);
                     onKey = 1;
-                    boolean success = mqService.sendBasic(topicName, device);
+                    boolean success = mqService.sendBasic(topicName, device,0x01);
                     countTimer.start();
 
                 }
@@ -880,7 +883,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     device.setLastlinesjog(0);
                     click = 2;
                     onKey = 2;
-                    boolean success = mqService.sendBasic(topicName, device);
+                    boolean success = mqService.sendBasic(topicName, device,0x01);
                     countTimer.start();
 //                    if (success){
 //                        linesAadpter.notifyDataSetChanged();
@@ -929,7 +932,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 device.setLastlinesjog(lastLinesJog);
 
                 if (mqService != null) {
-                    boolean success = mqService.sendBasic(topicName, device);
+                    boolean success = mqService.sendBasic(topicName, device,0x02);
                     countTimer.start();
                     click = 3;
 //                    if (success){
@@ -999,7 +1002,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     device.setPrelinesjog(0);
                     device.setLastlinesjog(0);
                     if (mqService != null) {
-                        mqService.sendBasic(topicName, device);
+                        mqService.sendBasic(topicName, device,0x01);
                         countTimer.start();
                     }
                 }

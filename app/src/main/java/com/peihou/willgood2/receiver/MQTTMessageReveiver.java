@@ -50,11 +50,13 @@ public class MQTTMessageReveiver extends BroadcastReceiver {
         } else if (mobNetInfo.isConnected() || wifiNetInfo.isConnected()) {
             Intent mqttIntent = new Intent(context, MQService.class);
             mqttIntent.putExtra("reconnect", "reconnect");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(mqttIntent);
-            }else {
-                context.startService(mqttIntent);
-            }
+            context.startService(mqttIntent);
+
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                context.startForegroundService(mqttIntent);
+//            }else {
+//                context.startService(mqttIntent);
+//            }
         }
     }
 

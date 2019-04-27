@@ -124,17 +124,20 @@ public class PowerLostMomoryActivity extends BaseActivity {
                     click=1;
                     if (open==1){
                         open=0;
-                        img_open.setImageResource(R.mipmap.img_close);
+//                        img_open.setImageResource(R.mipmap.img_close);
                         plMemory=0;
                     }else {
                         open=1;
-                        img_open.setImageResource(R.mipmap.img_open);
+//                        img_open.setImageResource(R.mipmap.img_open);
                         plMemory=1;
                     }
                     Device device=mqService.getDeviceByMac(deviceMac);
                     if (device!=null){
+//                        device.setDeviceState(0);
+//                        device.setPrelinesjog(0);
+//                        device.setLastlinesjog(0);
                         device.setPlMemory(plMemory);
-                        mqService.sendBasic(topicName,device);
+                        mqService.sendBasic(topicName,device,0x03);
                         onClick=1;
                         countTimer.start();
                     }

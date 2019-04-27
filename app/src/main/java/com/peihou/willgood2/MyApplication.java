@@ -55,7 +55,7 @@ public class MyApplication extends Application {
         JPushInterface.setDebugMode(true);
         JPushInterface.init(this);
         disableAPIDialog();
-        createNotificationChannel();
+//        createNotificationChannel();
         String registrationID=JPushInterface.getRegistrationID(this);
         Log.i("registrationIDqqq","-->"+registrationID);
         MobSDK.init(this);

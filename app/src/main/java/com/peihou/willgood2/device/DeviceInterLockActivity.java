@@ -234,10 +234,9 @@ public class DeviceInterLockActivity extends BaseActivity {
                     lastlineSwitch=TenTwoUtil.changeToTen2(lastLineSwitch);
                     device.setPrelineswitch(prelineSwitch);
                     device.setLastlineswitch(lastlineSwitch);
-                    device.setPrelinesjog(0);
-                    device.setLastlinesjog(0);
+
                     if (mqService!=null){
-                        boolean success=mqService.sendBasic(topicName,device);
+                        boolean success=mqService.sendBasic(topicName,device,0x04);
                         countTimer.start();
                         click=1;
                         if (success){
@@ -278,7 +277,7 @@ public class DeviceInterLockActivity extends BaseActivity {
                     device.setPrelinesjog(0);
                     device.setLastlinesjog(0);
                     if (mqService!=null){
-                        boolean success=mqService.sendBasic(topicName,device);
+                        boolean success=mqService.sendBasic(topicName,device,0x04);
                         click=1;
                         countTimer.start();
 
@@ -323,7 +322,7 @@ public class DeviceInterLockActivity extends BaseActivity {
                     device.setPrelinesjog(0);
                     device.setLastlinesjog(0);
                     if (mqService!=null){
-                        boolean success=mqService.sendBasic(topicName,device);
+                        boolean success=mqService.sendBasic(topicName,device,0x04);
                         countTimer.start();
                         click=1;
 //                        if (success){

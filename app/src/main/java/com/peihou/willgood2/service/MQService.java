@@ -8,10 +8,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
@@ -31,6 +33,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
@@ -186,13 +189,13 @@ public class MQService extends Service {
 //
 //        mTts = SpeechSynthesizer.createSynthesizer(this,
 //                mTtsInitListener);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-////            Notification notification = new Notification.Builder(this, PUSH_CHANNEL_ID).setWhen(System.currentTimeMillis()).
-////
-////                    build();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+//            Notification notification = new Notification.Builder(this, PUSH_CHANNEL_ID).setWhen(System.currentTimeMillis()).
 //
-        startForeground(1,new Notification());
-        }
+//                    build();
+//        startForeground(1,new Notification());
+//
+//        }
         listenNetworkConnectivity();
         screenBroadcastReceiver.registerScreenBroadcastReceiver(this);
         mediaPlayer = new MediaPlayer();
@@ -217,6 +220,7 @@ public class MQService extends Service {
         deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
         deviceInterLockDao = new DeviceInterLockDaoImpl(getApplicationContext());
         init();
+        countTimer.setMillisUntilFinished(0);
     }
 
     @Override
@@ -233,11 +237,27 @@ public class MQService extends Service {
 //        Notification notification = builder.build();notification.flags= Notification.FLAG_FOREGROUND_SERVICE;
 //        startForeground(0,notification);Log.i("Service","UnreadMessageServices onStartCommand"); if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         Log.i("RestartSrtvice","-->启动服务");
+        if (countTimer.getMillisUntilFinished()<=1){
+            countTimer.start();
+        }
         connect(1);
-        return START_NOT_STICKY;
+        return super.onStartCommand(intent,flags,startId);
 
     }
-   private   void writeState(int state) {
+
+//    private final DaemonAidl aidl = new DaemonAidl.Stub() {
+//        @Override
+//        public void startService() throws RemoteException {
+//            Log.d(TAG, "aidl startService()");
+//        }
+//
+//        @Override
+//        public void stopService() throws RemoteException {
+//            Log.e(TAG, "aidl stopService()");
+//        }
+//    };
+
+    private   void writeState(int state) {
         SharedPreferences.Editor editor = getSharedPreferences("serviceStart", MODE_MULTI_PROCESS)
                 .edit();
         editor.clear();
@@ -274,6 +294,8 @@ public class MQService extends Service {
         try {
             unregisterReceiver(reciiver);
             Log.i(TAG, "onDestroy");
+
+
             scheduler.shutdown();
             client.disconnect();
             screenBroadcastReceiver.unregisterScreenBroadcastReceiver(this);
@@ -548,6 +570,7 @@ public class MQService extends Service {
             e.printStackTrace();
         }
     }
+
 
 
     List<Table> list = new ArrayList<>();
@@ -2166,57 +2189,57 @@ public class MQService extends Service {
 
         }
     }
+    CountTimer countTimer=new CountTimer(1000*60*60*24*365*100,60000);
+    class CountTimer extends CountDownTimer {
 
-//    class CountTimer extends CountDownTimer {
-//
-//        private String macArress;
-//        private long millisUntilFinished;
-//
-//        /**
-//         * @param millisInFuture    The number of millis in the future from the call
-//         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
-//         *                          is called.
-//         * @param countDownInterval The interval along the way to receive
-//         *                          {@link #onTick(long)} callbacks.
-//         */
-//        public CountTimer(long millisInFuture, long countDownInterval) {
-//            super(millisInFuture, countDownInterval);
-//        }
-//
-//
-//        @Override
-//        public void onTick(long millisUntilFinished) {
-//            this.millisUntilFinished = millisUntilFinished / 1000;
-//            Log.e("millisUntilFinished", macArress + "->" + millisUntilFinished / 1000);
-//        }
-//
-//        @Override
-//        public void onFinish() {
-//            Log.e("CountTimerFinished", "-->" + millisUntilFinished);
-//
-//            String topicName = "qjjc/gateway/" + macArress + "/server_to_client";
-//            Intent intent = new Intent("offline");
-//            intent.putExtra("macAddress", macArress);
-//            sendBroadcast(intent);
-//            getData(topicName, 0x11);
-//        }
-//
-//        public long getMillisUntilFinished() {
-//            return millisUntilFinished;
-//        }
-//
-//        public void setMillisUntilFinished(long millisUntilFinished) {
-//            this.millisUntilFinished = millisUntilFinished;
-//        }
-//
-//        public String getMacArress() {
-//            return macArress;
-//        }
-//
-//        public void setMacArress(String macArress) {
-//            this.macArress = macArress;
-//        }
-//    }
+        private long millisUntilFinished;
+
+        /**
+         * @param millisInFuture    The number of millis in the future from the call
+         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+         *                          is called.
+         * @param countDownInterval The interval along the way to receive
+         *                          {@link #onTick(long)} callbacks.
+         */
+        public CountTimer(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+            this.millisUntilFinished = millisUntilFinished / 1000;
+            Log.e("CountTimer","-->"+millisUntilFinished);
+            boolean running2= ServiceUtils.isServiceRunning(getApplicationContext(),"com.peihou.willgood2.service.MQService");
+            Log.i("BaseActivity","-->"+running2);
+            if (!running2){
+                Intent intent=new Intent(getApplicationContext(), MQService.class);
+                intent.putExtra("restart",1);
+                startService(intent);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                startForegroundService(intent);
+//            }else {
+//                startService(intent);
+//            }
+            }
+
+        }
+
+        @Override
+        public void onFinish() {
+            Log.e("CountTimerFinished", "-->" + millisUntilFinished);
+
+        }
+
+        public long getMillisUntilFinished() {
+            return millisUntilFinished;
+        }
+
+        public void setMillisUntilFinished(long millisUntilFinished) {
+            this.millisUntilFinished = millisUntilFinished;
+        }
+
+    }
 
     /**
      * 发送主题
@@ -2690,7 +2713,7 @@ public class MQService extends Service {
      * @param topicName
      * @param device
      */
-    public boolean sendBasic(String topicName, Device device) {
+    public boolean sendBasic(String topicName, Device device,int operate) {
         boolean success = false;
         try {
             int mcuVersion = device.getMcuVersion();
@@ -2724,6 +2747,7 @@ public class MQService extends Service {
             datas[9] = (byte) prelinesjog;
             datas[10] = (byte) lastlinesjog;
             datas[11] = (byte) plMemory;
+            datas[12]= (byte) operate;
             int sum = 0;
             for (int i = 0; i < datas.length; i++) {
                 sum += datas[i];
@@ -3967,12 +3991,12 @@ public class MQService extends Service {
                         if (!running2){
                             Intent intent=new Intent(MQService.this, MQService.class);
                             intent.putExtra("restart",1);
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                startForegroundService(intent);
-                            }else {
-                                startService(intent);
-                            }
+                            startService(intent);
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                startForegroundService(intent);
+//                            }else {
+//                                startService(intent);
+//                            }
                         }
                     }
 
@@ -3985,12 +4009,12 @@ public class MQService extends Service {
                         if (!running2){
                             Intent intent=new Intent(MQService.this, MQService.class);
                             intent.putExtra("restart",1);
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                startForegroundService(intent);
-                            }else {
-                                startService(intent);
-                            }
+                            startService(intent);
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                startForegroundService(intent);
+//                            }else {
+//                                startService(intent);
+//                            }
                         }
                     }
 
@@ -4003,12 +4027,12 @@ public class MQService extends Service {
                         if (!running2){
                             Intent intent=new Intent(MQService.this, MQService.class);
                             intent.putExtra("restart",1);
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                startForegroundService(intent);
-                            }else {
-                                startService(intent);
-                            }
+                            startService(intent);
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                startForegroundService(intent);
+//                            }else {
+//                                startService(intent);
+//                            }
                         }
                     }
                 });
@@ -4028,12 +4052,12 @@ public class MQService extends Service {
             if (!running2){
                 Intent intent2=new Intent(context, MQService.class);
                 intent2.putExtra("restart",1);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(intent);
-                }else {
-                    startService(intent);
-                }
+                startService(intent2);
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    startForegroundService(intent2);
+//                }else {
+//                    startService(intent2);
+//                }
             }
         }
 

@@ -48,7 +48,7 @@
     <uses-permission android:name="android.permission.DEVICE_POWER"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name=".MyApplication"
@@ -139,8 +139,6 @@
             android:enabled="true"
             android:exported="true"
            />
-
-
 
         <activity android:name=".login.LoginActivity">
             <intent-filter>

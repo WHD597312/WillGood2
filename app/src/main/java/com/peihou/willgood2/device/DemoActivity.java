@@ -156,7 +156,7 @@ public class DemoActivity extends AppCompatActivity {
                         sendMoniLinkSwitch(topicName1);
                         break;
                     case 25:
-                        sendAlerm(topicName1,0x11);
+                        sendAlerm(topicName1,0x88);
                         break;
                     case 26:
                         send485(topicName1);

@@ -852,7 +852,7 @@ public class DeviceListActivity extends BaseActivity {
                             String deviceMac = device.getDeviceOnlyMac();
                             String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //                            String topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
-                            success = mqService.sendBasic(topicName, device);
+                            success = mqService.sendBasic(topicName, device,0x01);
                         }
                     }
                 }
@@ -884,7 +884,7 @@ public class DeviceListActivity extends BaseActivity {
                             String deviceMac = device.getDeviceOnlyMac();
                             String topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
 //                            String topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
-                            success = mqService.sendBasic(topicName, device);
+                            success = mqService.sendBasic(topicName, device,0x01);
                         }
                     }
                 }

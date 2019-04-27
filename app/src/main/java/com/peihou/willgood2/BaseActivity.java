@@ -21,6 +21,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 
+
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.LogUtil;
@@ -142,12 +143,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!running2){
             Intent intent=new Intent(this, MQService.class);
             intent.putExtra("restart",1);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent);
-            }else {
-                startService(intent);
-            }
+            startService(intent);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                startForegroundService(intent);
+//            }else {
+//                startService(intent);
+//            }
         }
     }
 
