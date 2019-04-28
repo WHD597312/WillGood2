@@ -47,6 +47,7 @@ import android.widget.Toast;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.utils.DistanceUtil;
 import com.google.gson.Gson;
+import com.peihou.willgood2.AbsHeartBeatService;
 import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.AlermDialog;
@@ -139,7 +140,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLContext;
 
-public class MQService extends Service {
+public class MQService extends AbsHeartBeatService {
 
     private String TAG = "MQService";
     private String host = "tcp://47.111.101.184:1883";//mqtt连接服务端ip
@@ -220,7 +221,6 @@ public class MQService extends Service {
         deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
         deviceInterLockDao = new DeviceInterLockDaoImpl(getApplicationContext());
         init();
-        countTimer.setMillisUntilFinished(0);
     }
 
     @Override
@@ -237,9 +237,7 @@ public class MQService extends Service {
 //        Notification notification = builder.build();notification.flags= Notification.FLAG_FOREGROUND_SERVICE;
 //        startForeground(0,notification);Log.i("Service","UnreadMessageServices onStartCommand"); if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
         Log.i("RestartSrtvice","-->启动服务");
-        if (countTimer.getMillisUntilFinished()<=1){
-            countTimer.start();
-        }
+
         connect(1);
         return super.onStartCommand(intent,flags,startId);
 
@@ -304,6 +302,30 @@ public class MQService extends Service {
         }
     }
 
+    @Override
+    public void onStartService() {
+        Log.d(TAG, "onStartService()");
+    }
+
+    @Override
+    public void onStopService() {
+        Log.e(TAG, "onStopService()");
+    }
+
+    @Override
+    public long getDelayExecutedMillis() {
+        return 0;
+    }
+
+    @Override
+    public long getHeartBeatMillis() {
+        return 30 * 1000;
+    }
+
+    @Override
+    public void onHeartBeat() {
+        Log.d(TAG, "onHeartBeat()");
+    }
 
     public void connect(int state) {
         try {
@@ -1813,24 +1835,40 @@ public class MQService extends Service {
                         double moni6 = Double.parseDouble(moni6Integer + "." + moni6Deci);
                         double moni7 = Double.parseDouble(moni7Integer + "." + moni7Deci);
                         double moni8 = Double.parseDouble(moni8Integer + "." + moni8Deci);
-                        Table table = deviceAnalogDao.findDeviceAnalog(macAddress, 1);
-
-                        table.setData(moni);
-                        Table table2 = deviceAnalogDao.findDeviceAnalog(macAddress, 2);
-                        table2.setData(moni2);
-                        Table table3 = deviceAnalogDao.findDeviceAnalog(macAddress, 3);
-                        table3.setData(moni3);
-                        Table table4 = deviceAnalogDao.findDeviceAnalog(macAddress, 4);
-                        table4.setData(moni4);
-                        Table table5 = deviceAnalogDao.findDeviceAnalog(macAddress, 5);
-                        table5.setData(moni5);
-                        Table table6 = deviceAnalogDao.findDeviceAnalog(macAddress, 6);
-                        table6.setData(moni6);
-                        Table table7 = deviceAnalogDao.findDeviceAnalog(macAddress, 7);
-                        table7.setData(moni7);
-                        Table table8 = deviceAnalogDao.findDeviceAnalog(macAddress, 8);
-                        table8.setData(moni8);
                         list.clear();
+                        Table table = deviceAnalogDao.findDeviceAnalog(macAddress, 1);
+                        if (table!=null){
+                            table.setData(moni);
+                        }
+                        Table table2 = deviceAnalogDao.findDeviceAnalog(macAddress, 2);
+                        if (table2!=null){
+                            table2.setData(moni2);
+                        }
+                        Table table3 = deviceAnalogDao.findDeviceAnalog(macAddress, 3);
+                        if (table3!=null){
+                            table3.setData(moni3);
+                        }
+                        Table table4 = deviceAnalogDao.findDeviceAnalog(macAddress, 4);
+                        if (table4!=null){
+                            table4.setData(moni4);
+                        }
+                        Table table5 = deviceAnalogDao.findDeviceAnalog(macAddress, 5);
+                        if (table5!=null){
+                            table5.setData(moni5);
+                        }
+                        Table table6 = deviceAnalogDao.findDeviceAnalog(macAddress, 6);
+                        if (table6!=null){
+                            table6.setData(moni6);
+                        }
+                        Table table7 = deviceAnalogDao.findDeviceAnalog(macAddress, 7);
+                        if (table7!=null){
+                            table7.setData(moni7);
+                        }
+                        Table table8 = deviceAnalogDao.findDeviceAnalog(macAddress, 8);
+                        if (table8!=null){
+                            table8.setData(moni8);
+                        }
+
                         list.add(table);
                         list.add(table2);
                         list.add(table3);
@@ -2189,57 +2227,57 @@ public class MQService extends Service {
 
         }
     }
-    CountTimer countTimer=new CountTimer(1000*60*60*24*365*100,60000);
-    class CountTimer extends CountDownTimer {
-
-        private long millisUntilFinished;
-
-        /**
-         * @param millisInFuture    The number of millis in the future from the call
-         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
-         *                          is called.
-         * @param countDownInterval The interval along the way to receive
-         *                          {@link #onTick(long)} callbacks.
-         */
-        public CountTimer(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);
-        }
-
-
-        @Override
-        public void onTick(long millisUntilFinished) {
-            this.millisUntilFinished = millisUntilFinished / 1000;
-            Log.e("CountTimer","-->"+millisUntilFinished);
-            boolean running2= ServiceUtils.isServiceRunning(getApplicationContext(),"com.peihou.willgood2.service.MQService");
-            Log.i("BaseActivity","-->"+running2);
-            if (!running2){
-                Intent intent=new Intent(getApplicationContext(), MQService.class);
-                intent.putExtra("restart",1);
-                startService(intent);
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                startForegroundService(intent);
-//            }else {
+//    CountTimer countTimer=new CountTimer(1000*60*60*24*365*100,60000);
+//    class CountTimer extends CountDownTimer {
+//
+//        private long millisUntilFinished;
+//
+//        /**
+//         * @param millisInFuture    The number of millis in the future from the call
+//         *                          to {@link #start()} until the countdown is done and {@link #onFinish()}
+//         *                          is called.
+//         * @param countDownInterval The interval along the way to receive
+//         *                          {@link #onTick(long)} callbacks.
+//         */
+//        public CountTimer(long millisInFuture, long countDownInterval) {
+//            super(millisInFuture, countDownInterval);
+//        }
+//
+//
+//        @Override
+//        public void onTick(long millisUntilFinished) {
+//            this.millisUntilFinished = millisUntilFinished / 1000;
+//            Log.e("CountTimer","-->"+millisUntilFinished);
+//            boolean running2= ServiceUtils.isServiceRunning(getApplicationContext(),"com.peihou.willgood2.service.MQService");
+//            Log.i("BaseActivity","-->"+running2);
+//            if (!running2){
+//                Intent intent=new Intent(getApplicationContext(), MQService.class);
+//                intent.putExtra("restart",1);
 //                startService(intent);
+////            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+////                startForegroundService(intent);
+////            }else {
+////                startService(intent);
+////            }
 //            }
-            }
-
-        }
-
-        @Override
-        public void onFinish() {
-            Log.e("CountTimerFinished", "-->" + millisUntilFinished);
-
-        }
-
-        public long getMillisUntilFinished() {
-            return millisUntilFinished;
-        }
-
-        public void setMillisUntilFinished(long millisUntilFinished) {
-            this.millisUntilFinished = millisUntilFinished;
-        }
-
-    }
+//
+//        }
+//
+//        @Override
+//        public void onFinish() {
+//            Log.e("CountTimerFinished", "-->" + millisUntilFinished);
+//
+//        }
+//
+//        public long getMillisUntilFinished() {
+//            return millisUntilFinished;
+//        }
+//
+//        public void setMillisUntilFinished(long millisUntilFinished) {
+//            this.millisUntilFinished = millisUntilFinished;
+//        }
+//
+//    }
 
     /**
      * 发送主题
@@ -3986,35 +4024,13 @@ public class MQService extends Service {
                     @Override
                     public void onAvailable(Network network) {
                         super.onAvailable(network);
-                        boolean running2= ServiceUtils.isServiceRunning(MQService.this,"com.peihou.willgood2.service.MQService");
-                        Log.i("BaseActivity","-->"+running2);
-                        if (!running2){
-                            Intent intent=new Intent(MQService.this, MQService.class);
-                            intent.putExtra("restart",1);
-                            startService(intent);
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                startForegroundService(intent);
-//                            }else {
-//                                startService(intent);
-//                            }
-                        }
                     }
 
                     @Override
                     public void onUnavailable() {
                         super.onUnavailable();
-                        Log.d(TAG, "onUnavailable()");
-                        boolean running2= ServiceUtils.isServiceRunning(MQService.this,"com.peihou.willgood2.service.MQService");
-                        Log.i("BaseActivity","-->"+running2);
-                        if (!running2){
-                            Intent intent=new Intent(MQService.this, MQService.class);
-                            intent.putExtra("restart",1);
-                            startService(intent);
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                startForegroundService(intent);
-//                            }else {
-//                                startService(intent);
-//                            }
+                        if (deviceDao!=null){
+                            updateDevice(deviceDao.findAllDevice());
                         }
                     }
 
@@ -4022,21 +4038,24 @@ public class MQService extends Service {
                     public void onLost(Network network) {
                         super.onLost(network);
                         Log.d(TAG, "onLost()");
-                        boolean running2= ServiceUtils.isServiceRunning(MQService.this,"com.peihou.willgood2.service.MQService");
-                        Log.i("BaseActivity","-->"+running2);
-                        if (!running2){
-                            Intent intent=new Intent(MQService.this, MQService.class);
-                            intent.putExtra("restart",1);
-                            startService(intent);
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                startForegroundService(intent);
-//                            }else {
-//                                startService(intent);
-//                            }
+                        if (deviceDao!=null){
+                            updateDevice(deviceDao.findAllDevice());
                         }
+
                     }
                 });
             }
+        }
+    }
+
+    /**
+     * 当网络不可用时。将所有的设备置为离线状态
+     * @param devices
+     */
+    private void updateDevice(List<Device> devices){
+        for(Device device:devices){
+            device.setOnline(false);
+            deviceDao.update(device);
         }
     }
     private class ScreenBroadcastReceiver extends BroadcastReceiver {

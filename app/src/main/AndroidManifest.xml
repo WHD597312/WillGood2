@@ -84,7 +84,6 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="67f78b6d4161e54109e1f1126b379b56" />
-
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"

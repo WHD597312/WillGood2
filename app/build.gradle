@@ -51,6 +51,10 @@ android {
                 JPUSH_CHANNEL: "developer-default",
         ]
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -95,5 +99,6 @@ dependencies {
     implementation 'com.lzy.widget:imagepicker:0.5.4'
     implementation 'com.github.YancyYe:GalleryPick:1.2.1'
     implementation 'com.jwenfeng.pulltorefresh:library:1.0.3'
+    implementation project(':DaemonService')
 
 }

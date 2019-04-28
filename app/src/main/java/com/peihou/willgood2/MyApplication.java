@@ -16,6 +16,7 @@ import android.util.Log;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.mob.MobSDK;
+import com.peihou.willgood2.service.MQService;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -48,6 +49,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        DaemonHolder.init(this, MQService.class);
 
 //        Beta.applyTinkerPatch(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/patch_signed_7zip.apk");
 
@@ -55,7 +57,6 @@ public class MyApplication extends Application {
         JPushInterface.setDebugMode(true);
         JPushInterface.init(this);
         disableAPIDialog();
-//        createNotificationChannel();
         String registrationID=JPushInterface.getRegistrationID(this);
         Log.i("registrationIDqqq","-->"+registrationID);
         MobSDK.init(this);
