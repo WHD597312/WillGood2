@@ -140,11 +140,6 @@ public class TimerTaskActivity extends BaseActivity {
 
 
         running=true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         if (mqService!=null && returnData==0){
             timerTasks.clear();
             adapter.notifyDataSetChanged();
@@ -155,10 +150,13 @@ public class TimerTaskActivity extends BaseActivity {
             }
             mqService.getData(topicName,0x22);
             countTimer.start();
-//            List<TimerTask> timerTasks2=timerTaskDao.findDeviceTimeTask(deviceMac);
-//            timerTasks.addAll(timerTasks2);
-//
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

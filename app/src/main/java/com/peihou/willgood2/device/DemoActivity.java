@@ -331,7 +331,23 @@ public class DemoActivity extends AppCompatActivity {
         bytes[1]= (byte) 0x99;
         bytes[2]=0;
         bytes[3]=0x07;
-        bytes[4]= (byte) alerm;
+        if (count2==0){
+            bytes[4]=0x11;
+        }else if (count2==1){
+            bytes[4]=0x22;
+        }else  if (count2==2){
+            bytes[4]=0x33;
+        }else if (count2==3){
+            bytes[4]=0x44;
+        }else if (count2==4){
+            bytes[4]=0x55;
+        }else if (count2==5){
+            bytes[4]=0x66;
+        }else if (count2==6){
+            bytes[4]=0x77;
+        }else if (count2==7){
+            bytes[4]= (byte) 0x88;
+        }
         bytes[5]= (byte) line;
         int sum=0;
         for (int i = 0; i <bytes.length ; i++) {
@@ -344,6 +360,11 @@ public class DemoActivity extends AppCompatActivity {
             line=1;
         else
             line++;
+        if (count2==7){
+            count2=0;
+        }else {
+            count2++;
+        }
         Log.i("DemoActivity","-->"+success+"#"+topicName1);
     }
     public void sendSwitch(String topicName){
@@ -627,6 +648,7 @@ public class DemoActivity extends AppCompatActivity {
         }
         return true;
     }
+    int count2=0;
     public boolean sendAlerm(String topicName) {
         boolean success = false;
         try {
@@ -659,6 +681,7 @@ public class DemoActivity extends AppCompatActivity {
             bytes[26] = (byte) (sum % 256);
             bytes[27] = 0x09;
             success = mqService.publish(topicName, 1, bytes);
+            count2++;
         } catch (Exception e) {
             e.printStackTrace();
         }

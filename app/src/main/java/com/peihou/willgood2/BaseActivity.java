@@ -2,16 +2,12 @@ package com.peihou.willgood2;
 
 
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,13 +17,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 
-
-import com.peihou.willgood2.service.MQService;
-import com.peihou.willgood2.service.ServiceUtils;
+import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.utils.LogUtil;
-import com.peihou.willgood2.utils.SharedPreferencesHelper;
-import com.peihou.willgood2.utils.StatusBarUtil;
-import com.peihou.willgood2.utils.ToastUtil;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;

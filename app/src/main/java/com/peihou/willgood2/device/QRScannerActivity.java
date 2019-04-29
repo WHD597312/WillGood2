@@ -579,7 +579,6 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                         int deviceInching= (int) params.get("deviceInching");
                         int deviceAnalog= (int) params.get("deviceAnalog");
 
-
                         device=deviceDao.findDeviceByMac(deviceMac);
                         if (device==null){
 //                            device=new Device(deviceId,deviceMac,deviceMac,devicePassword,"share",deviceAlarm,deviceMap,deviceLineSwitch,deviceAnalog,deviceSwitch,devicePowerOff,deviceInching)

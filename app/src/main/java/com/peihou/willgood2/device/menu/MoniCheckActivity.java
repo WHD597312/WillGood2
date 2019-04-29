@@ -65,6 +65,7 @@ import butterknife.OnClick;
 
 public class MoniCheckActivity extends BaseActivity {
 
+    private String TAG="MoniCheckActivity";
     @BindView(R.id.table)
     ListView table;
     List<Table> tables = new ArrayList<>();
@@ -113,23 +114,24 @@ public class MoniCheckActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         running=true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         if (mqService!=null){
             List<Table> tables2=deviceAnalogDao.findDeviceAnalogs(deviceMac);
             tables.clear();
             tables.addAll(tables2);
             adapter.notifyDataSetChanged();
             if (mqService!=null){
-                mqService.connectMqtt(deviceMac);
+//                mqService.connectMqtt(deviceMac);
 
                 mqService.getData(topicName,0x88);
                 countTimer.start();
             }
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
     }
 
@@ -231,9 +233,9 @@ public class MoniCheckActivity extends BaseActivity {
         protected void onPostExecute(MoniCheckActivity activity, Integer integer) {
             if (integer==100){
                 adapter.notifyDataSetChanged();
+                Log.i(TAG,"-->AnalogCheckAcync");
                 if (mqService!=null){
                     mqService.getData(topicName,0x88);
-                    countTimer.start();
                 }
             }
         }
@@ -476,6 +478,7 @@ public class MoniCheckActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             MQService.LocalBinder binder= (MQService.LocalBinder) service;
             mqService=binder.getService();
+            Log.i(TAG,"-->connection");
 
         }
 
@@ -543,9 +546,12 @@ public class MoniCheckActivity extends BaseActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
+                Log.i(TAG,"-->"+deviceMac);
                 String macAddress=intent.getStringExtra("macAddress");
+
                 List<Table> tables2= (List<Table>) intent.getSerializableExtra("table");
-                if (macAddress.equals(deviceMac) && !tables2.isEmpty() && tables2.size()==9){
+                Log.i(TAG,"-->"+deviceMac+",size:"+tables2.size());
+                if (macAddress.equals(deviceMac) && !tables2.isEmpty() && tables2.size()==8){
                     tables.clear();
                     tables.addAll(tables2);
                     adapter.notifyDataSetChanged();

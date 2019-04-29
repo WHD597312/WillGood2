@@ -143,7 +143,8 @@ public class ShareDeviceFragment extends Fragment {
         @Override
         public int getChildrenCount(int groupPosition) {
             try {
-                return devices.get(groupPosition).size();
+                int size=devices.get(groupPosition).size();
+                return size;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -325,9 +326,12 @@ public class ShareDeviceFragment extends Fragment {
                     JSONObject jsonObject = new JSONObject(result);
                     code = jsonObject.getInt("returnCode");
                     if (code == 100) {
-                        devices.get(groupPosition).remove(childPosition);
-                        if (devices.get(groupPosition).isEmpty()) {
+                        int groupDeviceSize=devices.get(groupPosition).size();
+                        if (groupDeviceSize==1){
                             usersInfo.remove(groupPosition);
+                            devices.remove(groupPosition);
+                        }else {
+                            devices.get(groupPosition).remove(childPosition);
                         }
                     }
                 }

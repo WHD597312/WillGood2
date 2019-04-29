@@ -107,16 +107,17 @@ public class MoniLinkItemActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         running=true;
+        if (mqService!=null){
+//            mqService.connectMqtt(deviceMac);
+            mqService.getData(topicName,0x3a);
+            countTimer.start();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mqService!=null){
-            mqService.connectMqtt(deviceMac);
-            mqService.getData(topicName,0x3a);
-            countTimer.start();
-        }
+
     }
 
     @Override

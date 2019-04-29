@@ -5,17 +5,16 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.util.Log;
 //import com.baidu.mapapi.CoordType;
 //import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.mob.MobSDK;
+import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.service.MQService;
 
 import java.lang.reflect.Field;
@@ -49,6 +48,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+//        createNotificationChannel();
         DaemonHolder.init(this, MQService.class);
 
 //        Beta.applyTinkerPatch(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/patch_signed_7zip.apk");

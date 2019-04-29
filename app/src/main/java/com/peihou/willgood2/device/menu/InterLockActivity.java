@@ -231,8 +231,9 @@ public class InterLockActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        running = true;
         if (mqService!=null){
-            mqService.connectMqtt(deviceMac);
+//            mqService.connectMqtt(deviceMac);
             lockLineList.clear();
             List<Line2> lockLineList2 = deviceLineDao.findDeviceOnlineLines(deviceMac);
             lockLineList.addAll(lockLineList2);
@@ -242,7 +243,7 @@ public class InterLockActivity extends BaseActivity {
             lockLineAdapter.notifyDataSetChanged();
             lockAdapter.notifyDataSetChanged();
         }
-        running = true;
+
     }
 
     @Override

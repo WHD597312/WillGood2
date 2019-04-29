@@ -1,24 +1,17 @@
 package com.peihou.willgood2.service;
 
-import android.annotation.SuppressLint;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
-import android.graphics.BitmapFactory;
-import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -26,32 +19,23 @@ import android.net.NetworkRequest;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.RemoteException;
-import android.os.SystemClock;
-import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.RemoteViews;
-import android.widget.Toast;
 
-import com.baidu.mapapi.model.LatLng;
-import com.baidu.mapapi.utils.DistanceUtil;
 import com.google.gson.Gson;
-import com.peihou.willgood2.AbsHeartBeatService;
+import com.peihou.willgood2.daemon.AbsHeartBeatService;
 import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
-import com.peihou.willgood2.custom.AlermDialog;
 import com.peihou.willgood2.custom.AlermDialog4;
+import com.peihou.willgood2.daemon.DaemonHolder;
+import com.peihou.willgood2.daemon.DaemonUtil;
 import com.peihou.willgood2.database.dao.impl.DeviceAlermDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceAnalogDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
@@ -78,7 +62,6 @@ import com.peihou.willgood2.device.menu.SwichCheckActivity;
 import com.peihou.willgood2.device.menu.TimerTaskActivity;
 import com.peihou.willgood2.location.LocationActivity;
 import com.peihou.willgood2.location.LocationSetActivity;
-import com.peihou.willgood2.login.LoginActivity;
 import com.peihou.willgood2.pojo.Alerm;
 import com.peihou.willgood2.pojo.AlermName;
 import com.peihou.willgood2.pojo.AnalogName;
@@ -97,8 +80,6 @@ import com.peihou.willgood2.utils.NoFastClickUtils;
 import com.peihou.willgood2.utils.TenTwoUtil;
 import com.peihou.willgood2.utils.ToastUtil;
 import com.peihou.willgood2.utils.UUID;
-import com.peihou.willgood2.utils.Utils;
-import com.peihou.willgood2.utils.WeakRefHandler;
 import com.peihou.willgood2.utils.http.BaseWeakAsyncTask;
 import com.peihou.willgood2.utils.http.HttpUtils;
 
@@ -112,33 +93,21 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import javax.net.ssl.SSLContext;
 
 public class MQService extends AbsHeartBeatService {
 
@@ -1808,6 +1777,7 @@ public class MQService extends AbsHeartBeatService {
                         latitude = Double.parseDouble(s1);
                         longitude = Double.parseDouble(s2);
 
+                        Log.i("location","("+latitude+","+longitude);
                     } else if (funCode == 0x88) {
                         int mcuVerion = data[2];
                         int moniInteger = data[4];
@@ -1839,56 +1809,59 @@ public class MQService extends AbsHeartBeatService {
                         Table table = deviceAnalogDao.findDeviceAnalog(macAddress, 1);
                         if (table!=null){
                             table.setData(moni);
+                            list.add(table);
                         }
                         Table table2 = deviceAnalogDao.findDeviceAnalog(macAddress, 2);
                         if (table2!=null){
                             table2.setData(moni2);
+                            list.add(table2);
                         }
                         Table table3 = deviceAnalogDao.findDeviceAnalog(macAddress, 3);
                         if (table3!=null){
                             table3.setData(moni3);
+                            list.add(table3);
                         }
                         Table table4 = deviceAnalogDao.findDeviceAnalog(macAddress, 4);
                         if (table4!=null){
                             table4.setData(moni4);
+                            list.add(table4);
                         }
                         Table table5 = deviceAnalogDao.findDeviceAnalog(macAddress, 5);
                         if (table5!=null){
                             table5.setData(moni5);
+                            list.add(table5);
                         }
                         Table table6 = deviceAnalogDao.findDeviceAnalog(macAddress, 6);
                         if (table6!=null){
                             table6.setData(moni6);
+                            list.add(table6);
                         }
                         Table table7 = deviceAnalogDao.findDeviceAnalog(macAddress, 7);
                         if (table7!=null){
                             table7.setData(moni7);
+                            list.add(table7);
                         }
                         Table table8 = deviceAnalogDao.findDeviceAnalog(macAddress, 8);
                         if (table8!=null){
                             table8.setData(moni8);
+                            list.add(table7);
                         }
 
-                        list.add(table);
-                        list.add(table2);
-                        list.add(table3);
-                        list.add(table4);
-                        list.add(table5);
-                        list.add(table6);
-                        list.add(table7);
-                        list.add(table8);
-                        deviceAnalogDao.updates(list);
+                        if (list.size()==8){
+                            deviceAnalogDao.updates(list);
 
-                        Collections.sort(list, new Comparator<Table>() {
-                            @Override
-                            public int compare(Table o1, Table o2) {
-                                if (o1.getI() > o2.getI())
-                                    return 1;
-                                else if (o1.getI() < o2.getI())
-                                    return -1;
-                                return 0;
-                            }
-                        });
+                            Collections.sort(list, new Comparator<Table>() {
+                                @Override
+                                public int compare(Table o1, Table o2) {
+                                    if (o1.getI() > o2.getI())
+                                        return 1;
+                                    else if (o1.getI() < o2.getI())
+                                        return -1;
+                                    return 0;
+                                }
+                            });
+                        }
+
                     } else if (funCode == 0x99) {
                         int type = 0;
                         int alermType = data[4];
@@ -1956,8 +1929,8 @@ public class MQService extends AbsHeartBeatService {
                             String cotent = alerm.getContent();
                             Message msg = handler.obtainMessage();
                             msg.what = 10004;
-                            msg.arg1 = type;
-                            msg.arg2 = alerm.getDeviceAlarmBroadcast();
+                            msg.arg1 = type;//报警类型 0为来电报警 1为断电报警 >1为其他报警
+                            msg.arg2 = alerm.getDeviceAlarmBroadcast();//报警次数
                             msg.obj = cotent;
                             handler.sendMessage(msg);
                         }
@@ -3784,26 +3757,26 @@ public class MQService extends AbsHeartBeatService {
                 }
                 setAlermDialog(type, line);
             } else if (msg.what == 10004) {
-                int arg1 = msg.arg1;
-                int arg2 = msg.arg2;
-                if (MyApplication.floating == 0) {
-                    arg2 = 1;
+                int type = msg.arg1;//报警类型
+                int count = msg.arg2;//报警次数
+                if (MyApplication.floating == 0) {//如果报警弹窗权限没有打开，报警次数为3次报警
+                    count = 1;
                 }
-                if (arg2 == 1) {
-                    if (arg1 == 0) {
-                        startVoice(4);
-                    } else if (arg1 == 1) {
-                        startVoice(6);
-                    } else {
-                        startVoice(5);
+                if (count == 1) {
+                    if (type == 0) {
+                        startVoice(4);//来电报警
+                    } else if (type == 1) {
+                        startVoice(5);//断电报警
+                    } else if (type>1){
+                        startVoice(6);//其他报警
                     }
-                } else if (arg2 == 2) {
-                    if (arg1 == 0) {
+                } else if (count == 2) {
+                    if (type == 0) {
                         startVoice(4, true);
-                    } else if (arg1 == 1) {
-                        startVoice(6, true);
-                    } else {
+                    } else if (type == 1) {
                         startVoice(5, true);
+                    } else if (type>1){
+                        startVoice(6, true);
                     }
                 }
             } else if (msg.what == 10005) {
@@ -3891,7 +3864,7 @@ public class MQService extends AbsHeartBeatService {
 
 
             } else if (type == 5) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
+                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -3906,7 +3879,7 @@ public class MQService extends AbsHeartBeatService {
                                 return;
                             } else if (soundCount < 3 && soundType == 5) {
                                 mediaPlayer.reset();
-                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_other);
+                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_close);
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
@@ -3924,7 +3897,7 @@ public class MQService extends AbsHeartBeatService {
 
 
             } else if (type == 6) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
+                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -3938,7 +3911,7 @@ public class MQService extends AbsHeartBeatService {
                                 soundCount = 3;
                             } else if (soundCount < 3 && soundType == 6) {
                                 mediaPlayer.reset();
-                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_close);
+                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_other);
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
@@ -4066,18 +4039,7 @@ public class MQService extends AbsHeartBeatService {
             if (intent != null) {
                 Log.e(TAG, "onReceive() action: " + intent.getAction());
             }
-            boolean running2= ServiceUtils.isServiceRunning(context,"com.peihou.willgood2.service.MQService");
-            Log.i("BaseActivity","-->"+running2);
-            if (!running2){
-                Intent intent2=new Intent(context, MQService.class);
-                intent2.putExtra("restart",1);
-                startService(intent2);
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    startForegroundService(intent2);
-//                }else {
-//                    startService(intent2);
-//                }
-            }
+            DaemonHolder.startService();
         }
 
         public void registerScreenBroadcastReceiver(Context context) {

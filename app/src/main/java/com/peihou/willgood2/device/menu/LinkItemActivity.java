@@ -83,7 +83,7 @@ public class LinkItemActivity extends BaseActivity {
         deviceMac = parms.getString("deviceMac");
         deviceId = parms.getLong("deviceId");
         analog = parms.getInt("analog");
-        online=parms.getBoolean("online");
+        online = parms.getBoolean("online");
         parms.getInt("voice");
         if (type == 0) {
             name = "温度";
@@ -125,13 +125,13 @@ public class LinkItemActivity extends BaseActivity {
                     intent.putExtra("deviceId", deviceId);
                     startActivityForResult(intent, 1000);
                 } else {
-                    if (type==0){
+                    if (type == 0) {
                         Intent intent = new Intent(LinkItemActivity.this, TempLinkedSetActivity.class);
                         intent.putExtra("type", type);
                         intent.putExtra("deviceMac", deviceMac);
                         intent.putExtra("deviceId", deviceId);
                         startActivityForResult(intent, 1001);
-                    }else {
+                    } else {
                         Intent intent = new Intent(LinkItemActivity.this, LinkedSetActivity.class);
                         intent.putExtra("type", type);
                         intent.putExtra("deviceMac", deviceMac);
@@ -159,8 +159,8 @@ public class LinkItemActivity extends BaseActivity {
     public void initView(View view) {
 
         tv_title.setText(name + "联动");
-        topicName="qjjc/gateway/"+deviceMac+"/server_to_client";
-        Log.i("topicName","-->"+topicName);
+        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+        Log.i("topicName", "-->" + topicName);
 //        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         if (type == 5) {
             deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
@@ -192,34 +192,32 @@ public class LinkItemActivity extends BaseActivity {
         setResult(1002);
         super.onBackPressed();
     }
-    private List<Linked> updateLinkeds(List<Linked> linkeds){
-        for (int i = 0; i <linkeds.size() ; i++) {
-            Linked linked=linkeds.get(i);
+
+    private List<Linked> updateLinkeds(List<Linked> linkeds) {
+        for (int i = 0; i < linkeds.size(); i++) {
+            Linked linked = linkeds.get(i);
             linked.setVisitity(0);
-            linkeds.set(i,linked);
+            linkeds.set(i, linked);
         }
         return linkeds;
     }
 
-    private List<MoniLink> updateMoniLink(List<MoniLink> moniLinks){
-        for (int i = 0; i <moniLinks.size() ; i++) {
-            MoniLink moniLink=moniLinks.get(i);
+    private List<MoniLink> updateMoniLink(List<MoniLink> moniLinks) {
+        for (int i = 0; i < moniLinks.size(); i++) {
+            MoniLink moniLink = moniLinks.get(i);
             moniLink.setVisitity(0);
-            moniLinks.set(i,moniLink);
+            moniLinks.set(i, moniLink);
         }
         return moniLinks;
     }
-    private int result=0;
+
+    private int result = 0;
+
     @Override
     protected void onStart() {
         super.onStart();
         running = true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();;
-        if (mqService!=null && returnData==0) {
+        if (mqService != null && returnData == 0) {
             if (type == 5) {
                 moniLinks.clear();
                 moniLinkAdapter.notifyDataSetChanged();
@@ -228,27 +226,27 @@ public class LinkItemActivity extends BaseActivity {
                     List<MoniLink> moniLinkList = updateMoniLink(moniLinks2);
                     mqService.updateMoniLinks(moniLinkList);
                 }
-                int state=0;
-                if (analog==0){
-                    state=0x11;
-                }else if (analog==1){
-                    state=0x22;
-                }else if (analog==2){
-                    state=0x33;
-                }else if (analog==3){
-                    state=0x44;
-                }else if (analog==4){
-                    state=0x55;
-                }else if (analog==5){
-                    state=0x66;
-                }else if (analog==6){
-                    state=0x77;
-                }else if (analog==7){
-                    state=0x88;
+                int state = 0;
+                if (analog == 0) {
+                    state = 0x11;
+                } else if (analog == 1) {
+                    state = 0x22;
+                } else if (analog == 2) {
+                    state = 0x33;
+                } else if (analog == 3) {
+                    state = 0x44;
+                } else if (analog == 4) {
+                    state = 0x55;
+                } else if (analog == 5) {
+                    state = 0x66;
+                } else if (analog == 6) {
+                    state = 0x77;
+                } else if (analog == 7) {
+                    state = 0x88;
                 }
-                mqService.connectMqtt(deviceMac);
+//                mqService.connectMqtt(deviceMac);
 
-                mqService.getData(topicName,0x39,state);
+                mqService.getData(topicName, 0x39, state);
                 countTimer.start();
             } else {
                 list.clear();
@@ -258,7 +256,7 @@ public class LinkItemActivity extends BaseActivity {
                     List<Linked> linkeds = updateLinkeds(list2);
                     mqService.updateLinkeds(linkeds);
                 }
-                int funCode=0;
+                int funCode = 0;
                 if (type == 0) {
                     funCode = 0x34;
                 } else if (type == 1) {
@@ -270,7 +268,7 @@ public class LinkItemActivity extends BaseActivity {
                 } else if (type == 4) {
                     funCode = 0x38;
                 }
-                mqService.connectMqtt(deviceMac);
+//                mqService.connectMqtt(deviceMac);
 
                 mqService.getData(topicName, funCode);
                 countTimer.start();
@@ -280,10 +278,16 @@ public class LinkItemActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         running = false;
-        returnData=0;
+        returnData = 0;
     }
 
     MQService mqService;
@@ -293,19 +297,19 @@ public class LinkItemActivity extends BaseActivity {
             MQService.LocalBinder binder = (MQService.LocalBinder) service;
             mqService = binder.getService();
             if (mqService != null) {
-                    if (type==5){
-                        List<MoniLink> moniLinks2=deviceMoniLinkDaoDao.findMoniLinks(deviceMac,moniType,moniNum);
-                        if (!moniLinks2.isEmpty()){
-                            List<MoniLink> moniLinkList=updateMoniLink(moniLinks2);
-                            mqService.updateMoniLinks(moniLinkList);
-                        }
-                    }else {
-                        List<Linked> list2=mqService.getLinkeds(deviceMac,type);
-                        if (!list2.isEmpty()){
-                            List<Linked> linkeds=updateLinkeds(list2);
-                            mqService.updateLinkeds(linkeds);
-                        }
+                if (type == 5) {
+                    List<MoniLink> moniLinks2 = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
+                    if (!moniLinks2.isEmpty()) {
+                        List<MoniLink> moniLinkList = updateMoniLink(moniLinks2);
+                        mqService.updateMoniLinks(moniLinkList);
                     }
+                } else {
+                    List<Linked> list2 = mqService.getLinkeds(deviceMac, type);
+                    if (!list2.isEmpty()) {
+                        List<Linked> linkeds = updateLinkeds(list2);
+                        mqService.updateLinkeds(linkeds);
+                    }
+                }
 
                 int funCode = 0;
                 if (type == 0) {
@@ -321,28 +325,28 @@ public class LinkItemActivity extends BaseActivity {
                 } else if (type == 5) {
                     funCode = 0x39;
                 }
-                if (funCode==0x39){
-                    int state=0;
-                    if (analog==0){
-                        state=0x11;
-                    }else if (analog==1){
-                        state=0x22;
-                    }else if (analog==2){
-                        state=0x33;
-                    }else if (analog==3){
-                        state=0x44;
-                    }else if (analog==4){
-                        state=0x55;
-                    }else if (analog==5){
-                        state=0x66;
-                    }else if (analog==6){
-                        state=0x77;
-                    }else if (analog==7){
-                        state=0x88;
+                if (funCode == 0x39) {
+                    int state = 0;
+                    if (analog == 0) {
+                        state = 0x11;
+                    } else if (analog == 1) {
+                        state = 0x22;
+                    } else if (analog == 2) {
+                        state = 0x33;
+                    } else if (analog == 3) {
+                        state = 0x44;
+                    } else if (analog == 4) {
+                        state = 0x55;
+                    } else if (analog == 5) {
+                        state = 0x66;
+                    } else if (analog == 6) {
+                        state = 0x77;
+                    } else if (analog == 7) {
+                        state = 0x88;
                     }
-                    mqService.getData(topicName,funCode,state);
-                    Log.i("topicNamesss","-->"+topicName);
-                }else {
+                    mqService.getData(topicName, funCode, state);
+                    Log.i("topicNamesss", "-->" + topicName);
+                } else {
                     mqService.getData(topicName, funCode);
                 }
                 countTimer.start();
@@ -362,30 +366,30 @@ public class LinkItemActivity extends BaseActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                String action=intent.getAction();
-                if ("offline".equals(action)){
+                String action = intent.getAction();
+                if ("offline".equals(action)) {
                     String macAddress = intent.getStringExtra("macAddress");
                     if (intent.hasExtra("all") || macAddress.equals(deviceMac)) {
-                        online=false;
+                        online = false;
                     }
-                }else {
+                } else {
                     String macAddress = intent.getStringExtra("macAddress");
-                    if (macAddress.equals(deviceMac)){
-                        boolean online2=intent.getBooleanExtra("online",false);
-                        online=online2;
+                    if (macAddress.equals(deviceMac)) {
+                        boolean online2 = intent.getBooleanExtra("online", false);
+                        online = online2;
                     }
                     int linkType = intent.getIntExtra("linkType", -1);
                     if (macAddress.equals(deviceMac) && linkType == type) {
                         int operate = intent.getIntExtra("operate", 0);
-                        if (returnData==1){
+                        if (returnData == 1) {
 
-                            if (operate==0){
-                                mqService.starSpeech(deviceMac,3);
-                            }else if (operate==1){
-                                mqService.starSpeech(deviceMac,7);
+                            if (operate == 0) {
+                                mqService.starSpeech(deviceMac, 3);
+                            } else if (operate == 1) {
+                                mqService.starSpeech(deviceMac, 7);
                             }
 
-                            returnData=0;
+                            returnData = 0;
                         }
                         if (intent.hasExtra("linkTypeNum") && intent.hasExtra("moniType")) {
                             int moniType2 = intent.getIntExtra("moniType", -1);
@@ -414,7 +418,7 @@ public class LinkItemActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (popupWindow2!=null && popupWindow2.isShowing()){
+        if (popupWindow2 != null && popupWindow2.isShowing()) {
             popupWindow2.dismiss();
         }
 
@@ -452,7 +456,7 @@ public class LinkItemActivity extends BaseActivity {
                     moniLink.setState(2);
                     if (mqService != null) {
                         dialog.dismiss();
-                        mqService.sendMoniLink(topicName, moniLink,0x02);
+                        mqService.sendMoniLink(topicName, moniLink, 0x02);
                         countTimer.start();
                         returnData = 1;
                     }
@@ -461,7 +465,7 @@ public class LinkItemActivity extends BaseActivity {
                     linked.setState(2);
                     if (mqService != null) {
                         dialog.dismiss();
-                        boolean success = mqService.sendLinkedSet(topicName, linked,0x02);
+                        boolean success = mqService.sendLinkedSet(topicName, linked, 0x02);
                         countTimer.start();
                         returnData = 1;
                     }
@@ -513,11 +517,11 @@ public class LinkItemActivity extends BaseActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             final Linked linked = list.get(position);
             final int state = linked.getState();
-            String name="";
-            if (type==2){
+            String name = "";
+            if (type == 2) {
                 name = linked.getName();
-            }else {
-                name = linked.getName()+"("+(position+1)+")";
+            } else {
+                name = linked.getName() + "(" + (position + 1) + ")";
             }
             String lines = linked.getLines();
             int condition = linked.getCondition();
@@ -536,7 +540,7 @@ public class LinkItemActivity extends BaseActivity {
             } else {
                 tv_lines.setText("");
             }
-            String ss="";
+            String ss = "";
             if (type == 2) {
                 if (condition == 1) {
                     c = "开关量断开";
@@ -549,12 +553,12 @@ public class LinkItemActivity extends BaseActivity {
                     c = c + "  关闭";
                 }
 
-                if (triType==1){
-                    ss=" 单次";
-                }else if (triType==0){
-                    ss=" 循环";
+                if (triType == 1) {
+                    ss = " 单次";
+                } else if (triType == 0) {
+                    ss = " 循环";
                 }
-                c=c+ss;
+                c = c + ss;
 
             } else {
                 if (triState == 1) {
@@ -567,12 +571,12 @@ public class LinkItemActivity extends BaseActivity {
                 } else {
                     c = c + "  关闭";
                 }
-                if (triType==1){
-                    ss=" 单次";
-                }else if (triType==0){
-                    ss=" 循环";
+                if (triType == 1) {
+                    ss = " 单次";
+                } else if (triType == 0) {
+                    ss = " 循环";
                 }
-                c=c+ss;
+                c = c + ss;
             }
 
 
@@ -588,10 +592,10 @@ public class LinkItemActivity extends BaseActivity {
             img_open.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!online){
-                        mqService.getData(topicName,0x11);
+                    if (!online) {
+                        mqService.getData(topicName, 0x11);
 
-                        ToastUtil.showShort(LinkItemActivity.this,"设备已离线");
+                        ToastUtil.showShort(LinkItemActivity.this, "设备已离线");
                         return;
                     }
 
@@ -601,7 +605,7 @@ public class LinkItemActivity extends BaseActivity {
                         linked.setState(1);
                     }
                     if (mqService != null) {
-                        boolean success = mqService.sendLinkedSet(topicName, linked,0x02);
+                        boolean success = mqService.sendLinkedSet(topicName, linked, 0x02);
                         returnData = 1;
                         countTimer.start();
                     }
@@ -643,13 +647,13 @@ public class LinkItemActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             final MoniLink moniLink = list.get(position);
-            String name = moniLink.getName()+"("+(position+1)+")";
+            String name = moniLink.getName() + "(" + (position + 1) + ")";
             int contition = moniLink.getContition();
             int triState = moniLink.getTriState();
             int controlState = moniLink.getControlState();
             String lines = moniLink.getLines();
             int state = moniLink.getState();
-            int triType=moniLink.getTriType();
+            int triType = moniLink.getTriType();
 
             TextView tv_condition = holder.itemView.findViewById(R.id.tv_condition);
             TextView tv_linked = holder.itemView.findViewById(R.id.tv_linked);
@@ -672,13 +676,13 @@ public class LinkItemActivity extends BaseActivity {
             } else {
                 c = c + "  关闭";
             }
-            String ss="";
-            if (triType==1){
-                ss=" 单次";
-            }else if (triType==0){
-                ss=" 循环";
+            String ss = "";
+            if (triType == 1) {
+                ss = " 单次";
+            } else if (triType == 0) {
+                ss = " 循环";
             }
-            c=c+ss;
+            c = c + ss;
 
 
             ImageView img_open = holder.itemView.findViewById(R.id.img_open);
@@ -692,8 +696,8 @@ public class LinkItemActivity extends BaseActivity {
             img_open.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!online){
-                        ToastUtil.showShort(LinkItemActivity.this,"设备已离线");
+                    if (!online) {
+                        ToastUtil.showShort(LinkItemActivity.this, "设备已离线");
                         return;
                     }
 
@@ -704,8 +708,8 @@ public class LinkItemActivity extends BaseActivity {
                         moniLink.setState(1);
                     }
                     if (mqService != null) {
-                        boolean success = mqService.sendMoniLink(topicName, moniLink,0x02);
-                        returnData=1;
+                        boolean success = mqService.sendMoniLink(topicName, moniLink, 0x02);
+                        returnData = 1;
                         countTimer.start();
                         if (success) {
                             list.set(position, moniLink);
@@ -738,39 +742,39 @@ public class LinkItemActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 
-            if (resultCode == 1000) {
-                int funCode = 0;
-                if (type == 0) {
-                    funCode = 0x34;
-                } else if (type == 1) {
-                    funCode = 0x35;
-                } else if (type == 2) {
-                    funCode = 0x36;
-                } else if (type == 3) {
-                    funCode = 0x37;
-                } else if (type == 4) {
-                    funCode = 0x38;
-                }
-                returnData = 1;
-                Linked linked = (Linked) data.getSerializableExtra("linked");
-                Log.i("topicName","-->"+topicName);
-                if (mqService!=null && linked != null) {
-                    mqService.sendLinkedSet(topicName, linked,0x01);
-                    add = 1;
-                    countTimer.start();
-                }
-            } else if (resultCode == 1001) {
-                Log.i("topicName","-->"+topicName);
-                returnData = 1;
-                MoniLink moniLink = (MoniLink) data.getSerializableExtra("moniLink");
-                if (moniLink != null && mqService!=null) {
-                    mqService.sendMoniLink(topicName, moniLink,0x01);
-                    add = 1;
-                    countTimer.start();
-                }
-            }else if (resultCode==1002){
-                returnData=2;
+        if (resultCode == 1000) {
+            int funCode = 0;
+            if (type == 0) {
+                funCode = 0x34;
+            } else if (type == 1) {
+                funCode = 0x35;
+            } else if (type == 2) {
+                funCode = 0x36;
+            } else if (type == 3) {
+                funCode = 0x37;
+            } else if (type == 4) {
+                funCode = 0x38;
             }
+            returnData = 1;
+            Linked linked = (Linked) data.getSerializableExtra("linked");
+            Log.i("topicName", "-->" + topicName);
+            if (mqService != null && linked != null) {
+                mqService.sendLinkedSet(topicName, linked, 0x01);
+                add = 1;
+                countTimer.start();
+            }
+        } else if (resultCode == 1001) {
+            Log.i("topicName", "-->" + topicName);
+            returnData = 1;
+            MoniLink moniLink = (MoniLink) data.getSerializableExtra("moniLink");
+            if (moniLink != null && mqService != null) {
+                mqService.sendMoniLink(topicName, moniLink, 0x01);
+                add = 1;
+                countTimer.start();
+            }
+        } else if (resultCode == 1002) {
+            returnData = 2;
+        }
 
     }
 
