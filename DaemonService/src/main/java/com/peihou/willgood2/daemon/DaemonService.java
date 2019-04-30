@@ -2,16 +2,21 @@ package com.peihou.willgood2.daemon;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.peihou.willgood2.WillgoodAidl;
 
 
 /**
@@ -28,11 +33,63 @@ public class DaemonService extends Service {
         try {
             if (DaemonHolder.mService != null) {
                 startService(new Intent(this, DaemonHolder.mService));
+                bindService(new Intent(this, DaemonHolder.mService), serviceConnection, Context.BIND_IMPORTANT);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    private final WillgoodAidl aidl = new WillgoodAidl.Stub() {
+        @Override
+        public void startService2() throws RemoteException {
+            Log.d(TAG, "aidl startService()");
+        }
+
+        @Override
+        public void stopService2() throws RemoteException {
+            Log.e(TAG, "aidl stopService()");
+        }
+
+        @Override
+        public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) {
+
+        }
+    };
+
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "onServiceConnected() 已绑定");
+            try {
+                service.linkToDeath(() -> {
+                    Log.e(TAG, "onServiceConnected() linkToDeath");
+                    try {
+                        aidl.startService2();
+                        startBindService();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }, 1);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.e(TAG, "onServiceDisconnected() 已解绑");
+            try {
+                aidl.stopService2();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onBindingDied(ComponentName name) {
+            onServiceDisconnected(name);
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -46,20 +103,22 @@ public class DaemonService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand()");
-        return Service.START_NOT_STICKY;
+        return Service.START_STICKY;
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind()");
-        return null;
+//        return null;
+        return (IBinder) aidl;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.e(TAG, "onDestroy()");
+        unbindService(serviceConnection);
 
         DaemonHolder.restartService(getApplicationContext(), getClass());
         screenBroadcastReceiver.unregisterScreenBroadcastReceiver(this);

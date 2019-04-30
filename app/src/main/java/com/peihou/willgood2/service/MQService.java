@@ -21,6 +21,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
@@ -115,7 +116,7 @@ public class MQService extends AbsHeartBeatService {
     private String host = "tcp://47.111.101.184:1883";//mqtt连接服务端ip
     private String userName = "mosquitto";//mqtt连接用户名
     private String passWord = "mosquitto";//mqtt连接密码
-
+//    private static final android.os.Handler mainThreadHandler = new android.os.Handler(Looper.getMainLooper());
 
     private MqttClient client;//mqtt客户端
 
@@ -208,7 +209,7 @@ public class MQService extends AbsHeartBeatService {
         Log.i("RestartSrtvice","-->启动服务");
 
         connect(1);
-        return super.onStartCommand(intent,flags,startId);
+        return START_STICKY;
 
     }
 
