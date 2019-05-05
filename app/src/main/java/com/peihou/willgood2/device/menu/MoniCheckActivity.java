@@ -299,7 +299,7 @@ public class MoniCheckActivity extends BaseActivity {
                     }else if (col==2){
                         if (Utils.isNumeric(content)){
                             double data=Double.parseDouble(content);
-                            if (data>=0.01 && data<=100){
+                            if (data>=0 && data<=99.99 && content.length()<6){
                                 dialog.dismiss();
                                 BigDecimal b = new BigDecimal(data);
                                 data = b.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
@@ -308,7 +308,7 @@ public class MoniCheckActivity extends BaseActivity {
                                 tables.set(row,table);
                                 adapter.notifyDataSetChanged();
                             }else {
-                                ToastUtil.showShort(MoniCheckActivity.this,"系数范围为0.01到100");
+                                ToastUtil.showShort(MoniCheckActivity.this,"系数范围为0.00到99.99");
                             }
                         }else {
                             ToastUtil.showShort(MoniCheckActivity.this,"不合法的数字");

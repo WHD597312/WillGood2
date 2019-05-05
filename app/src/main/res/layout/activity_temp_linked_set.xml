@@ -80,7 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginTop="@dimen/dp_27"
-        android:text="99"
+        android:text="512"
         android:textColor="@color/white"
         android:layout_marginRight="38dp"
         android:gravity="center"
@@ -109,7 +109,7 @@
         app:rsb_tick_mark_mode="other"
         app:rsb_tick_mark_text_margin="14dp"
         app:rsb_tick_mark_text_size="18sp"
-        app:rsb_max="99"
+        app:rsb_max="512"
         app:rsb_min="-128"
         />
     <TextView

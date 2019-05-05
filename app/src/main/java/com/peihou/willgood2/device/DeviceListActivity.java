@@ -135,6 +135,7 @@ public class DeviceListActivity extends BaseActivity {
         reveiver = new MQTTMessageReveiver();
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+//        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         filter.addAction("mqttmessage2");
 //        filter.addAction(Intent.ACTION_TIME_TICK);
         this.registerReceiver(reveiver, filter);

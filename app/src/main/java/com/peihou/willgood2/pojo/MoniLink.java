@@ -19,7 +19,7 @@ public class MoniLink implements Serializable {
     private String name;//模拟量联动名称
     private int type;//o为电流，1为电压
     private int num;//1，2，3，4
-    private int contition;//触发条件
+    private double contition;//触发条件
     private int triState;//触发条件状态 0低于，1高于
     private int preLine;//前8路
     private int lastLine;//后8路
@@ -37,7 +37,7 @@ public class MoniLink implements Serializable {
     public MoniLink() {
     }
 
-    public MoniLink(int type, int num, int contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, String deviceMac, int mcuVersion) {
+    public MoniLink(int type, int num, double contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, String deviceMac, int mcuVersion) {
         this.type = type;
         this.num = num;
         this.contition = contition;
@@ -51,7 +51,7 @@ public class MoniLink implements Serializable {
         this.mcuVersion = mcuVersion;
     }
 
-    public MoniLink(String name, int type, int num, int contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, int controlType, String deviceMac, int mcuVersion) {
+    public MoniLink(String name, int type, int num, double contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, int controlType, String deviceMac, int mcuVersion) {
         this.name = name;
         this.type = type;
         this.num = num;
@@ -80,9 +80,9 @@ public class MoniLink implements Serializable {
         this.deviceMac = deviceMac;
     }
 
-    @Generated(hash = 1226823812)
-    public MoniLink(Long id, String name, int type, int num, int contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, int controlType, String deviceMac,
-            int mcuVersion, String lines, int visitity) {
+    @Generated(hash = 593558972)
+    public MoniLink(Long id, String name, int type, int num, double contition, int triState, int preLine, int lastLine, int controlState, int triType, int state, int controlType, String deviceMac, int mcuVersion,
+            String lines, int visitity) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -100,6 +100,8 @@ public class MoniLink implements Serializable {
         this.lines = lines;
         this.visitity = visitity;
     }
+
+
 
     public int getType() {
         return type;
@@ -201,11 +203,11 @@ public class MoniLink implements Serializable {
         this.triState = triState;
     }
 
-    public int getContition() {
+    public double getContition() {
         return this.contition;
     }
 
-    public void setContition(int contition) {
+    public void setContition(double contition) {
         this.contition = contition;
     }
 

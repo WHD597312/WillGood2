@@ -28,7 +28,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         public final static Property Name = new Property(1, String.class, "name", false, "NAME");
         public final static Property Type = new Property(2, int.class, "type", false, "TYPE");
         public final static Property Num = new Property(3, int.class, "num", false, "NUM");
-        public final static Property Contition = new Property(4, int.class, "contition", false, "CONTITION");
+        public final static Property Contition = new Property(4, double.class, "contition", false, "CONTITION");
         public final static Property TriState = new Property(5, int.class, "triState", false, "TRI_STATE");
         public final static Property PreLine = new Property(6, int.class, "preLine", false, "PRE_LINE");
         public final static Property LastLine = new Property(7, int.class, "lastLine", false, "LAST_LINE");
@@ -59,7 +59,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
                 "\"NAME\" TEXT," + // 1: name
                 "\"TYPE\" INTEGER NOT NULL ," + // 2: type
                 "\"NUM\" INTEGER NOT NULL ," + // 3: num
-                "\"CONTITION\" INTEGER NOT NULL ," + // 4: contition
+                "\"CONTITION\" REAL NOT NULL ," + // 4: contition
                 "\"TRI_STATE\" INTEGER NOT NULL ," + // 5: triState
                 "\"PRE_LINE\" INTEGER NOT NULL ," + // 6: preLine
                 "\"LAST_LINE\" INTEGER NOT NULL ," + // 7: lastLine
@@ -94,7 +94,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         }
         stmt.bindLong(3, entity.getType());
         stmt.bindLong(4, entity.getNum());
-        stmt.bindLong(5, entity.getContition());
+        stmt.bindDouble(5, entity.getContition());
         stmt.bindLong(6, entity.getTriState());
         stmt.bindLong(7, entity.getPreLine());
         stmt.bindLong(8, entity.getLastLine());
@@ -131,7 +131,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         }
         stmt.bindLong(3, entity.getType());
         stmt.bindLong(4, entity.getNum());
-        stmt.bindLong(5, entity.getContition());
+        stmt.bindDouble(5, entity.getContition());
         stmt.bindLong(6, entity.getTriState());
         stmt.bindLong(7, entity.getPreLine());
         stmt.bindLong(8, entity.getLastLine());
@@ -165,7 +165,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
             cursor.getInt(offset + 2), // type
             cursor.getInt(offset + 3), // num
-            cursor.getInt(offset + 4), // contition
+            cursor.getDouble(offset + 4), // contition
             cursor.getInt(offset + 5), // triState
             cursor.getInt(offset + 6), // preLine
             cursor.getInt(offset + 7), // lastLine
@@ -187,7 +187,7 @@ public class MoniLinkDao extends AbstractDao<MoniLink, Long> {
         entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setType(cursor.getInt(offset + 2));
         entity.setNum(cursor.getInt(offset + 3));
-        entity.setContition(cursor.getInt(offset + 4));
+        entity.setContition(cursor.getDouble(offset + 4));
         entity.setTriState(cursor.getInt(offset + 5));
         entity.setPreLine(cursor.getInt(offset + 6));
         entity.setLastLine(cursor.getInt(offset + 7));

@@ -118,6 +118,7 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <!--<action android:name="android.intent.action.TIME_TICK"></action>-->
                 <action android:name="mqttmessage" />
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED"/>-->
             </intent-filter>
         </receiver>
         <!-- Required SDK 核心功能-->

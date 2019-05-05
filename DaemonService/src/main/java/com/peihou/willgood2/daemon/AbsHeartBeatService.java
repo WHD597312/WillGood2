@@ -136,6 +136,7 @@ public abstract class AbsHeartBeatService extends Service {
         }
     }
 
+
     public abstract void onStartService();
 
     public abstract void onStopService();

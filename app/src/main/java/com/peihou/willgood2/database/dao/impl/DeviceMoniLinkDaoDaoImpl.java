@@ -67,7 +67,7 @@ public class DeviceMoniLinkDaoDaoImpl {
      * @param triState
      * @return
      */
-    public MoniLink findMoniLink(String deviceMac,int type,int num,int contition,int triState,int preline,int lastline,int triType){
+    public MoniLink findMoniLink(String deviceMac,int type,int num,double contition,int triState,int preline,int lastline,int triType){
         WhereCondition whereCondition=deviceMoniLinkDao.queryBuilder().and(
                 MoniLinkDao.Properties.DeviceMac.eq(deviceMac),
                 MoniLinkDao.Properties.Type.eq(type),

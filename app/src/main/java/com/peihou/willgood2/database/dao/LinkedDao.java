@@ -30,7 +30,7 @@ public class LinkedDao extends AbstractDao<Linked, Long> {
         public final static Property Type = new Property(3, int.class, "type", false, "TYPE");
         public final static Property Lines = new Property(4, String.class, "lines", false, "LINES");
         public final static Property Name = new Property(5, String.class, "name", false, "NAME");
-        public final static Property Condition = new Property(6, int.class, "condition", false, "CONDITION");
+        public final static Property Condition = new Property(6, double.class, "condition", false, "CONDITION");
         public final static Property TriState = new Property(7, int.class, "triState", false, "TRI_STATE");
         public final static Property ConditionState = new Property(8, int.class, "conditionState", false, "CONDITION_STATE");
         public final static Property PreLines = new Property(9, int.class, "preLines", false, "PRE_LINES");
@@ -61,7 +61,7 @@ public class LinkedDao extends AbstractDao<Linked, Long> {
                 "\"TYPE\" INTEGER NOT NULL ," + // 3: type
                 "\"LINES\" TEXT," + // 4: lines
                 "\"NAME\" TEXT," + // 5: name
-                "\"CONDITION\" INTEGER NOT NULL ," + // 6: condition
+                "\"CONDITION\" REAL NOT NULL ," + // 6: condition
                 "\"TRI_STATE\" INTEGER NOT NULL ," + // 7: triState
                 "\"CONDITION_STATE\" INTEGER NOT NULL ," + // 8: conditionState
                 "\"PRE_LINES\" INTEGER NOT NULL ," + // 9: preLines
@@ -104,7 +104,7 @@ public class LinkedDao extends AbstractDao<Linked, Long> {
         if (name != null) {
             stmt.bindString(6, name);
         }
-        stmt.bindLong(7, entity.getCondition());
+        stmt.bindDouble(7, entity.getCondition());
         stmt.bindLong(8, entity.getTriState());
         stmt.bindLong(9, entity.getConditionState());
         stmt.bindLong(10, entity.getPreLines());
@@ -141,7 +141,7 @@ public class LinkedDao extends AbstractDao<Linked, Long> {
         if (name != null) {
             stmt.bindString(6, name);
         }
-        stmt.bindLong(7, entity.getCondition());
+        stmt.bindDouble(7, entity.getCondition());
         stmt.bindLong(8, entity.getTriState());
         stmt.bindLong(9, entity.getConditionState());
         stmt.bindLong(10, entity.getPreLines());
@@ -167,7 +167,7 @@ public class LinkedDao extends AbstractDao<Linked, Long> {
             cursor.getInt(offset + 3), // type
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // lines
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // name
-            cursor.getInt(offset + 6), // condition
+            cursor.getDouble(offset + 6), // condition
             cursor.getInt(offset + 7), // triState
             cursor.getInt(offset + 8), // conditionState
             cursor.getInt(offset + 9), // preLines
@@ -189,7 +189,7 @@ public class LinkedDao extends AbstractDao<Linked, Long> {
         entity.setType(cursor.getInt(offset + 3));
         entity.setLines(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setName(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
-        entity.setCondition(cursor.getInt(offset + 6));
+        entity.setCondition(cursor.getDouble(offset + 6));
         entity.setTriState(cursor.getInt(offset + 7));
         entity.setConditionState(cursor.getInt(offset + 8));
         entity.setPreLines(cursor.getInt(offset + 9));

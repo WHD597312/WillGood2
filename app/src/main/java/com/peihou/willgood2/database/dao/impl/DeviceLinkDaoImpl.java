@@ -59,7 +59,7 @@ public class DeviceLinkDaoImpl {
      * @param triType
      * @return
      */
-    public Linked findLinked(String deviceMac,int type,int condition,int triState,int preline,int lastline,int triType){
+    public Linked findLinked(String deviceMac,int type,double condition,int triState,int preline,int lastline,int triType){
         WhereCondition whereCondition=linkedDao.queryBuilder().and(
                 LinkedDao.Properties.DeviceMac.eq(deviceMac),
                 LinkedDao.Properties.Type.eq(type),

@@ -923,8 +923,8 @@ public class AlermActivity extends BaseActivity {
                 try {
                     double s = Double.parseDouble(value);
                     if (type == 0) {
-                        if (s >= -50 && s <= 120) {
-                            s += 50;
+                        if (s >= -128 && s <= 512.9) {
+                            s += 128;
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int)( s * 10);
@@ -945,7 +945,7 @@ public class AlermActivity extends BaseActivity {
                             return;
                         }
                     } else if (type == 1) {
-                        if (s >= 0 && s <= 100) {
+                        if (s >= 0 && s <= 99.9) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s * 10);
@@ -966,7 +966,7 @@ public class AlermActivity extends BaseActivity {
                             return;
                         }
                     } else if (type == 2) {
-                        if (s >= 0 && s <= 1000) {
+                        if (s >= 0 && s <= 1024.9) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s*10);
@@ -987,7 +987,7 @@ public class AlermActivity extends BaseActivity {
                             return;
                         }
                     } else if (type == 3) {
-                        if (s >= 0 && s <= 1000) {
+                        if (s >= 0 && s <= 1024.9) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int alermValue = (int) (s * 10);
@@ -1008,18 +1008,37 @@ public class AlermActivity extends BaseActivity {
                             return;
                         }
                     } else if (type == 4) {
-                        if (s >= 0) {
+                        if (s >= 0 && s<=131071.9) {
                             BigDecimal b = new BigDecimal(s);
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
-                            int alermValue = (int) (s * 10);
+                            int rangeValue=(int)( s*10);
+                            String range=Integer.toHexString(rangeValue);
+                            int middlePower=0;
+                            int lowPower=0;
+                            int highPower=0;
+                            int size=range.length();
+                            if (size<=2){
+                                lowPower=Integer.parseInt(range,16);
+                            }
+                            else if (size>2 && size<=4){
+                                lowPower=Integer.parseInt(range.substring(2),16);
+                                middlePower=Integer.parseInt(range.substring(0,2),16);
+                            }
+                            else if (size>4 && size<=6){
+                                highPower=Integer.parseInt(range.substring(0,2),16);
+                                middlePower=Integer.parseInt(range.substring(2,4),16);
+                                lowPower=Integer.parseInt(range.substring(4),16);
+                            }
+
                             int data []=mqService.getAlermData();
-                            data[13] = alermValue / 256;
-                            data[14] = alermValue % 256;
+                            data[13] =middlePower;
+                            data[14] =lowPower;
                             if (open == 1) {
                                 data[15] = 0x11;
                             } else {
                                 data[15] = 0x22;
                             }
+                            data[17]=highPower;
                             mqService.sendAlerm(topicName, mcuVersion, data);
                             click=1;
                             countTimer.start();
@@ -1049,6 +1068,8 @@ public class AlermActivity extends BaseActivity {
         alermDialog2.show();
 
     }
+
+
 
     //设置蒙版
     private void backgroundAlpha(float f) {

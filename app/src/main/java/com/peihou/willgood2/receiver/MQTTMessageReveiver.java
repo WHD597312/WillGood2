@@ -7,9 +7,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import com.peihou.willgood2.MyApplication;
+import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.service.ServiceUtils;
 import com.peihou.willgood2.utils.ToastUtil;
@@ -26,6 +28,11 @@ public class MQTTMessageReveiver extends BroadcastReceiver {
         NetworkInfo wifiNetInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 
+        if (intent!=null && intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)){
+            Toast.makeText(context,"设备开机了",Toast.LENGTH_SHORT).show();
+
+            DaemonHolder.startService();
+        }
       if (intent!=null){
           Log.i("JPushReceiver","-->"+intent.getAction());
       }

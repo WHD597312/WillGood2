@@ -8,12 +8,14 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -30,6 +32,7 @@ import com.peihou.willgood2.pojo.MoniLink;
 import com.peihou.willgood2.service.MQService;
 import com.peihou.willgood2.utils.TenTwoUtil;
 import com.peihou.willgood2.utils.ToastUtil;
+import com.peihou.willgood2.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +55,8 @@ public class LinkedSetActivity extends BaseActivity {
     @BindView(R.id.gv_line)
     GridView gv_line;//线路网格布局
     private List<Line2> lines = new ArrayList<>();//线路集合
-    @BindView(R.id.slide_bar)
-    RangeSeekBar slide_bar;
+//    @BindView(R.id.slide_bar)
+//    RangeSeekBar slide_bar;
     @BindView(R.id.btn_once)
     TextView btn_once;//单次触发
     @BindView(R.id.btn_loop)
@@ -67,6 +70,9 @@ public class LinkedSetActivity extends BaseActivity {
     @BindView(R.id.btn_close)
     TextView btn_close;//控制状态关
     LinesAdapter adapter;
+    @BindView(R.id.et_range) EditText et_range;//联动范围
+//    @BindView(R.id.tv_low) TextView tv_low;//最小值
+//    @BindView(R.id.tv_high) TextView tv_high;//最大值
     private DeviceLineDaoImpl deviceLineDao;//设备线路表的操作对象
     private DeviceLinkDaoImpl deviceLinkDao;//设备联动表的操作对象
     private DeviceMoniLinkDaoDaoImpl deviceMoniLinkDaoDao;
@@ -96,12 +102,26 @@ public class LinkedSetActivity extends BaseActivity {
     public void initView(View view) {
         if (type == 0) {
             s = "温度";
+            et_range.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
+            et_range.setHint("请输入-128.0~512.9的范围值");
+
         } else if (type == 1) {
             s = "湿度";
+            et_range.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            et_range.setHint("请输入0.0~99.9的范围值");
+
         } else if (type == 3) {
             s = "电流";
+//            tv_low.setText("0");
+//            tv_high.setText("1024.9");
+//            slide_bar.setRange(0f,1024.9f);
+            et_range.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            et_range.setHint("请输入0.0~1024.9的范围值");
+
         } else if (type == 4) {
             s = "电压";
+            et_range.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            et_range.setHint("请输入0.0~1024.9的范围值");
         } else if (type == 5) {
             if (analog < 4) {
                 int i = analog + 1;
@@ -114,10 +134,15 @@ public class LinkedSetActivity extends BaseActivity {
                 moniType = 1;
                 num = analog - 4;
             }
+            et_range.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            et_range.setHint("请输入0.00~99.99的范围值");
+//            tv_low.setText("0");
+//            tv_high.setText("100");
+//            slide_bar.setRange(0f,100f);
         }
 
-        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
-//        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
+//        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         deviceLineDao = new DeviceLineDaoImpl(getApplicationContext());
 
         if (type == 5) {
@@ -144,7 +169,7 @@ public class LinkedSetActivity extends BaseActivity {
                 adapter.notifyDataSetChanged();
             }
         });
-        slide_bar.setTypeface(Typeface.DEFAULT_BOLD);
+//        slide_bar.setTypeface(Typeface.DEFAULT_BOLD);
 //        slide_bar.setValue(40);
 //        slide_bar.setLineRight(40);
 //        if (type==0){
@@ -152,27 +177,27 @@ public class LinkedSetActivity extends BaseActivity {
 //            slide_bar.setLineRight(99);
 //        }
 //        slide_bar.setRange(0,1000);
-        slide_bar.setIndicatorTextDecimalFormat("0");
-        slide_bar.setTickMarkTextColor(getResources().getColor(R.color.white));
+
+//        slide_bar.setTickMarkTextColor(getResources().getColor(R.color.white));
 
 
-        slide_bar.setOnRangeChangedListener(new OnRangeChangedListener() {
-            @Override
-            public void onRangeChanged(RangeSeekBar view, float leftValue, float rightValue, boolean isFromUser) {
-                value = Math.round(leftValue);
-                Log.i("OnRangeChangedListener", "-->" + value);
-            }
-
-            @Override
-            public void onStartTrackingTouch(RangeSeekBar view, boolean isLeft) {
-                Log.i("isLeft", "-->" + isLeft);
-            }
-
-            @Override
-            public void onStopTrackingTouch(RangeSeekBar view, boolean isLeft) {
-                Log.i("isLeft", "-->" + isLeft);
-            }
-        });
+//        slide_bar.setOnRangeChangedListener(new OnRangeChangedListener() {
+//            @Override
+//            public void onRangeChanged(RangeSeekBar view, float leftValue, float rightValue, boolean isFromUser) {
+//                value = Math.round(leftValue);
+//                Log.i("OnRangeChangedListener", "-->" + value);
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(RangeSeekBar view, boolean isLeft) {
+//                Log.i("isLeft", "-->" + isLeft);
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(RangeSeekBar view, boolean isLeft) {
+//                Log.i("isLeft", "-->" + isLeft);
+//            }
+//        });
     }
 
     @Override
@@ -181,7 +206,7 @@ public class LinkedSetActivity extends BaseActivity {
     }
 
     int type = 0;//联动的类型
-    int value = 0;//联动的触发条件
+    double value = 0;//联动的触发条件
     long deviceId;//设备Id
     String deviceMac;//设备的mac地址
     int condition = 0;//条件 0为低于 1为高于
@@ -212,6 +237,30 @@ public class LinkedSetActivity extends BaseActivity {
                 break;
             case R.id.img_ensure:
                 if (type == 5) {
+                    String rango=et_range.getText().toString();
+                    if (TextUtils.isEmpty(rango)){
+                        ToastUtil.showShort(this,"请输入0.00~99.99范围的值");
+                        break;
+                    }else {
+                        if (!Utils.isNumeric(rango)){
+                            ToastUtil.showShort(this,"不合法的数字");
+                            et_range.setText("");
+                            break;
+                        }else {
+                            double dRanfo=Double.parseDouble(rango);
+                            if (dRanfo<0 || dRanfo>99.99){
+                                ToastUtil.showShort(this,"请输入0.00~99.99范围的值");
+                                et_range.setText("");
+                                break;
+                            }
+                            if (rango.length()>5){
+                                ToastUtil.showShort(this,"请输入0.00~99.99范围的值");
+                                et_range.setText("");
+                                break;
+                            }
+                        }
+                        value=Double.parseDouble(rango);
+                    }
                     for (int i = 0; i < lines.size(); i++) {
                         Line2 line2 = lines.get(i);
                         int deviceLineNum = line2.getDeviceLineNum() - 1;
@@ -248,6 +297,83 @@ public class LinkedSetActivity extends BaseActivity {
                     setResult(1001, intent);
                     finish();
                 } else {
+                    String rango=et_range.getText().toString();
+                    if (type==0){
+                        if (TextUtils.isEmpty(rango)){
+                            ToastUtil.showShort(this,"请输入-128.0~512.9范围的值");
+                            break;
+                        }else {
+                            if (!Utils.isNumeric(rango)){
+                                ToastUtil.showShort(this,"不合法的数字");
+                                et_range.setText("");
+                                break;
+                            }else {
+                                double dRanfo=Double.parseDouble(rango);
+                                if (dRanfo<-128.0 || dRanfo>512.9){
+                                    ToastUtil.showShort(this,"请输入-128.0~512.9范围的值");
+                                    et_range.setText("");
+                                    break;
+                                }
+                                if (dRanfo>=0 && rango.length()>5){
+                                    ToastUtil.showShort(this,"请输入-128.0~512.9范围的值");
+                                    et_range.setText("");
+                                    break;
+                                }else if (dRanfo<0 && rango.length()>5){
+                                    ToastUtil.showShort(this,"请输入-128.0~512.9范围的值");
+                                    et_range.setText("");
+                                    break;
+                                }
+                            }
+                            value=Double.parseDouble(rango);
+                        }
+                    }else if (type==1){
+                        if (TextUtils.isEmpty(rango)){
+                            ToastUtil.showShort(this,"请输入0.0~99.9范围的值");
+                            break;
+                        }else {
+                            if (!Utils.isNumeric(rango)){
+                                ToastUtil.showShort(this,"不合法的数字");
+                                et_range.setText("");
+                                break;
+                            }else{
+                                double dRanfo=Double.parseDouble(rango);
+                                if (dRanfo<0 || dRanfo>99.9){
+                                    ToastUtil.showShort(this,"请输入0.0~99.9范围的值");
+                                    et_range.setText("");
+                                    break;
+                                }
+                                if (rango.length()>4){
+                                    ToastUtil.showShort(this,"请输入0.0~99.9范围的值");
+                                    et_range.setText("");
+                                    break;
+                                }
+                            }
+                            value=Double.parseDouble(rango);
+                        }
+                    }else if (type==3 || type==4){
+                        if (TextUtils.isEmpty(rango)){
+                            ToastUtil.showShort(this,"请输入0.0~1024.9范围的值");
+                            break;
+                        } if (!Utils.isNumeric(rango)){
+                            ToastUtil.showShort(this,"不合法的数字");
+                            et_range.setText("");
+                            break;
+                        }else {
+                            double dRanfo=Double.parseDouble(rango);
+                            if (dRanfo<0 || dRanfo>1024.9){
+                                ToastUtil.showShort(this,"请输入0.0~1024.9范围的值");
+                                et_range.setText("");
+                                break;
+                            }
+                            if (rango.length()>7){
+                                ToastUtil.showShort(this,"请输入0.0~1024.9范围的值");
+                                et_range.setText("");
+                                break;
+                            }
+                        }
+                        value=Double.parseDouble(rango);
+                    }
+
                     Linked linked2 = null;
                     for (int i = 0; i < lines.size(); i++) {
                         Line2 line2 = lines.get(i);

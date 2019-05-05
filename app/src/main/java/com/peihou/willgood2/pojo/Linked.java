@@ -19,7 +19,7 @@ public class Linked implements Serializable {
     private int type;//联动的类型
     private String lines;//联动的线路
     private String name;//联动的名称
-    private int condition;//联动触发条件值
+    private double condition;//联动触发条件值
     private int triState;//触发条件状态 0低于，1高于
     private int conditionState;//控制条件状态，0关闭 1打开
     private int preLines;//联动控制前8路线路
@@ -44,7 +44,7 @@ public class Linked implements Serializable {
      * @param triType
      */
 
-    public Linked(String deviceMac, int type, String name, int condition, int triState,int conditionState,int state, int preLines, int lastLines, int triType) {
+    public Linked(String deviceMac, int type, String name, double condition, int triState,int conditionState,int state, int preLines, int lastLines, int triType) {
         this.deviceMac = deviceMac;
         this.type = type;
         this.name = name;
@@ -69,7 +69,7 @@ public class Linked implements Serializable {
      * @param lastLines
      * @param triType
      */
-    public Linked(String deviceMac, int type, String name, int condition,int conditionState,int state, int preLines, int lastLines, int triType) {
+    public Linked(String deviceMac, int type, String name, double condition,int conditionState,int state, int preLines, int lastLines, int triType) {
         this.deviceMac = deviceMac;
         this.type = type;
         this.name = name;
@@ -88,12 +88,8 @@ public class Linked implements Serializable {
     public Linked() {
     }
 
-
-
-
-
-    @Generated(hash = 1928273482)
-    public Linked(Long id, String deviceMac, int mcuVersion, int type, String lines, String name, int condition, int triState, int conditionState, int preLines,
+    @Generated(hash = 2054883553)
+    public Linked(Long id, String deviceMac, int mcuVersion, int type, String lines, String name, double condition, int triState, int conditionState, int preLines,
             int lastLines, int triType, int state, int analog, int switchLine, int visitity) {
         this.id = id;
         this.deviceMac = deviceMac;
@@ -113,6 +109,11 @@ public class Linked implements Serializable {
         this.visitity = visitity;
     }
 
+
+
+
+
+   
     public int getType() {
         return type;
     }
@@ -184,11 +185,11 @@ public class Linked implements Serializable {
             this.conditionState = conditionState;
     }
 
-    public int getCondition() {
+    public double getCondition() {
         return this.condition;
     }
 
-    public void setCondition(int condition) {
+    public void setCondition(double condition) {
         this.condition = condition;
     }
 

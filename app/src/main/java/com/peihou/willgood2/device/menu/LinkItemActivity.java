@@ -125,23 +125,31 @@ public class LinkItemActivity extends BaseActivity {
                     intent.putExtra("deviceId", deviceId);
                     startActivityForResult(intent, 1000);
                 } else {
-                    if (type == 0) {
-                        Intent intent = new Intent(LinkItemActivity.this, TempLinkedSetActivity.class);
-                        intent.putExtra("type", type);
-                        intent.putExtra("deviceMac", deviceMac);
-                        intent.putExtra("deviceId", deviceId);
-                        startActivityForResult(intent, 1001);
-                    } else {
-                        Intent intent = new Intent(LinkItemActivity.this, LinkedSetActivity.class);
-                        intent.putExtra("type", type);
-                        intent.putExtra("deviceMac", deviceMac);
-                        intent.putExtra("deviceId", deviceId);
-                        if (type == 5) {
-                            intent.putExtra("analog", analog);
-                        }
-                        startActivityForResult(intent, 1001);
-
+                    Intent intent = new Intent(LinkItemActivity.this, LinkedSetActivity.class);
+                    intent.putExtra("type", type);
+                    intent.putExtra("deviceMac", deviceMac);
+                    intent.putExtra("deviceId", deviceId);
+                    if (type == 5) {
+                        intent.putExtra("analog", analog);
                     }
+                    startActivityForResult(intent, 1001);
+//                    if (type == 0) {
+//                        Intent intent = new Intent(LinkItemActivity.this, TempLinkedSetActivity.class);
+//                        intent.putExtra("type", type);
+//                        intent.putExtra("deviceMac", deviceMac);
+//                        intent.putExtra("deviceId", deviceId);
+//                        startActivityForResult(intent, 1001);
+//                    } else {
+//                        Intent intent = new Intent(LinkItemActivity.this, LinkedSetActivity.class);
+//                        intent.putExtra("type", type);
+//                        intent.putExtra("deviceMac", deviceMac);
+//                        intent.putExtra("deviceId", deviceId);
+//                        if (type == 5) {
+//                            intent.putExtra("analog", analog);
+//                        }
+//                        startActivityForResult(intent, 1001);
+//
+//                    }
                 }
                 break;
         }
@@ -159,9 +167,9 @@ public class LinkItemActivity extends BaseActivity {
     public void initView(View view) {
 
         tv_title.setText(name + "联动");
-        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+//        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
         Log.i("topicName", "-->" + topicName);
-//        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
+        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         if (type == 5) {
             deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
 //            moniLinks = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);
@@ -524,7 +532,7 @@ public class LinkItemActivity extends BaseActivity {
                 name = linked.getName() + "(" + (position + 1) + ")";
             }
             String lines = linked.getLines();
-            int condition = linked.getCondition();
+            double condition = linked.getCondition();
             int triType = linked.getTriType();
             int triState = linked.getTriState();
             int conditionState = linked.getConditionState();
@@ -561,10 +569,12 @@ public class LinkItemActivity extends BaseActivity {
                 c = c + ss;
 
             } else {
+                String condition2="";
+                condition2=String.format("%.1f",condition);
                 if (triState == 1) {
-                    c = "高于" + "  " + condition;
+                    c = "高于" + "  " + condition2;
                 } else {
-                    c = "低于" + "  " + condition;
+                    c = "低于" + "  " + condition2;
                 }
                 if (conditionState == 1) {
                     c = c + "  开启";
@@ -648,7 +658,7 @@ public class LinkItemActivity extends BaseActivity {
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             final MoniLink moniLink = list.get(position);
             String name = moniLink.getName() + "(" + (position + 1) + ")";
-            int contition = moniLink.getContition();
+            double contition2 = moniLink.getContition();
             int triState = moniLink.getTriState();
             int controlState = moniLink.getControlState();
             String lines = moniLink.getLines();
@@ -665,7 +675,7 @@ public class LinkItemActivity extends BaseActivity {
             } else {
                 tv_lines.setText("");
             }
-
+            String contition=""+String.format("%.2f",contition2);
             if (triState == 1) {
                 c = "高于" + "  " + contition;
             } else {

@@ -42,6 +42,14 @@ public class Utils {
             return false;//如果抛出异常，返回False
         }
     }
+    public static boolean isNumeric2(String str){
+        try {
+            double num=Integer.parseInt(str);//把字符串强制转换为数字
+            return true;//如果是数字，返回True
+        } catch (Exception e) {
+            return false;//如果抛出异常，返回False
+        }
+    }
     public static String week(int i){
         String s="";
         switch (i){

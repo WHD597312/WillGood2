@@ -26,7 +26,7 @@ import com.peihou.willgood2.WillgoodAidl;
  */
 public class DaemonService extends Service {
     private static final String TAG = "DaemonService";
-    private ScreenBroadcastReceiver screenBroadcastReceiver = new ScreenBroadcastReceiver();
+//    private DaemonReceiver screenBroadcastReceiver = new DaemonReceiver();
 
 
     private void startBindService() {
@@ -91,15 +91,39 @@ public class DaemonService extends Service {
         }
     };
 
+    DaemonReceiver daemonReceiver;
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
         startBindService();
         listenNetworkConnectivity();
-        screenBroadcastReceiver.registerScreenBroadcastReceiver(this);
+        registerDaemonReceiver();
+//        screenBroadcastReceiver.registerScreenBroadcastReceiver(this);
     }
 
+    public class DaemonReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent!=null){
+                DaemonHolder.startService();
+            }
+        }
+    }
+    private void registerDaemonReceiver(){
+        daemonReceiver=new DaemonReceiver();
+        IntentFilter filter=new IntentFilter();
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);//开机
+        filter.addAction(Intent.ACTION_SCREEN_ON); // 开屏
+        filter.addAction(Intent.ACTION_SCREEN_OFF); // 锁屏
+        filter.addAction(Intent.ACTION_USER_PRESENT); // 解锁
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS); // Home键
+        filter.addAction("android.media.AUDIO_BECOMING_NOISY");
+        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+        filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+        registerReceiver(daemonReceiver,filter);
+ }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand()");
@@ -121,7 +145,10 @@ public class DaemonService extends Service {
         unbindService(serviceConnection);
 
         DaemonHolder.restartService(getApplicationContext(), getClass());
-        screenBroadcastReceiver.unregisterScreenBroadcastReceiver(this);
+//        screenBroadcastReceiver.unregisterScreenBroadcastReceiver(this);
+        if (daemonReceiver!=null){
+            unregisterReceiver(daemonReceiver);
+        }
     }
 
     private void listenNetworkConnectivity() {
@@ -154,34 +181,36 @@ public class DaemonService extends Service {
         }
     }
 
-    private class ScreenBroadcastReceiver extends BroadcastReceiver {
-        private boolean isRegistered = false;
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null) {
-                Log.e(TAG, "onReceive() action: " + intent.getAction());
-            }
-            DaemonHolder.startService();
-        }
-
-        public void registerScreenBroadcastReceiver(Context context) {
-            if (!isRegistered) {
-                isRegistered = true;
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(Intent.ACTION_SCREEN_ON); // 开屏
-                filter.addAction(Intent.ACTION_SCREEN_OFF); // 锁屏
-                filter.addAction(Intent.ACTION_USER_PRESENT); // 解锁
-                filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS); // Home键
-                context.registerReceiver(ScreenBroadcastReceiver.this, filter);
-            }
-        }
-
-        public void unregisterScreenBroadcastReceiver(Context context) {
-            if (isRegistered) {
-                isRegistered = false;
-                context.unregisterReceiver(ScreenBroadcastReceiver.this);
-            }
-        }
-    }
+//    private class DaemonReceiver extends BroadcastReceiver {
+//        private boolean isRegistered = false;
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if (intent != null) {
+//                Log.e(TAG, "onReceive() action: " + intent.getAction());
+//            }
+//            DaemonHolder.startService();
+//        }
+//
+//        public void registerScreenBroadcastReceiver(Context context) {
+//            Log.e(TAG,"-->"+isRegistered);
+//            if (!isRegistered) {
+//                isRegistered = true;
+//                IntentFilter filter = new IntentFilter();
+//                filter.addAction(Intent.ACTION_BOOT_COMPLETED);//开机
+//                filter.addAction(Intent.ACTION_SCREEN_ON); // 开屏
+//                filter.addAction(Intent.ACTION_SCREEN_OFF); // 锁屏
+//                filter.addAction(Intent.ACTION_USER_PRESENT); // 解锁
+//                filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS); // Home键
+//                context.registerReceiver(DaemonReceiver.this, filter);
+//            }
+//        }
+//
+//        public void unregisterScreenBroadcastReceiver(Context context) {
+//            if (isRegistered) {
+//                isRegistered = false;
+//                context.unregisterReceiver(DaemonReceiver.this);
+//            }
+//        }
+//    }
 }

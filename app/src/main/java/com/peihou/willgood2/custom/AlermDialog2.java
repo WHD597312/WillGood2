@@ -128,35 +128,35 @@ public class AlermDialog2 extends Dialog {
             tv_title.setText("温度报警");
             et_1.setHint("温度报警中,请注意");
             et_1.setText("温度报警中,请注意");
-            tv_2.setText("请输入报警数值,-50~120℃");
+            tv_2.setText("请输入报警数值,-128.0~512.9℃");
             et_2.setText(value);
             et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
         }else if (mode==1){
            tv_title.setText("湿度报警");
             et_1.setHint("湿度报警中,请注意");
             et_1.setText("湿度报警中,请注意");
-            tv_2.setText("请输入报警数值,0~100%");
+            tv_2.setText("请输入报警数值,0.0~99.9%");
             et_2.setText(value);
             et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
         }else if (mode==2){
             tv_title.setText("电压报警");
             et_1.setText("电压报警中,请注意");
             et_1.setHint("电压报警中,请注意");
-            tv_2.setText("请输入报警数值,0~1000V");
+            tv_2.setText("请输入报警数值,0.0~1024.9V");
             et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
             et_2.setText(value);
         } else if (mode==3){
             tv_title.setText("电流报警");
             et_1.setText("电流报警中,请注意");
             et_1.setHint("电流报警中,请注意");
-            tv_2.setText("请输入报警数值,0~1000A");
+            tv_2.setText("请输入报警数值,0.0~1024.9A");
             et_2.setText(value);
             et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
         }else if (mode==4){
             tv_title.setText("功率报警");
             et_1.setText("功率报警中,请注意");
             et_1.setHint("功率报警中,请注意");
-            tv_2.setText("请输入报警数值,>=0W");
+            tv_2.setText("请输入报警数值,0.0~131071.9W");
             et_2.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_NUMBER_FLAG_SIGNED);
             et_2.setText(value);
         }
