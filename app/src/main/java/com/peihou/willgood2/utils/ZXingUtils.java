@@ -13,10 +13,18 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.ChecksumException;
 import com.google.zxing.EncodeHintType;
+import com.google.zxing.FormatException;
 import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Result;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.QRCodeWriter;
 
 import java.util.Hashtable;
@@ -168,4 +176,28 @@ public class ZXingUtils {
         return newBitmap;
     }
 
+    public static String recogQRcode(Bitmap bitmap){
+        String result=null;
+//        Bitmap image = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int[] data = new int[width * height];
+        bitmap.getPixels(data, 0, width, 0, 0, width, height);    //得到像素
+        RGBLuminanceSource source = new RGBLuminanceSource(width,height,data);   //RGBLuminanceSource对象
+        BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
+        QRCodeReader reader = new QRCodeReader();
+        Result re = null;
+        try {
+            //得到结果
+            re = reader.decode(bitmap1);
+            result=re.getText();
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+        } catch (ChecksumException e) {
+            e.printStackTrace();
+        } catch (FormatException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

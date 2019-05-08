@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
@@ -3865,32 +3866,36 @@ public class MQService extends AbsHeartBeatService {
             soundType = type;
             mediaPlayer.reset();
             if (type == 0) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.open);
+                AssetFileDescriptor file = getAssets().openFd("open.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 file.close();
             } else if (type == 1) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.close);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.close);
+                AssetFileDescriptor file = getAssets().openFd("close.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
 
                 file.close();
             } else if (type == 2) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.control);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.control);
+                AssetFileDescriptor file = getAssets().openFd("control.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 file.close();
             } else if (type == 3) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.set);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.set);
+                AssetFileDescriptor file = getAssets().openFd("set.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 file.close();
             } else if (type == 4) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_com);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_com);
+                AssetFileDescriptor file = getAssets().openFd("alerm_com.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -3905,7 +3910,8 @@ public class MQService extends AbsHeartBeatService {
                                 return;
                             } else if (soundCount < 3 && soundType == 4) {
                                 mediaPlayer.reset();
-                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_com);
+//                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_com);
+                                AssetFileDescriptor file = getAssets().openFd("alerm_com.mp3");
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
@@ -3921,7 +3927,8 @@ public class MQService extends AbsHeartBeatService {
 
 
             } else if (type == 5) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
+                AssetFileDescriptor file = getAssets().openFd("alerm_close.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -3936,7 +3943,8 @@ public class MQService extends AbsHeartBeatService {
                                 return;
                             } else if (soundCount < 3 && soundType == 5) {
                                 mediaPlayer.reset();
-                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_close);
+//                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_close);
+                                AssetFileDescriptor file = getAssets().openFd("alerm_close.mp3");
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
@@ -3954,7 +3962,8 @@ public class MQService extends AbsHeartBeatService {
 
 
             } else if (type == 6) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
+                AssetFileDescriptor file = getAssets().openFd("alerm_other.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -3968,7 +3977,8 @@ public class MQService extends AbsHeartBeatService {
                                 soundCount = 3;
                             } else if (soundCount < 3 && soundType == 6) {
                                 mediaPlayer.reset();
-                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_other);
+//                                AssetFileDescriptor file = MQService.this.getResources().openRawResourceFd(R.raw.alerm_other);
+                                AssetFileDescriptor file = getAssets().openFd("alerm_other.mp3");
                                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                                 mediaPlayer.prepare();
                                 mediaPlayer.start();
@@ -3983,7 +3993,8 @@ public class MQService extends AbsHeartBeatService {
                 });
 
             } else if (type == 7) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.delete);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.delete);
+                AssetFileDescriptor file = getAssets().openFd("delete.mp3");
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
@@ -3997,21 +4008,24 @@ public class MQService extends AbsHeartBeatService {
     public void startVoice(int type, boolean looper) {
         try {
             if (type == 4) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_com);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_com);
+                AssetFileDescriptor file = getAssets().openFd("alerm_com.mp3");
                 mediaPlayer.setLooping(looper);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 file.close();
             } else if (type == 5) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_close);
+                AssetFileDescriptor file = getAssets().openFd("alerm_close.mp3");
                 mediaPlayer.setLooping(looper);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();
                 mediaPlayer.start();
                 file.close();
             } else if (type == 6) {
-                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
+//                AssetFileDescriptor file = this.getResources().openRawResourceFd(R.raw.alerm_other);
+                AssetFileDescriptor file = getAssets().openFd("alerm_other.mp3");
                 mediaPlayer.setLooping(looper);
                 mediaPlayer.setDataSource(file.getFileDescriptor(), file.getStartOffset(), file.getLength());
                 mediaPlayer.prepare();

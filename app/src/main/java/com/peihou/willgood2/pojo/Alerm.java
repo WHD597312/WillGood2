@@ -37,7 +37,7 @@ public class Alerm implements Serializable {
     private int state;//报警开关状态
     private long deviceId;
     private double value;
-    private int deviceAlarmBroadcast=1;//语音播报
+    private int deviceAlarmBroadcast=1;//语音播报 1为三次，2为循环 0为关闭
     private int deviceAlarmFlag=1;//弹框提醒
     private int state2;//报警值高于，低于 0x11高于 0x22低于
     public Alerm(String name, int type,String content, boolean open,long deviceId,String deviceMac,double value) {
