@@ -176,6 +176,11 @@ public class ZXingUtils {
         return newBitmap;
     }
 
+    /**
+     * 解析二维码图片的内容
+     * @param bitmap
+     * @return
+     */
     public static String recogQRcode(Bitmap bitmap){
         String result=null;
 //        Bitmap image = ((BitmapDrawable)imageView.getDrawable()).getBitmap();
