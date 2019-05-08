@@ -236,6 +236,7 @@ public class MoniCheckActivity extends BaseActivity {
                 Log.i(TAG,"-->AnalogCheckAcync");
                 if (mqService!=null){
                     mqService.getData(topicName,0x88);
+                    countTimer.start();
                 }
             }
         }
@@ -297,9 +298,19 @@ public class MoniCheckActivity extends BaseActivity {
                             e.printStackTrace();
                         }
                     }else if (col==2){
+
                         if (Utils.isNumeric(content)){
                             double data=Double.parseDouble(content);
-                            if (data>=0 && data<=99.99 && content.length()<6){
+                            String ss=""+data;
+                            if (ss.contains(".")){
+                                ss=ss.substring(ss.indexOf(".")+1);
+                            }else {
+                                ss="";
+                            }
+                            if (ss.length()>2){
+                                ToastUtil.showShort(MoniCheckActivity.this,"系数精确到小数后两位");
+
+                            }else {
                                 dialog.dismiss();
                                 BigDecimal b = new BigDecimal(data);
                                 data = b.setScale(2, BigDecimal.ROUND_HALF_DOWN).doubleValue();
@@ -307,8 +318,6 @@ public class MoniCheckActivity extends BaseActivity {
                                 deviceAnalogDao.update(table);
                                 tables.set(row,table);
                                 adapter.notifyDataSetChanged();
-                            }else {
-                                ToastUtil.showShort(MoniCheckActivity.this,"系数范围为0.00到99.99");
                             }
                         }else {
                             ToastUtil.showShort(MoniCheckActivity.this,"不合法的数字");

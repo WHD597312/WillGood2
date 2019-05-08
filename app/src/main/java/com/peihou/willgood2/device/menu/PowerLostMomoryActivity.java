@@ -38,6 +38,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
     int type;
     int voice;
     String deviceMac;
+    Device device;
     @Override
     public void initParms(Bundle parms) {
         type=parms.getInt("type");
@@ -47,7 +48,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
         }else {
             voice=parms.getInt("voice");
         }
-
+        device= (Device) parms.getSerializable("device");
     }
 
     @Override
@@ -131,11 +132,11 @@ public class PowerLostMomoryActivity extends BaseActivity {
 //                        img_open.setImageResource(R.mipmap.img_open);
                         plMemory=1;
                     }
-                    Device device=mqService.getDeviceByMac(deviceMac);
+
                     if (device!=null){
-//                        device.setDeviceState(0);
-//                        device.setPrelinesjog(0);
-//                        device.setLastlinesjog(0);
+                        device.setDeviceState(0);
+                        device.setPrelinesjog(0);
+                        device.setLastlinesjog(0);
                         device.setPlMemory(plMemory);
                         mqService.sendBasic(topicName,device,0x03);
                         onClick=1;
@@ -253,6 +254,7 @@ public class PowerLostMomoryActivity extends BaseActivity {
             String macAddress=intent.getStringExtra("macAddress");
             if (macAddress.equals(deviceMac)){
                 plMemory=intent.getIntExtra("plMemory",0);
+                device= (Device) intent.getSerializableExtra("device");
                 if (type==1){
                     if (onClick==1){
                         onClick=0;

@@ -185,7 +185,8 @@ public class DeviceListActivity extends BaseActivity {
         swipeRefresh.setRefreshListener(new BaseRefreshListener() {
             @Override
             public void refresh() {
-                swipeRefresh.finishRefresh();
+                countTimer.start();
+                new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
             }
 
             @Override
@@ -479,6 +480,7 @@ public class DeviceListActivity extends BaseActivity {
         @Override
         protected List<String> doInBackground(DeviceListActivity deviceListActivity, List<String>... lists) {
             try {
+
                 if (mqService != null) {
                     List<Device> devices=deviceDao.findAllDevice();
                     mqService.subscribeAll(devices);
@@ -500,7 +502,9 @@ public class DeviceListActivity extends BaseActivity {
         @Override
         protected void onPostExecute(DeviceListActivity deviceListActivity, List<String> list1) {
             Log.i("onPostExecute", "-->" + list.size());
-
+            if (swipeRefresh!=null){
+                swipeRefresh.finishRefresh();
+            }
 
         }
     }

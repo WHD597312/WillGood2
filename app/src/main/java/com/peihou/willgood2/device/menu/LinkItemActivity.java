@@ -167,9 +167,9 @@ public class LinkItemActivity extends BaseActivity {
     public void initView(View view) {
 
         tv_title.setText(name + "联动");
-//        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
+        topicName = "qjjc/gateway/" + deviceMac + "/server_to_client";
         Log.i("topicName", "-->" + topicName);
-        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
+//        topicName = "qjjc/gateway/" + deviceMac + "/client_to_server";
         if (type == 5) {
             deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
 //            moniLinks = deviceMoniLinkDaoDao.findMoniLinks(deviceMac, moniType, moniNum);

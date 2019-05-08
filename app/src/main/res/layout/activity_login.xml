@@ -128,7 +128,7 @@
         </RelativeLayout>
         <TextView
             android:id="@+id/btn_forpswd"
-            android:layout_width="@dimen/dp_70"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/rl_pswd"
             android:layout_alignParentRight="true"

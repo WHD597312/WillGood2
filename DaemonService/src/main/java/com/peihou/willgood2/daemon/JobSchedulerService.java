@@ -47,7 +47,7 @@ public class JobSchedulerService extends JobService {
     public boolean onStartJob(JobParameters params) {
         Log.d(TAG, "onStartJob()");
         DaemonHolder.startService();
-        return false;
+        return true;
     }
 
     @Override

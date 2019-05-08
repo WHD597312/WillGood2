@@ -1455,13 +1455,13 @@ public class MQService extends AbsHeartBeatService {
                             } else {
                                 lines = "";
                             }
-                            if (moniLink == null && state==1) {
+                            if (moniLink == null) {
                                 moniLink = new MoniLink(name, type, num, contition, triState, preLine, lastLine, controlState, triType, state, controlType, macAddress, mcuVersion);
                                 moniLink.setLines(lines);
                                 moniLink.setVisitity(1);
                                 deviceMoniLinkDaoDao.insert(moniLink);
                                 operateState = 0;
-                            } else if (moniLink != null && state ==1) {
+                            } else if (moniLink != null) {
                                 moniLink.setName(name);
                                 moniLink.setLines(lines);
                                 moniLink.setState(state);
@@ -1649,6 +1649,24 @@ public class MQService extends AbsHeartBeatService {
                         String powerMiddle=Integer.toHexString(data[17]);
                         String powerLow = Integer.toHexString(data[18]);
                         String powerHigh =Integer.toHexString(data[21]);
+                        if (powerHigh.length()==0){
+                            powerHigh="00";
+                        } else if (powerHigh.length()==1){
+                            powerHigh="0"+powerHigh;
+                        }
+
+
+                        if (powerMiddle.length()==0){
+                            powerMiddle="00";
+                        } else if (powerMiddle.length()==1){
+                            powerMiddle="0"+powerMiddle;
+                        }
+
+                        if (powerLow.length()==0){
+                            powerLow="00";
+                        } else if (powerLow.length()==1){
+                            powerLow="0"+powerLow;
+                        }
                         String powerS =powerHigh+powerMiddle+powerLow;
                         int powerI=Integer.parseInt(powerS,16);
                         double power=powerI/10.0;
@@ -1811,14 +1829,14 @@ public class MQService extends AbsHeartBeatService {
                         int moni8Integer = data[18];
                         int moni8Deci = data[19];
 
-                        double moni = Double.parseDouble(moniInteger + "." + moniDeci);
-                        double moni2 = Double.parseDouble(moni2Integer + "." + moni2Deci);
-                        double moni3 = Double.parseDouble(moni3Integer + "." + moni3Deci);
-                        double moni4 = Double.parseDouble(moni4Integer + "." + moni4Deci);
-                        double moni5 = Double.parseDouble(moni5Integer + "." + moni5Deci);
-                        double moni6 = Double.parseDouble(moni6Integer + "." + moni6Deci);
-                        double moni7 = Double.parseDouble(moni7Integer + "." + moni7Deci);
-                        double moni8 = Double.parseDouble(moni8Integer + "." + moni8Deci);
+                        double moni = (moniInteger*256+moniDeci)/100.0;
+                        double moni2 =(moni2Integer*256+moni2Deci)/100.0;
+                        double moni3 = (moni3Integer*256+moni3Deci)/100.0;
+                        double moni4 =(moni4Integer*256+moni4Deci)/100.0;
+                        double moni5 = (moni5Integer*256+moni5Deci)/100.0;
+                        double moni6 = (moni6Integer*256+moni6Deci)/100.0;
+                        double moni7 = (moni7Integer*256+moni7Deci)/100.0;
+                        double moni8 = (moni8Integer*256+moni8Deci)/100.0;
                         list.clear();
                         Table table = deviceAnalogDao.findDeviceAnalog(macAddress, 1);
                         if (table!=null){
@@ -1987,6 +2005,7 @@ public class MQService extends AbsHeartBeatService {
                         Intent intent = new Intent("PowerLostMomoryActivity");
                         intent.putExtra("macAddress", macAddress);
                         intent.putExtra("plMemory", plMemory);
+                        intent.putExtra("device", device);
                         sendBroadcast(intent);
                     } else if (DeviceItemActivity.running && funCode == 0x11) {
                         Intent intent = new Intent("DeviceItemActivity");

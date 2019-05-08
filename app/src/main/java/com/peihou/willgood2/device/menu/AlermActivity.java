@@ -922,6 +922,16 @@ public class AlermActivity extends BaseActivity {
 
                 try {
                     double s = Double.parseDouble(value);
+                    String ss=Math.abs(s)+"";
+                    if (ss.contains(".")){
+                        ss=ss.substring(ss.indexOf(".")+1);
+                    }else {
+                        ss="";
+                    }
+                    if (ss.length()>1){
+                        ToastUtil.showShort(AlermActivity.this, "报警数值精确到小数后1位");
+                        return;
+                    }
                     if (type == 0) {
                         if (s >= -128 && s <= 512.9) {
                             s += 128;
@@ -1013,22 +1023,23 @@ public class AlermActivity extends BaseActivity {
                             s = b.setScale(1, BigDecimal.ROUND_HALF_DOWN).doubleValue();
                             int rangeValue=(int)( s*10);
                             String range=Integer.toHexString(rangeValue);
+                            if (range.length()==1){
+                                range="00000"+range;
+                            }else if (range.length()==2){
+                                range="0000"+range;
+                            }else if (range.length()==3){
+                                range="000"+range;
+                            }else if (range.length()==4){
+                                range="00"+range;
+                            }else if (range.length()==5) {
+                                range="0"+range;
+                            }
                             int middlePower=0;
                             int lowPower=0;
                             int highPower=0;
-                            int size=range.length();
-                            if (size<=2){
-                                lowPower=Integer.parseInt(range,16);
-                            }
-                            else if (size>2 && size<=4){
-                                lowPower=Integer.parseInt(range.substring(2),16);
-                                middlePower=Integer.parseInt(range.substring(0,2),16);
-                            }
-                            else if (size>4 && size<=6){
-                                highPower=Integer.parseInt(range.substring(0,2),16);
-                                middlePower=Integer.parseInt(range.substring(2,4),16);
-                                lowPower=Integer.parseInt(range.substring(4),16);
-                            }
+                            highPower=Integer.parseInt(range.substring(0,2),16);
+                            middlePower=Integer.parseInt(range.substring(2,4),16);
+                            lowPower=Integer.parseInt(range.substring(4),16);
 
                             int data []=mqService.getAlermData();
                             data[13] =middlePower;

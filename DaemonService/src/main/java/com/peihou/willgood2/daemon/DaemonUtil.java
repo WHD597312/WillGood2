@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * @author sunfusheng on 2018/8/1.
@@ -21,6 +22,7 @@ public class DaemonUtil {
     }
 
     public static boolean isServiceRunning(Context context, String serviceName) {
+        Log.i("DaemonUtil","-->ssssssssss");
         if (TextUtils.isEmpty(serviceName)) {
             return false;
         }

@@ -383,6 +383,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                         plIntent.putExtra("plMemory", plMemory);
                         plIntent.putExtra("deviceMac",deviceMac);
                         plIntent.putExtra("type", 1);
+                        plIntent.putExtra("device",device);
                         startActivityForResult(plIntent, 8000);
                         break;
                     case 9:
@@ -397,6 +398,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                         voiceIntent.putExtra("type", 2);
                         voiceIntent.putExtra("voice", device.getVlice2());
                         voiceIntent.putExtra("deviceMac", device.getDeviceOnlyMac());
+                        voiceIntent.putExtra("device",device);
                         startActivityForResult(voiceIntent, 9000);
                         break;
                 }
@@ -493,6 +495,17 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 list2 = mqService.getDeviceOnlineLiens(deviceMac);
             }
 
+            Collections.sort(list2, new Comparator<Line2>() {
+                @Override
+                public int compare(Line2 o1, Line2 o2) {
+                    if (o1.getDeviceLineNum()>o2.getDeviceLineNum()){
+                        return 1;
+                    }else if (o1.getDeviceLineNum()>o2.getDeviceLineNum()){
+                        return -1;
+                    }
+                    return 0;
+                }
+            });
             Class<Device> clazz = (Class<Device>) Class.forName("com.peihou.willgood2.pojo.Device");
             for (int i = 0; i < list2.size(); i++) {
                 Line2 line21 = list2.get(i);
