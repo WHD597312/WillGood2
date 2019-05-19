@@ -225,6 +225,7 @@ public class LoginActivity extends BaseActivity {
             try {
                 Log.i("result","-->"+result);
                 if (!TextUtils.isEmpty(result)){
+//                    deviceDao.deleteAll();
                     JSONObject jsonObject=new JSONObject(result);
                     code=jsonObject.getInt("returnCode");
                     if (code==100){
@@ -285,6 +286,7 @@ public class LoginActivity extends BaseActivity {
                     JSONObject jsonObject=new JSONObject(result);
                     code=jsonObject.getInt("returnCode");
                     if (code==100){
+                        deviceDao.deleteAll();
                         JSONObject returnData=jsonObject.getJSONObject("returnData");
                         String data=returnData.toString();
                         Gson gson=new Gson();
@@ -331,6 +333,10 @@ public class LoginActivity extends BaseActivity {
                         e.printStackTrace();
                     }
                     break;
+                case 30005:
+                    logining=0;
+                    ToastUtil.showShort(LoginActivity.this,"该用户已经被冻结，请联系你的上级");
+                    break;
                 case 10004:
                     logining=0;
                     ToastUtil.showShort(LoginActivity.this,"用户名或密码错误");
@@ -338,10 +344,12 @@ public class LoginActivity extends BaseActivity {
                     et_pswd.setText("");
                     break;
                     default:
+                        logining=0;
                         if (login==1){
                             ToastUtil.showShort(LoginActivity.this,"登录失败");
                         }
                         break;
+
             }
         }
     }

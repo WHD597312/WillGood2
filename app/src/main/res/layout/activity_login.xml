@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F7F7"
+    android:background="@color/white"
     android:fitsSystemWindows="true"
     tools:context=".login.LoginActivity">
 
@@ -45,9 +45,9 @@
         >
 
         <ImageView
-            android:id="@+id/img_logo"
-            android:layout_width="@dimen/dp_80"
-            android:layout_height="@dimen/dp_80"
+            android:id="@+id/logo"
+            android:layout_width="@dimen/dp_70"
+            android:layout_height="@dimen/dp_70"
             android:layout_centerHorizontal="true"
             android:scaleType="centerCrop"
             android:src="@mipmap/logo" />
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/img_logo"
             android:layout_marginLeft="@dimen/dp_15"
-            android:layout_marginTop="@dimen/dp_60"
+            android:layout_marginTop="@dimen/dp_90"
             android:layout_marginRight="@dimen/dp_15"
             android:background="@drawable/shape_et_name">
 

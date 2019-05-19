@@ -4,6 +4,7 @@
     <string name="app_name">迈科智联</string>
     <string name="location">定位</string>
     <string name="camer">请打开相机权限</string>
+    <string name="location_camer">请打开相机与定位权限</string>
     <string name="camer_save">请打开相机权限与存储权限</string>
     <string name="cancle">取消</string>
     <string name="sure">确定</string>

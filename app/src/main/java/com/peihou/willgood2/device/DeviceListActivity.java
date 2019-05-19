@@ -49,6 +49,7 @@ import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.custom.AppUpdateDialog;
 import com.peihou.willgood2.custom.ChangeDialog;
+import com.peihou.willgood2.custom.DialogLoad;
 import com.peihou.willgood2.custom.ExitLoginDialog;
 import com.peihou.willgood2.custom.MyHeadRefreshView;
 import com.peihou.willgood2.custom.MyLoadMoreView;
@@ -149,6 +150,7 @@ public class DeviceListActivity extends BaseActivity {
         preferences = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         userId = preferences.getInt("userId", 0);
 
+        Log.i("userIddddd","-->"+userId);
         UtilsJPush.resumeJpush(this);
         Intent intent = getIntent();
         if (intent.hasExtra("login")) {
@@ -532,8 +534,8 @@ public class DeviceListActivity extends BaseActivity {
                     for (int i = 0; i < list.size(); i++) {
                         Device device2 = list.get(i);
                         if (device2 != null && macAddress.equals(device2.getDeviceOnlyMac())) {
-                            if (popupWindow2!=null && popupWindow2.isShowing()){
-                                popupWindow2.dismiss();
+                            if (dialogLoad!=null && dialogLoad.isShowing()){
+                                dialogLoad.dismiss();
                             }
                             device2.setOnline(false);
                             deviceDao.update(device2);
@@ -575,8 +577,8 @@ public class DeviceListActivity extends BaseActivity {
                     Device device2 = list.get(i);
                     if (device2 != null && device.getDeviceOnlyMac().equals(device2.getDeviceOnlyMac())) {
                         if (onClick == 1) {
-                            if (popupWindow2 != null && popupWindow2.isShowing()) {
-                                popupWindow2.dismiss();
+                            if (dialogLoad != null && dialogLoad.isShowing()) {
+                                dialogLoad.dismiss();
                             }
                             mqService.starSpeech(device.getDeviceOnlyMac(), 0);
                             operateLog.clear();
@@ -588,8 +590,8 @@ public class DeviceListActivity extends BaseActivity {
                             new AddOperationLogAsync(DeviceListActivity.this).execute(operateLog);
                             onClick = 0;
                         } else if (onClick == 2) {
-                            if (popupWindow2 != null && popupWindow2.isShowing()) {
-                                popupWindow2.dismiss();
+                            if (dialogLoad != null && dialogLoad.isShowing()) {
+                                dialogLoad.dismiss();
                             }
                             operateLog.clear();
                             operateLog.put("deviceMac", device.getDeviceOnlyMac());
@@ -612,8 +614,10 @@ public class DeviceListActivity extends BaseActivity {
                 }
             }else if (what==100){
                 Log.i("handler","-->"+mqService);
-                popupmenuWindow3();
-                new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
+                if (!topicNames.isEmpty()){
+                    setLoadDialog();
+                    new LoadDataAsync(DeviceListActivity.this).execute(topicNames);
+                }
             }
             return true;
         }
@@ -659,7 +663,7 @@ public class DeviceListActivity extends BaseActivity {
             popupWindow.dismiss();
             return;
         }
-        if (popupWindow2 != null && popupWindow2.isShowing()) {
+        if (dialogLoad != null && dialogLoad.isShowing()) {
             ToastUtil.showShort(this,"请稍后");
             return;
         }
@@ -681,8 +685,8 @@ public class DeviceListActivity extends BaseActivity {
         if (popupWindow!=null && popupWindow.isShowing()){
             popupWindow.dismiss();
         }
-        if (popupWindow2!=null && popupWindow2.isShowing()){
-            popupWindow2.dismiss();
+        if (dialogLoad!=null && dialogLoad.isShowing()){
+            dialogLoad.dismiss();
         }
         if (reveiver != null) {
             unregisterReceiver(reveiver);
@@ -817,7 +821,7 @@ public class DeviceListActivity extends BaseActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.img_exit:
-                if (popupWindow2!=null && popupWindow2.isShowing()){
+                if (dialogLoad!=null && dialogLoad.isShowing()){
                     ToastUtil.showShort(this,"请稍后...");
                     break;
                 }
@@ -836,7 +840,7 @@ public class DeviceListActivity extends BaseActivity {
                 startActivityForResult(intent, 100);
                 break;
             case R.id.img_all_close:
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                if (dialogLoad != null && dialogLoad.isShowing()) {
                     ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
@@ -869,7 +873,7 @@ public class DeviceListActivity extends BaseActivity {
                 }
                 break;
             case R.id.img_all_open:
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                if (dialogLoad != null && dialogLoad.isShowing()) {
                     ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
@@ -933,8 +937,8 @@ public class DeviceListActivity extends BaseActivity {
                 if (popupWindow != null && popupWindow.isShowing()) {
                     popupWindow.dismiss();
                 }
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
-                    popupWindow2.dismiss();
+                if (dialogLoad != null && dialogLoad.isShowing()) {
+                    dialogLoad.dismiss();
                 }
                 setExitLoginPage();
             }
@@ -1188,8 +1192,8 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         public void onFinish() {
-            if (popupWindow2 != null && popupWindow2.isShowing()) {
-                popupWindow2.dismiss();
+            if (dialogLoad != null && dialogLoad.isShowing()) {
+                dialogLoad.dismiss();
             }
             if (mqService != null) {
                 Map<String, Device> deviceMap = mqService.getOfflineDevices();
@@ -1224,51 +1228,62 @@ public class DeviceListActivity extends BaseActivity {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            popupmenuWindow3();
+            setLoadDialog();
             Log.e("CountDownTimer", "-->" + millisUntilFinished);
         }
 
         @Override
         public void onFinish() {
-            if (popupWindow2 != null && popupWindow2.isShowing()) {
-                popupWindow2.dismiss();
+            if ( dialogLoad!= null && dialogLoad.isShowing()) {
+                dialogLoad.dismiss();
             }
         }
     }
-
-    private PopupWindow popupWindow2;
-
-    public void popupmenuWindow3() {
-        try {
-            if (popupWindow2 != null && popupWindow2.isShowing()) {
-                return;
-            }
-            View view = View.inflate(this, R.layout.progress, null);
-            TextView tv_load = view.findViewById(R.id.tv_load);
-            tv_load.setTextColor(getResources().getColor(R.color.white));
-
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-
-            //添加弹出、弹入的动画
-            popupWindow2.setAnimationStyle(R.style.Popupwindow);
-            popupWindow2.setFocusable(false);
-            popupWindow2.setOutsideTouchable(false);
-            backgroundAlpha(0.6f);
-            popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
-                @Override
-                public void onDismiss() {
-                    backgroundAlpha(1.0f);
-                }
-            });
-//        ColorDrawable dw = new ColorDrawable(0x30000000);
-//        popupWindow.setBackgroundDrawable(dw);
-//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
-            popupWindow2.showAtLocation(grid_list, Gravity.CENTER, 0, 0);
-        } catch (Resources.NotFoundException e) {
-            e.printStackTrace();
+    DialogLoad dialogLoad;
+    private void setLoadDialog() {
+        if (dialogLoad != null && dialogLoad.isShowing()) {
+            return;
         }
-        //添加按键事件监听
+
+        dialogLoad = new DialogLoad(this);
+        dialogLoad.setCanceledOnTouchOutside(false);
+        dialogLoad.setLoad("正在加载,请稍后");
+        dialogLoad.show();
     }
+
+//    private PopupWindow popupWindow2;
+
+//    public void popupmenuWindow3() {
+//        try {
+//            if (popupWindow2 != null && popupWindow2.isShowing()) {
+//                return;
+//            }
+//            View view = View.inflate(this, R.layout.progress, null);
+//            TextView tv_load = view.findViewById(R.id.tv_load);
+//            tv_load.setTextColor(getResources().getColor(R.color.white));
+//
+//            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+//
+//            //添加弹出、弹入的动画
+//            popupWindow2.setAnimationStyle(R.style.Popupwindow);
+//            popupWindow2.setFocusable(false);
+//            popupWindow2.setOutsideTouchable(false);
+//            backgroundAlpha(0.6f);
+//            popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//                @Override
+//                public void onDismiss() {
+//                    backgroundAlpha(1.0f);
+//                }
+//            });
+////        ColorDrawable dw = new ColorDrawable(0x30000000);
+////        popupWindow.setBackgroundDrawable(dw);
+////        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+//            popupWindow2.showAtLocation(grid_list, Gravity.CENTER, 0, 0);
+//        } catch (Resources.NotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        //添加按键事件监听
+//    }
 
     //设置蒙版
     private void backgroundAlpha(float f) {

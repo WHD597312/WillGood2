@@ -35,6 +35,11 @@ public class DeviceLineDaoImpl {
     public void deleteDeviceLines(List<Line2> list){
         lineDao.deleteInTx(list);
     }
+
+    /**
+     * 删除设备线路
+     * @param deviceMac
+     */
     public void deleteDeviceLines(String deviceMac){
         List<Line2> list=findDeviceLines(deviceMac);
         if (list!=null &&!list.isEmpty()){
@@ -62,11 +67,22 @@ public class DeviceLineDaoImpl {
     public List<Line2> findDeviceLines(long deviceId){
         return lineDao.queryBuilder().where(Line2Dao.Properties.DeviceId.eq(deviceId)).orderAsc(Line2Dao.Properties.DeviceLineNum).list();
     }
+
+    /**
+     * 查询在线线路
+     * @param deviceId
+     * @return
+     */
     public List<Line2> findDeviceOnlineLines(long deviceId){
         WhereCondition whereCondition=lineDao.queryBuilder().and(Line2Dao.Properties.DeviceId.eq(deviceId),Line2Dao.Properties.Online.eq(true));
         return lineDao.queryBuilder().where(whereCondition).orderAsc(Line2Dao.Properties.DeviceLineNum).list();
     }
 
+    /**
+     * 查询在线线路
+     * @param deviceMac
+     * @return
+     */
     public List<Line2> findDeviceOnlineLines(String deviceMac){
         WhereCondition whereCondition=lineDao.queryBuilder().and(Line2Dao.Properties.DeviceMac.eq(deviceMac),Line2Dao.Properties.Online.eq(true));
         return lineDao.queryBuilder().where(whereCondition).orderAsc(Line2Dao.Properties.DeviceLineNum).list();

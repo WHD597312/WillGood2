@@ -500,7 +500,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 public int compare(Line2 o1, Line2 o2) {
                     if (o1.getDeviceLineNum()>o2.getDeviceLineNum()){
                         return 1;
-                    }else if (o1.getDeviceLineNum()>o2.getDeviceLineNum()){
+                    }else if (o1.getDeviceLineNum()<o2.getDeviceLineNum()){
                         return -1;
                     }
                     return 0;
@@ -748,6 +748,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     if (macAddress.equals(deviceMac)) {
                         Device device2 = (Device) intent.getSerializableExtra("device");
                         if (device2 != null) {
+                            Log.i("ServiceConnection","-->ServiceConnection33");
                             device = device2;
 //                            plMemory=device.getPlMemory();
                             setMode(device2);
