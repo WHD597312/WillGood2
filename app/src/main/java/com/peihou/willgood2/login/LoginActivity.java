@@ -132,7 +132,7 @@ public class LoginActivity extends BaseActivity {
                 if (state==0)
                     break;
                 state=0;
-                setLoginModle();
+                setLoginModle(0);
                 break;
             case R.id.tv_register:
                 if (state==1)
@@ -240,13 +240,17 @@ public class LoginActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(LoginActivity activity,Integer code) {
+            logining=0;
             switch (code){
                 case 100:
                    try {
-                       params.clear();
-                       params.put("phone",phone);
-                       params.put("password",password);
-                       new LoginAsync(LoginActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+
+                       ToastUtil.showShort(LoginActivity.this,"注册成功");
+                       setLoginModle(1);
+                       state=0;
+//                       params.put("phone",phone);
+//                       params.put("password",password);
+//                       new LoginAsync(LoginActivity.this).execute(params).get(3,TimeUnit.SECONDS);
                    }catch (Exception e){
                        e.printStackTrace();
                    }
@@ -293,6 +297,9 @@ public class LoginActivity extends BaseActivity {
                         UserInfo userInfo=gson.fromJson(data,UserInfo.class);
                         SharedPreferences.Editor editor=sharedPreferences.edit();
                         int userId=userInfo.getUserId();
+                        if (userId==0){
+                            return -200;
+                        }
                         String username=userInfo.getUsername();
                         String phone=userInfo.getPhone();
                         String password=userInfo.getPassword();
@@ -301,8 +308,9 @@ public class LoginActivity extends BaseActivity {
                         editor.putString("phone",phone);
                         editor.putString("password",password);
                         Log.i("userId","-->"+userId);
-                        JPushInterface.setAlias(LoginActivity.this,1,""+userId);
                         editor.commit();
+                        JPushInterface.setAlias(LoginActivity.this,1,""+userId);
+
                     }
                 }
             }catch (Exception e){
@@ -314,15 +322,20 @@ public class LoginActivity extends BaseActivity {
         @Override
         protected void onPostExecute(LoginActivity activity,Integer code) {
             switch (code){
+                case -200:
+                    ToastUtil.showShort(LoginActivity.this,"服务器状态错误!");
+                    break;
                 case 100:
                     try {
                         if (state==1){
-                            ToastUtil.showShort(LoginActivity.this,"注册成功");
+                            ToastUtil.showShort(LoginActivity.this,"注册成功,请登录");
                             startActivity(DeviceListActivity.class);
                         }else {
+                            ToastUtil.showShort(LoginActivity.this,"登录成功");
+
                             int userId=sharedPreferences.getInt("userId",0);
-                            params.clear();
-                            params.put("userId",userId);
+//                            params.clear();
+//                            params.put("userId",userId);
                             Intent intent=new Intent(LoginActivity.this,DeviceListActivity.class);
                             intent.putExtra("login",1);
                             intent.putExtra("userId",userId);
@@ -442,9 +455,11 @@ public class LoginActivity extends BaseActivity {
     /**
      * 处理登录界面
      */
-    private void setLoginModle(){
-        et_phone.setText("");
-        et_pswd.setText("");
+    private void setLoginModle(int mode){
+        if (mode==0){
+            et_phone.setText("");
+            et_pswd.setText("");
+        }
         btn_forpswd.setVisibility(View.VISIBLE);
         btn_login.setText("登录");
         tv_login.setTextSize(22);

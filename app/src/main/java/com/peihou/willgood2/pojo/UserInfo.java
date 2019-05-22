@@ -2,7 +2,7 @@ package com.peihou.willgood2.pojo;
 
 public class UserInfo {
     private int userId;
-    private String username;
+    private String userName;
     private String phone;
     private String password;
     private String address;
@@ -23,9 +23,9 @@ public class UserInfo {
     public UserInfo() {
     }
 
-    public UserInfo(int userId, String username, String phone, String password, String address, String headImgUrl, int creatorId, int role) {
+    public UserInfo(int userId, String userName, String phone, String password, String address, String headImgUrl, int creatorId, int role) {
         this.userId = userId;
-        this.username = username;
+        this.userName = userName;
         this.phone = phone;
         this.password = password;
         this.address = address;
@@ -43,11 +43,11 @@ public class UserInfo {
     }
 
     public String getUsername() {
-        return username;
+        return userName;
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.userName = username;
     }
 
     public String getPhone() {

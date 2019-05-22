@@ -170,7 +170,8 @@ public class ZXingUtils {
         Canvas cv = new Canvas(newBitmap);
         cv.drawBitmap(first, marginW, 0, null);
         cv.drawBitmap(second, fromPoint.x, fromPoint.y, null);
-        cv.save(Canvas.ALL_SAVE_FLAG);
+        cv.save();
+//        cv.save(Canvas.ALL_SAVE_FLAG);
         cv.restore();
 
         return newBitmap;

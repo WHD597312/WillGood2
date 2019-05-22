@@ -1601,6 +1601,7 @@ public class DeviceListActivity extends BaseActivity {
             try {
                 String url = HttpUtils.ipAddress + "device/deleteDeviceByApp";
                 String result = HttpUtils.requestPost(url, params);
+                Log.i("DeleteDeviceAsync","-->"+result);
                 if (!TextUtils.isEmpty(result)) {
                     JSONObject jsonObject = new JSONObject(result);
                     code = jsonObject.getInt("returnCode");

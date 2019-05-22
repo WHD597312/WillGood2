@@ -403,8 +403,8 @@ public class DemoActivity extends AppCompatActivity {
     }
     public void sendOffline(){
         String topicName1="qjjc/gateway/8655330313815/lwt";
-        boolean success=mqService.publish(topicName1,1,"offline");
-        Log.i("DemoActivity","-->"+success+"#"+topicName1);
+//        boolean success=mqService.publish(topicName1,1,"offline");
+//        Log.i("DemoActivity","-->"+success+"#"+topicName1);
     }
     public boolean sendLinkedSwitch(String topicName, int mcuVerion, int data) {
         boolean success = false;

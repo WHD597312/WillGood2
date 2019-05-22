@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.peihou.willgood2.CheckPermissionsActivity;
+import com.peihou.willgood2.custom.DialogLoad;
 import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.MyApplication;
 import com.peihou.willgood2.R;
@@ -435,53 +436,63 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
 
         @Override
         public void onTick(long millisUntilFinished) {
-            popupmenuWindow3();
+            setLoadDialog();
         }
 
         @Override
         public void onFinish() {
-            if (popupWindow2 != null && popupWindow2.isShowing()) {
+            if (dialogLoad != null && dialogLoad.isShowing()) {
                 if (load == 1) {
                     if (mqService != null) {
                         mqService.connectMqtt(deviceMac);
                     }
                 }
                 load = 0;
-                popupWindow2.dismiss();
+                dialogLoad.dismiss();
             }
         }
     }
 
-    private PopupWindow popupWindow2;
+//    private PopupWindow popupWindow2;
 
-    public void popupmenuWindow3() {
-        if (popupWindow2 != null && popupWindow2.isShowing()) {
+//    public void popupmenuWindow3() {
+//        if (popupWindow2 != null && popupWindow2.isShowing()) {
+//            return;
+//        }
+//        View view = View.inflate(this, R.layout.progress, null);
+//        TextView tv_load = view.findViewById(R.id.tv_load);
+//        tv_load.setTextColor(getResources().getColor(R.color.white));
+//
+//            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+//
+//        //添加弹出、弹入的动画
+//        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+//        popupWindow2.setFocusable(false);
+//        popupWindow2.setOutsideTouchable(false);
+//        backgroundAlpha(0.5f);
+//        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//            @Override
+//            public void onDismiss() {
+//                backgroundAlpha(1.0f);
+//            }
+//        });
+////        ColorDrawable dw = new ColorDrawable(0x30000000);
+////        popupWindow.setBackgroundDrawable(dw);
+////        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+//        popupWindow2.showAtLocation(rv_lines, Gravity.CENTER, 0, 0);
+//        //添加按键事件监听
+//    }
+    DialogLoad dialogLoad;
+    private void setLoadDialog() {
+        if (dialogLoad != null && dialogLoad.isShowing()) {
             return;
         }
-        View view = View.inflate(this, R.layout.progress, null);
-        TextView tv_load = view.findViewById(R.id.tv_load);
-        tv_load.setTextColor(getResources().getColor(R.color.white));
 
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-
-        //添加弹出、弹入的动画
-        popupWindow2.setAnimationStyle(R.style.Popupwindow);
-        popupWindow2.setFocusable(false);
-        popupWindow2.setOutsideTouchable(false);
-        backgroundAlpha(0.5f);
-        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                backgroundAlpha(1.0f);
-            }
-        });
-//        ColorDrawable dw = new ColorDrawable(0x30000000);
-//        popupWindow.setBackgroundDrawable(dw);
-//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
-        popupWindow2.showAtLocation(rv_lines, Gravity.CENTER, 0, 0);
-        //添加按键事件监听
+        dialogLoad = new DialogLoad(this);
+        dialogLoad.setCanceledOnTouchOutside(false);
+        dialogLoad.setLoad("正在加载,请稍后");
+        dialogLoad.show();
     }
-
 
 
     List<Line2> list2 = new ArrayList<>();
@@ -695,8 +706,8 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (popupWindow2 != null && popupWindow2.isShowing()) {
-            popupWindow2.dismiss();
+        if (dialogLoad != null && dialogLoad.isShowing()) {
+            dialogLoad.dismiss();
         }
 
         handler.removeCallbacksAndMessages(null);
@@ -849,7 +860,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     break;
                 }
 
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                if (dialogLoad != null && dialogLoad.isShowing()) {
                     ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
@@ -877,7 +888,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     break;
                 }
 
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                if (dialogLoad != null && dialogLoad.isShowing()) {
                     ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
@@ -913,7 +924,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                     ToastUtil.show(this, "请选择线路", Toast.LENGTH_SHORT);
                     break;
                 }
-                if (popupWindow2 != null && popupWindow2.isShowing()) {
+                if (dialogLoad != null && dialogLoad.isShowing()) {
                     ToastUtil.showShort(this, "请稍后...");
                     break;
                 }
@@ -963,7 +974,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
                 } else if (choicedLines > 1) {
                     ToastUtil.show(this, "请单独选择一路", Toast.LENGTH_SHORT);
                 } else if (choicedLines == 1) {
-                    if (popupWindow2 != null && popupWindow2.isShowing()) {
+                    if (dialogLoad != null && dialogLoad.isShowing()) {
                         ToastUtil.showShort(this, "请稍后...");
                         break;
                     }

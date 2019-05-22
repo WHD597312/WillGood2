@@ -402,6 +402,9 @@ public class QRScannerActivity extends BaseActivity implements SurfaceHolder.Cal
                 case 10014:
                     ToastUtil.showShort(QRScannerActivity.this, "该设备已被他人添加!");
                     break;
+                case 100111:
+                    ToastUtil.showShort(QRScannerActivity.this, "该设备未在经销商注册!");
+                    break;
                 default:
                     ToastUtil.showShort(QRScannerActivity.this, "添加失败");
                     break;

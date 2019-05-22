@@ -184,23 +184,31 @@ public class MQService extends AbsHeartBeatService {
         IntentFilter intentFilter = new IntentFilter("SpeechReceiverAlerm");
         reciiver = new SpeechReceiver();
         registerReceiver(reciiver, intentFilter);
-        deviceDao = new DeviceDaoImpl(getApplicationContext());
+        new InitMQttAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//        init();
+    }
+    class InitMQttAsync extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            deviceDao = new DeviceDaoImpl(getApplicationContext());
 //        List<Device> devices = deviceDao.findAllDevice();
 //        for (Device device : devices) {
 //            String deviceMac = device.getDeviceOnlyMac();
 //            addCountTimer(deviceMac);
 //        }
-        deviceAlermDao = new DeviceAlermDaoImpl(getApplicationContext());
-        deviceLineDao = new DeviceLineDaoImpl(getApplicationContext());
-        timerTaskDao = new TimerTaskDaoImpl(getApplicationContext());
-        deviceAnalogDao = new DeviceAnalogDaoImpl(getApplicationContext());
-        deviceLinkedTypeDao = new DeviceLinkedTypeDaoImpl(getApplicationContext());
-        deviceLinkDao = new DeviceLinkDaoImpl(getApplicationContext());
-        deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
-        deviceInterLockDao = new DeviceInterLockDaoImpl(getApplicationContext());
-        init();
+            deviceAlermDao = new DeviceAlermDaoImpl(getApplicationContext());
+            deviceLineDao = new DeviceLineDaoImpl(getApplicationContext());
+            timerTaskDao = new TimerTaskDaoImpl(getApplicationContext());
+            deviceAnalogDao = new DeviceAnalogDaoImpl(getApplicationContext());
+            deviceLinkedTypeDao = new DeviceLinkedTypeDaoImpl(getApplicationContext());
+            deviceLinkDao = new DeviceLinkDaoImpl(getApplicationContext());
+            deviceMoniLinkDaoDao = new DeviceMoniLinkDaoDaoImpl(getApplicationContext());
+            deviceInterLockDao = new DeviceInterLockDaoImpl(getApplicationContext());
+            init();
+            return null;
+        }
     }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -310,13 +318,10 @@ public class MQService extends AbsHeartBeatService {
     public void connect(int state) {
         try {
             Log.i(TAG, "-->" + state);
-            if (client != null && !client.isConnected()) {
-                client.connect(options);
-            }
-            if (state == 1) {
-                new ConAsync(MQService.this).execute();
-//                countTime2.start();
-            }
+//            if (client != null && !client.isConnected()) {
+//                client.connect(options);
+//            }
+            new ConAsync(MQService.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,state);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -380,17 +385,18 @@ public class MQService extends AbsHeartBeatService {
         deviceLineDao.update(list);
     }
 
-    class ConAsync extends BaseWeakAsyncTask<Void, Void, Integer, MQService> {
+    class ConAsync extends BaseWeakAsyncTask<Integer, Void, Integer, MQService> {
 
         public ConAsync(MQService mqService) {
             super(mqService);
         }
 
         @Override
-        protected Integer doInBackground(MQService mqService, Void... voids) {
+        protected Integer doInBackground(MQService mqService, Integer... integers) {
             int code = 0;
             try {
-                if (client.isConnected() == false) {
+
+                if (client!=null && client.isConnected() == false) {
                     client.connect(options);
                 }
                 List<String> topicNames = getTopicNames();
@@ -3171,7 +3177,7 @@ public class MQService extends AbsHeartBeatService {
             bytes[11] = 0x09;
             boolean success = publish(topicName, 1, bytes);
             if (!success)
-                publish(topicName, 1, topicName);
+                publish(topicName, 1, bytes);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -3783,7 +3789,7 @@ public class MQService extends AbsHeartBeatService {
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), PUSH_CHANNEL_ID);
                 builder.setSmallIcon(R.mipmap.logo)
-                        .setContentTitle("迈科智联")
+                        .setContentTitle("朋宝科技")
                         .setContentText("你有一条报警信息,请及时处理")
                         .setDefaults(Notification.DEFAULT_ALL)
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)// 设置为public后，通知栏将在锁屏界面显示

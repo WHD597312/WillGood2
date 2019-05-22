@@ -1,7 +1,7 @@
 <resources>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="app_name">迈科智联</string>
+    <string name="app_name">朋宝科技</string>
     <string name="location">定位</string>
     <string name="camer">请打开相机权限</string>
     <string name="location_camer">请打开相机与定位权限</string>

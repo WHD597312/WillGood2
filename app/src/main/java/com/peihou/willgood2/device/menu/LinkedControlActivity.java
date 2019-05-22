@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.peihou.willgood2.R;
 import com.peihou.willgood2.BaseActivity;
+import com.peihou.willgood2.custom.DialogLoad;
 import com.peihou.willgood2.database.dao.impl.DeviceLinkDaoImpl;
 import com.peihou.willgood2.database.dao.impl.DeviceLinkedTypeDaoImpl;
 import com.peihou.willgood2.pojo.Linked;
@@ -169,8 +170,8 @@ public class LinkedControlActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (popupWindow2!=null && popupWindow2.isShowing()){
-            popupWindow2.dismiss();
+        if (dialogLoad!=null && dialogLoad.isShowing()){
+            dialogLoad.dismiss();
         }
 
         if (bind){
@@ -413,43 +414,54 @@ public class LinkedControlActivity extends BaseActivity {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            popupmenuWindow3();
+            setLoadDialog();
         }
 
         @Override
         public void onFinish() {
-            if (popupWindow2!=null && popupWindow2.isShowing()){
-                popupWindow2.dismiss();
+            if (dialogLoad!=null && dialogLoad.isShowing()){
+                dialogLoad.dismiss();
             }
         }
     }
-        private PopupWindow popupWindow2;
-
-    public void popupmenuWindow3() {
-        if (popupWindow2 != null && popupWindow2.isShowing()) {
+    DialogLoad dialogLoad;
+    private void setLoadDialog() {
+        if (dialogLoad != null && dialogLoad.isShowing()) {
             return;
         }
-        View view = View.inflate(this, R.layout.progress, null);
-        TextView tv_load=view.findViewById(R.id.tv_load);
-        tv_load.setTextColor(getResources().getColor(R.color.white));
 
-            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
-        //添加弹出、弹入的动画
-        popupWindow2.setAnimationStyle(R.style.Popupwindow);
-        popupWindow2.setFocusable(false);
-        popupWindow2.setOutsideTouchable(false);
-        backgroundAlpha(0.6f);
-        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                backgroundAlpha(1.0f);
-            }
-        });
-//        ColorDrawable dw = new ColorDrawable(0x30000000);
-//        popupWindow.setBackgroundDrawable(dw);
-//        popupWindow2.showAsDropDown(et_wifi, 0, -20);
-        popupWindow2.showAtLocation(tv_title, Gravity.CENTER, 0, 0);
-        //添加按键事件监听
+        dialogLoad = new DialogLoad(this);
+        dialogLoad.setCanceledOnTouchOutside(false);
+        dialogLoad.setLoad("正在加载,请稍后");
+        dialogLoad.show();
     }
+//        private PopupWindow popupWindow2;
+
+//    public void popupmenuWindow3() {
+//        if (popupWindow2 != null && popupWindow2.isShowing()) {
+//            return;
+//        }
+//        View view = View.inflate(this, R.layout.progress, null);
+//        TextView tv_load=view.findViewById(R.id.tv_load);
+//        tv_load.setTextColor(getResources().getColor(R.color.white));
+//
+//            popupWindow2 = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+//        //添加弹出、弹入的动画
+//        popupWindow2.setAnimationStyle(R.style.Popupwindow);
+//        popupWindow2.setFocusable(false);
+//        popupWindow2.setOutsideTouchable(false);
+//        backgroundAlpha(0.6f);
+//        popupWindow2.setOnDismissListener(new PopupWindow.OnDismissListener() {
+//            @Override
+//            public void onDismiss() {
+//                backgroundAlpha(1.0f);
+//            }
+//        });
+////        ColorDrawable dw = new ColorDrawable(0x30000000);
+////        popupWindow.setBackgroundDrawable(dw);
+////        popupWindow2.showAsDropDown(et_wifi, 0, -20);
+//        popupWindow2.showAtLocation(tv_title, Gravity.CENTER, 0, 0);
+//        //添加按键事件监听
+//    }
 
 }

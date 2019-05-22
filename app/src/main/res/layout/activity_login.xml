@@ -50,7 +50,7 @@
             android:layout_height="@dimen/dp_70"
             android:layout_centerHorizontal="true"
             android:scaleType="centerCrop"
-            android:src="@mipmap/logo" />
+            android:src="@mipmap/logo3" />
 
         <RelativeLayout
             android:id="@+id/rl_phone"
