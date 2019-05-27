@@ -3789,7 +3789,7 @@ public class MQService extends AbsHeartBeatService {
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), PUSH_CHANNEL_ID);
                 builder.setSmallIcon(R.mipmap.logo)
-                        .setContentTitle("朋宝科技")
+                        .setContentTitle("迈科智联")
                         .setContentText("你有一条报警信息,请及时处理")
                         .setDefaults(Notification.DEFAULT_ALL)
                         .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)// 设置为public后，通知栏将在锁屏界面显示

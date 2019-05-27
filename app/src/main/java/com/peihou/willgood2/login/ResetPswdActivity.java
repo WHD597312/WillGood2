@@ -226,16 +226,20 @@ public class ResetPswdActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(ResetPswdActivity activity,Integer integer) {
-            super.onPostExecute(integer);
-            running=0;
-            if (integer==10003){
-                ToastUtil.showShort(ResetPswdActivity.this,"验证码错误");
-            }else if (integer==100) {
-                ToastUtil.showShort(ResetPswdActivity.this, "修改成功,请重新登录");
-                setResult(1001);
-                finish();
-            }else {
-                ToastUtil.showShort(ResetPswdActivity.this,"修改失败");
+            try {
+//                super.onPostExecute(integer);
+                running=0;
+                if (integer==10003){
+                    ToastUtil.showShort(ResetPswdActivity.this,"验证码错误");
+                }else if (integer==100) {
+                    ToastUtil.showShort(ResetPswdActivity.this, "修改成功,请重新登录");
+                    setResult(1001);
+                    finish();
+                }else {
+                    ToastUtil.showShort(ResetPswdActivity.this,"修改失败");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

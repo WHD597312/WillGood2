@@ -5,6 +5,7 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -54,20 +55,9 @@ public class MyApplication extends Application {
 //        Beta.applyTinkerPatch(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/patch_signed_7zip.apk");
 
 //        Bugly.init(getApplicationContext(), "cba63d9cf7", false);
-        JPushInterface.setDebugMode(true);
-        JPushInterface.init(this);
-        disableAPIDialog();
-        String registrationID=JPushInterface.getRegistrationID(this);
-        Log.i("registrationIDqqq","-->"+registrationID);
-        MobSDK.init(this);
-        //在使用SDK各组件之前初始化context信息，传入ApplicationContext
-        SDKInitializer.initialize(this);
-        JPushInterface.setPowerSaveMode(this,true);
-        JPushInterface.setChannel(this, "channel_1");
-        //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置您使用的坐标类型.
-        //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
-        SDKInitializer.setCoordType(CoordType.BD09LL);
+
         mContext = getApplicationContext();
+        new LoadAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         fragments=new ArrayList<>();
 
         activities=new ArrayList<>();
@@ -106,6 +96,33 @@ public class MyApplication extends Application {
             public void onActivityDestroyed(Activity activity) {
             }
         });
+    }
+    class LoadAsync extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            JPushInterface.setDebugMode(true);
+            JPushInterface.init(mContext);
+            disableAPIDialog();
+            String registrationID=JPushInterface.getRegistrationID(mContext);
+            Log.i("registrationIDqqq","-->"+registrationID);
+            MobSDK.init(mContext);
+            //在使用SDK各组件之前初始化context信息，传入ApplicationContext
+
+            JPushInterface.setPowerSaveMode(mContext,true);
+            JPushInterface.setChannel(mContext, "channel_1");
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置您使用的坐标类型.
+            //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
+            SDKInitializer.initialize(mContext);
+            SDKInitializer.setCoordType(CoordType.BD09LL);
+        }
     }
     private static final String PUSH_CHANNEL_ID = "PUSH_NOTIFY_ID";
     private static final String PUSH_CHANNEL_NAME = "PUSH_NOTIFY_NAME";
