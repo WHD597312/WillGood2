@@ -801,6 +801,7 @@ public class DeviceItemActivity extends CheckPermissionsActivity implements View
     }
 
 
+
     class AddOperationLogAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, DeviceItemActivity> {
 
         public AddOperationLogAsync(DeviceItemActivity activity) {

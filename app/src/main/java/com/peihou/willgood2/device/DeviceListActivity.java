@@ -164,6 +164,7 @@ public class DeviceListActivity extends BaseActivity {
                         params.clear();
                         versionName = packageInfo.versionName;
                         versionCode = packageInfo.versionCode;
+
                         params.put("appType", versionCode);
                         new UpdateAppAsync(this).execute(params).get(3, TimeUnit.SECONDS);
                     } catch (Exception e) {
@@ -235,7 +236,7 @@ public class DeviceListActivity extends BaseActivity {
             try {
                 Map<String, Object> params = maps[0];
                 String result = HttpUtils.requestPost(appUrl, params);
-                Log.i("result", "-->" + result);
+                Log.i("UpdateAppAsync", "-->" + result);
                 if (!TextUtils.isEmpty(result)) {
                     JSONObject jsonObject = new JSONObject(result);
                     int resultCode = jsonObject.getInt("returnCode");

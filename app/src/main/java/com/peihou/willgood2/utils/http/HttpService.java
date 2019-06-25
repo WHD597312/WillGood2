@@ -29,6 +29,6 @@ public interface HttpService {
 
     @Multipart
     @POST("device/updateSwitchPic")
-    Call<ResponseBody> uploadFile(@PartMap Map<String, RequestBody> map, @Part MultipartBody.Part file);
+    Call<ResponseBody> uploadFile(@PartMap Map<String, Object> map, @Part MultipartBody.Part file);
 
 }

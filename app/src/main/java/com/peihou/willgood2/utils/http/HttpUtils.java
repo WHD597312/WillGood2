@@ -146,20 +146,20 @@ public class HttpUtils {
 
             // 执行请求
 
-            Map<String, RequestBody> requestBodyMap = new HashMap<>();
-            for (Map.Entry<String,Object> entry:paramsMap.entrySet()){
-                String key=entry.getKey();
-                String value=entry.getValue()+"";
-                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), value);
-                requestBodyMap.put(key, requestBody);
-            }
+//            Map<String, RequestBody> requestBodyMap = new HashMap<>();
+//            for (Map.Entry<String,Object> entry:paramsMap.entrySet()){
+//                String key=entry.getKey();
+//                String value=entry.getValue()+"";
+//                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), value);
+//                requestBodyMap.put(key, requestBody);
+//            }
 
 
             RequestBody requestFile =
                     RequestBody.create(MediaType.parse("image/jpg"), file);
             MultipartBody.Part body =
                     MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-            Call<ResponseBody> call = userService.uploadFile(requestBodyMap,body);
+            Call<ResponseBody> call = userService.uploadFile(paramsMap,body);
             retrofit2.Response<ResponseBody> response=call.execute();
             boolean success=response.isSuccessful();
             if (success){

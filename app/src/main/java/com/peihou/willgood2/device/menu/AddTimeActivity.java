@@ -561,6 +561,7 @@ public class AddTimeActivity extends BaseActivity {
         timerHour.setMinValue(0);
         timerHour.setValue(hour);
 
+
         timerMin = view.findViewById(R.id.timerMin);
 
         setNumberPickerDivider(timerMin);

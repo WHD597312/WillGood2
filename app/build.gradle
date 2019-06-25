@@ -11,7 +11,7 @@ MobSDK {
     SMSSDK {}
 }
 greendao {
-    schemaVersion 32
+    schemaVersion 33
     daoPackage 'com.peihou.willgood2.database.dao'
     targetGenDir 'src/main/java'
 }

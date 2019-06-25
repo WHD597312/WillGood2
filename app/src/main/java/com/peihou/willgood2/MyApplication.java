@@ -14,6 +14,7 @@ import android.util.Log;
 //import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
+import com.bumptech.glide.Glide;
 import com.mob.MobSDK;
 import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.service.MQService;
@@ -50,14 +51,14 @@ public class MyApplication extends Application {
         super.onCreate();
 
 //        createNotificationChannel();
-        DaemonHolder.init(this, MQService.class);
+//        DaemonHolder.init(this, MQService.class);
 
 //        Beta.applyTinkerPatch(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/patch_signed_7zip.apk");
 
 //        Bugly.init(getApplicationContext(), "cba63d9cf7", false);
 
         mContext = getApplicationContext();
-        new LoadAsync().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new LoadAsync().execute();
         fragments=new ArrayList<>();
 
         activities=new ArrayList<>();
@@ -101,6 +102,7 @@ public class MyApplication extends Application {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Glide.get(mContext);
             JPushInterface.setDebugMode(true);
             JPushInterface.init(mContext);
             disableAPIDialog();
@@ -120,6 +122,7 @@ public class MyApplication extends Application {
             super.onPostExecute(aVoid);
             //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置您使用的坐标类型.
             //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
+            DaemonHolder.init(mContext, MQService.class);
             SDKInitializer.initialize(mContext);
             SDKInitializer.setCoordType(CoordType.BD09LL);
         }

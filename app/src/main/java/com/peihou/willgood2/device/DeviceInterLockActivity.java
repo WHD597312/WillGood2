@@ -544,7 +544,7 @@ public class DeviceInterLockActivity extends BaseActivity {
 //        popupWindow2.showAtLocation(listInterLock, Gravity.CENTER, 0, 0);
 //        //添加按键事件监听
 //    }
-DialogLoad dialogLoad;
+    DialogLoad dialogLoad;
     private void setLoadDialog() {
         if (dialogLoad != null && dialogLoad.isShowing()) {
             return;

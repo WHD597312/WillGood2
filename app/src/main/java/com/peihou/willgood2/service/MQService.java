@@ -2410,19 +2410,19 @@ public class MQService extends AbsHeartBeatService {
     }
 
 
-    public void insert(Device device) {
-        String deviceMac = device.getDeviceOnlyMac();
-        Device device2 = deviceDao.findDeviceByMac(deviceMac);
-        if (device2 != null) {
-            deviceDao.update(device);
-        } else {
-            List<Device> devices = deviceDao.findDevicesByMac(deviceMac);
-            if (devices != null && !devices.isEmpty()) {
-                deviceDao.deleteDevices(devices);
-            }
-            deviceDao.insert(device);
-        }
-    }
+//    public void insert(Device device) {
+//        String deviceMac = device.getDeviceOnlyMac();
+//        Device device2 = deviceDao.findDeviceByMac(deviceMac);
+//        if (device2 != null) {
+//            deviceDao.update(device);
+//        } else {
+//            List<Device> devices = deviceDao.findDevicesByMac(deviceMac);
+//            if (devices != null && !devices.isEmpty()) {
+//                deviceDao.deleteDevices(devices);
+//            }
+//            deviceDao.insert(device);
+//        }
+//    }
 
     /**
      * 批量更新定时
@@ -2764,6 +2764,13 @@ public class MQService extends AbsHeartBeatService {
     }
 
 
+    /**
+     *查询联动数据
+     * @param topicName 设备主题
+     * @param funCode 功能码
+     * @param state 查询某个联动
+     *              0x11:电流1联动设置 0x22:电流2联动设置 0x33:电流3联动设置 0x44:电流4联动设置  0x55:电压1联动设置 0x66:电压2联动设置 0x77:电压3联动设置 0x88:电压4联动设置
+     */
     public void getData(String topicName, int funCode, int state) {
         try {
             byte[] bytes = new byte[16];
@@ -2789,10 +2796,12 @@ public class MQService extends AbsHeartBeatService {
     }
 
     /**
-     * 基础设置 0x11
+     * 发送基础数据 0x11
      *
-     * @param topicName
-     * @param device
+     * @param topicName 设备主题
+     * @param device 操作设备
+     * @operate 操作状态 0x01:控制 0x02:点动 0x03:掉电记忆 0x04:互锁
+     * @return true发送成功,false发送失败
      */
     public boolean sendBasic(String topicName, Device device, int operate) {
         boolean success = false;
@@ -2849,9 +2858,9 @@ public class MQService extends AbsHeartBeatService {
 
     /**
      * 定时设置 0x22
-     *
-     * @param topicName
-     * @param timerTask
+     * @param topicName 设备主题
+     * @param timerTask 定时任务
+     * @operate 0x01:添加 0x02:命令
      */
     public boolean sendTimerTask(String topicName, TimerTask timerTask, int operate) {
         boolean success = false;
@@ -2939,9 +2948,10 @@ public class MQService extends AbsHeartBeatService {
     /**
      * 发送联动控制
      *
-     * @param topicName
-     * @param linked
-     * @return
+     * @param topicName 设备主题
+     * @param linked 联动
+     * @param operate 0x01:添加 0x02:命令
+     *
      */
     public boolean sendLinkedSet(String topicName, Linked linked, int operate) {
         boolean success = false;
@@ -3050,7 +3060,8 @@ public class MQService extends AbsHeartBeatService {
      *
      * @param topicName
      * @param moniLink
-     * @return
+     * @param operate
+     *      1:打开 0:关闭 2:删除 3:查询（如果该值为3是4-7都忽略，只是查询模拟量联动中对应联动控制的数据
      */
     public boolean sendMoniLink(String topicName, MoniLink moniLink, int operate) {
         boolean success = false;
@@ -3154,7 +3165,6 @@ public class MQService extends AbsHeartBeatService {
 
     /**
      * 发送模拟量开关
-     *
      * @param topicName
      * @param mcuVersion
      * @param data
@@ -3306,7 +3316,6 @@ public class MQService extends AbsHeartBeatService {
      * @param topicName
      * @param mcuVersion
      * @param data
-     * @return
      */
     public boolean sendAlerm(String topicName, int mcuVersion, int[] data) {
         boolean success = false;
