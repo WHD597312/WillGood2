@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +21,8 @@ import android.view.WindowManager;
 
 import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.utils.LogUtil;
+import com.peihou.willgood2.utils.RomUtil;
+import com.pgyersdk.crash.PgyCrashManager;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -35,12 +39,13 @@ public abstract class BaseActivity extends AppCompatActivity {
     /** 是否输出日志信息 **/
     private boolean isDebug;
     private String APP_NAME;
-    protected final String TAG = this.getClass().getSimpleName();
+    protected final String TAG ="BaseActivity";
     Unbinder unbinder;
     MyApplication application;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         application = (MyApplication) getApplication();
         application.addActivity(this);
@@ -49,6 +54,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (getSupportActionBar() != null){
             getSupportActionBar().hide();
         }
+        PgyCrashManager.register(); //推荐使用
+        CrashHandler crashHandler = CrashHandler.getInstance();
+        crashHandler.init(getApplicationContext());
+
         try {
             Bundle bundle = getIntent().getExtras();
             if(bundle!=null)
@@ -126,10 +135,27 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    int REQUEST_CODE_ASK_WRITE_SETTINGS=1000;
     @Override
     protected void onStart() {
         super.onStart();
-        DaemonHolder.startService();
+        try {
+            DaemonHolder.startService();
+            if(RomUtil.isEmui() && Build.VERSION.SDK_INT == Build.VERSION_CODES.M) {
+                if (!Settings.System.canWrite(this)) {
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                            Uri.parse("package:" + getPackageName()));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivityForResult(intent, REQUEST_CODE_ASK_WRITE_SETTINGS);
+                } else {
+                    //有了权限，你要做什么呢？具体的动作
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
 //        boolean running2= ServiceUtils.isServiceRunning(this,"com.peihou.willgood2.service.MQService");
 //        Log.i("BaseActivity","-->"+running2);
 //        if (!running2){
@@ -143,6 +169,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 ////            }
 //        }
     }
+
 
     /**
      * 获取状态栏高度

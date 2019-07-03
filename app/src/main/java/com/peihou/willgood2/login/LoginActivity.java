@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
+import com.peihou.willgood2.custom.DialogLoad;
 import com.peihou.willgood2.database.dao.impl.DeviceDaoImpl;
 import com.peihou.willgood2.device.DeviceListActivity;
 import com.peihou.willgood2.pojo.Device;
@@ -181,13 +182,13 @@ public class LoginActivity extends BaseActivity {
                         params.put("password",password);
                         login=1;
                         UtilsJPush.resumeJpush(this);
-                        new LoginAsync(LoginActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                        new LoginAsync(LoginActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
                     } else if (state==1){
                         params.put("phone",phone);
                         params.put("registerType",0);
                         params.put("password",password);
                         UtilsJPush.resumeJpush(this);
-                        new RegisterAsync(LoginActivity.this).execute(params).get(3,TimeUnit.SECONDS);
+                        new RegisterAsync(LoginActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
                     }
                 }catch (Exception e){
                     e.printStackTrace();
@@ -213,6 +214,11 @@ public class LoginActivity extends BaseActivity {
 
         public RegisterAsync(LoginActivity activity) {
             super(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
         }
 
         @Override

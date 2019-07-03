@@ -158,27 +158,26 @@ public class DeviceListActivity extends BaseActivity {
             if (login == 1) {
 //                if ("cancel".equals(MyApplication.update)) {
                 try {
-                    PackageManager packageManager = application.getPackageManager();
-                    try {
-                        PackageInfo packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
-                        params.clear();
-                        versionName = packageInfo.versionName;
-                        versionCode = packageInfo.versionCode;
+                    String appName=getString(R.string.app_name);
+                    if ("迈科智联".equals(appName)){
+                        PackageManager packageManager = application.getPackageManager();
+                        try {
+                            PackageInfo packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
 
-                        params.put("appType", versionCode);
-                        new UpdateAppAsync(this).execute(params).get(3, TimeUnit.SECONDS);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                            versionName = packageInfo.versionName;
+                            versionCode = packageInfo.versionCode;
+                            params.put("appType",6);
+                            new UpdateAppAsync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 //                }
 
-                load = 1;
-                params.clear();
-                params.put("userId", userId);
-                new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
+
             }
         }
         adapter = new MyAdapter(list, this);
@@ -224,6 +223,7 @@ public class DeviceListActivity extends BaseActivity {
     AppUpdateDialog appUpdateDialog;
 
     String updateAppVersion;
+
     class UpdateAppAsync extends BaseWeakAsyncTask<Map<String, Object>, Void, Integer, DeviceListActivity> {
 
         public UpdateAppAsync(DeviceListActivity activity) {
@@ -234,7 +234,7 @@ public class DeviceListActivity extends BaseActivity {
         protected Integer doInBackground(DeviceListActivity activity, Map<String, Object>... maps) {
             int code = 0;
             try {
-                Map<String, Object> params = maps[0];
+                Map<String,Object> params=maps[0];
                 String result = HttpUtils.requestPost(appUrl, params);
                 Log.i("UpdateAppAsync", "-->" + result);
                 if (!TextUtils.isEmpty(result)) {
@@ -286,6 +286,11 @@ public class DeviceListActivity extends BaseActivity {
                     }
                 });
                 appUpdateDialog.show();
+            }else {
+                load = 1;
+                params.clear();
+                params.put("userId", userId);
+                new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
             }
         }
     }
@@ -518,50 +523,55 @@ public class DeviceListActivity extends BaseActivity {
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if ("offline".equals(action)) {
-                if (intent.hasExtra("all")) {
-                    for (int i = 0; i < list.size(); i++) {
-                        Device device2 = list.get(i);
-                        device2.setOnline(false);
-                        deviceDao.update(device2);
-                        device2.setChoice(0);
-                        if (mqService != null) {
-                            mqService.updateDevice(device2);
-                        }
-                    }
-                    adapter.notifyDataSetChanged();
-                } else {
-                    String macAddress = intent.getStringExtra("macAddress");
-                    for (int i = 0; i < list.size(); i++) {
-                        Device device2 = list.get(i);
-                        if (device2 != null && macAddress.equals(device2.getDeviceOnlyMac())) {
-                            if (dialogLoad!=null && dialogLoad.isShowing()){
-                                dialogLoad.dismiss();
-                            }
+            try {
+                if ("offline".equals(action)) {
+                    if (intent.hasExtra("all")) {
+                        for (int i = 0; i < list.size(); i++) {
+                            Device device2 = list.get(i);
                             device2.setOnline(false);
                             deviceDao.update(device2);
                             device2.setChoice(0);
-                            adapter.notifyDataSetChanged();
-                            break;
+                            if (mqService != null) {
+                                mqService.updateDevice(device2);
+                            }
+                        }
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        String macAddress = intent.getStringExtra("macAddress");
+                        for (int i = 0; i < list.size(); i++) {
+                            Device device2 = list.get(i);
+                            if (device2 != null && macAddress.equals(device2.getDeviceOnlyMac())) {
+                                if (dialogLoad != null && dialogLoad.isShowing()) {
+                                    dialogLoad.dismiss();
+                                }
+                                device2.setOnline(false);
+                                deviceDao.update(device2);
+                                device2.setChoice(0);
+                                list.set(i,device2);
+                                adapter.notifyDataSetChanged();
+                                break;
+                            }
                         }
                     }
-                }
-            } else {
-                try {
-                    int funCode = intent.getIntExtra("funCode", 0);
-                    if (funCode == 0x11) {
-                        String macAddress = intent.getStringExtra("macAddress");
-                        Device device = (Device) intent.getSerializableExtra("device");
-                        String lines = intent.getStringExtra("lines");
-                        device.setLines(lines);
-                        Message msg = handler.obtainMessage();
-                        msg.what = 1001;
-                        msg.obj = device;
-                        handler.sendMessage(msg);
+                } else {
+                    try {
+                        int funCode = intent.getIntExtra("funCode", 0);
+                        if (funCode == 0x11) {
+                            String macAddress = intent.getStringExtra("macAddress");
+                            Device device = (Device) intent.getSerializableExtra("device");
+                            String lines = intent.getStringExtra("lines");
+                            device.setLines(lines);
+                            Message msg = handler.obtainMessage();
+                            msg.what = 1001;
+                            msg.obj = device;
+                            handler.sendMessage(msg);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     }

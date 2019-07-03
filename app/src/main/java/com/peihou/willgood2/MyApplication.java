@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide;
 import com.mob.MobSDK;
 import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.service.MQService;
+import com.pgyersdk.crash.PgyCrashManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -49,13 +50,15 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        PgyCrashManager.register(); //推荐使用
 //        createNotificationChannel();
 //        DaemonHolder.init(this, MQService.class);
 
 //        Beta.applyTinkerPatch(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/patch_signed_7zip.apk");
 
 //        Bugly.init(getApplicationContext(), "cba63d9cf7", false);
+
+
 
         mContext = getApplicationContext();
         new LoadAsync().execute();

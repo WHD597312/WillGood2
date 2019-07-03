@@ -35,8 +35,8 @@ android {
         applicationId "com.peihou.willgood2"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 6
-        versionName "6.0"
+        versionCode 7
+        versionName "7.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         renderscriptSupportModeEnabled true
@@ -101,5 +101,5 @@ dependencies {
     implementation 'com.jwenfeng.pulltorefresh:library:1.0.3'
     implementation 'com.wang.avi:library:2.1.3'
     implementation project(':DaemonService')
-
+    implementation 'com.pgyersdk:sdk:3.0.5'
 }
