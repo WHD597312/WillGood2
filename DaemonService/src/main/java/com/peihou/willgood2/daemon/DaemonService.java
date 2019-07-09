@@ -29,11 +29,12 @@ public class DaemonService extends Service {
 //    private DaemonReceiver screenBroadcastReceiver = new DaemonReceiver();
 private ScreenBroadcastReceiver screenBroadcastReceiver = new ScreenBroadcastReceiver();
 
+    private boolean bind=false;
     private void startBindService() {
         try {
             if (DaemonHolder.mService != null) {
                 startService(new Intent(this, DaemonHolder.mService));
-                bindService(new Intent(this, DaemonHolder.mService), serviceConnection, Context.BIND_IMPORTANT);
+                bind=bindService(new Intent(this, DaemonHolder.mService), serviceConnection, Context.BIND_IMPORTANT);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +67,7 @@ private ScreenBroadcastReceiver screenBroadcastReceiver = new ScreenBroadcastRec
                     try {
                         aidl.startService2();
                         startBindService();
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }, 1);
@@ -159,10 +160,16 @@ private ScreenBroadcastReceiver screenBroadcastReceiver = new ScreenBroadcastRec
     public void onDestroy() {
         super.onDestroy();
         Log.e(TAG, "onDestroy()");
-        unbindService(serviceConnection);
+        try {
+            if (bind){
+                unbindService(serviceConnection);
+            }
+            DaemonHolder.restartService(getApplicationContext(), getClass());
+            screenBroadcastReceiver.unregisterScreenBroadcastReceiver(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        DaemonHolder.restartService(getApplicationContext(), getClass());
-        screenBroadcastReceiver.unregisterScreenBroadcastReceiver(this);
 //        if (daemonReceiver!=null){
 //            unregisterReceiver(daemonReceiver);
 //        }

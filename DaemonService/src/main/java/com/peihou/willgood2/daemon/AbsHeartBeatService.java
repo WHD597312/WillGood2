@@ -32,7 +32,7 @@ public abstract class AbsHeartBeatService extends Service {
         }
     };
 
-    private final WillgoodAidl aidl=new WillgoodAidl.Stub() {
+    private  WillgoodAidl aidl=new WillgoodAidl.Stub() {
         @Override
         public void startService2() throws RemoteException {
             Log.d(TAG, "aidl startService()");
@@ -49,21 +49,22 @@ public abstract class AbsHeartBeatService extends Service {
         }
     };
 
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
+    private  ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "onServiceConnected() 已绑定");
             try {
+
                 service.linkToDeath(() -> {
                     Log.e(TAG, "onServiceConnected() linkToDeath");
                     try {
                         aidl.startService2();
                         startBindService();
-                    } catch (RemoteException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }, 1);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -84,10 +85,13 @@ public abstract class AbsHeartBeatService extends Service {
         }
     };
 
+    boolean bind=false;
     private void startBindService() {
         try {
             startService(new Intent(this, DaemonService.class));
-            bindService(new Intent(this, DaemonHolder.mService), serviceConnection, Context.BIND_IMPORTANT);
+            bind=bindService(new Intent(this, DaemonService.class), serviceConnection, Context.BIND_IMPORTANT);
+            Log.i(TAG,"-->"+bind);
+            System.out.println(TAG+"-->"+bind);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,12 +126,14 @@ public abstract class AbsHeartBeatService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.e(TAG, "onDestroy()");
-        onStopService();
 
-        unbindService(serviceConnection);
-        DaemonHolder.restartService(getApplicationContext(), DaemonHolder.mService);
 
         try {
+            onStopService();
+
+            if (bind)
+                unbindService(serviceConnection);
+            DaemonHolder.restartService(getApplicationContext(), DaemonHolder.mService);
             timer.cancel();
             timer.purge();
             timerTask.cancel();
