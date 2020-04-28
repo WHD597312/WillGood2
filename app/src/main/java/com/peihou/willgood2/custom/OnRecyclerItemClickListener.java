@@ -2,12 +2,13 @@ package com.peihou.willgood2.custom;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v4.view.GestureDetectorCompat;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.core.view.GestureDetectorCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * Created by Administrator on 2017/3/13 0013.

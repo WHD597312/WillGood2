@@ -7,8 +7,10 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 /**
  * @author sunfusheng on 2018/8/1.

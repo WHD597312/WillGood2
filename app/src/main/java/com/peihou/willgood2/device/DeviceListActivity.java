@@ -22,8 +22,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcelable;
 import android.provider.Settings;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -158,20 +156,24 @@ public class DeviceListActivity extends BaseActivity {
             if (login == 1) {
 //                if ("cancel".equals(MyApplication.update)) {
                 try {
-                    String appName=getString(R.string.app_name);
-                    if ("迈科智联".equals(appName)){
-                        PackageManager packageManager = application.getPackageManager();
-                        try {
-                            PackageInfo packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
-
-                            versionName = packageInfo.versionName;
-                            versionCode = packageInfo.versionCode;
-                            params.put("appType",6);
-                            new UpdateAppAsync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
+//                    String appName=getString(R.string.app_name);
+//                    if ("迈科智联".equals(appName)){
+//                        PackageManager packageManager = application.getPackageManager();
+//                        try {
+//                            PackageInfo packageInfo = packageManager.getPackageInfo(getPackageName(), 0);
+//
+//                            versionName = packageInfo.versionName;
+//                            versionCode = packageInfo.versionCode;
+//                            params.put("appType",6);
+////                            new UpdateAppAsync(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+                    load = 1;
+                    params.clear();
+                    params.put("userId", userId);
+                    new LoadDeviceListAsync(DeviceListActivity.this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,params);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -497,6 +499,7 @@ public class DeviceListActivity extends BaseActivity {
                         String macAddress = topicName.substring(13, topicName.lastIndexOf("/"));
                         Log.i("subscribeAll", "-->" + topicName);
 //                        mqService.addCountTimer(macAddress);
+                        Thread.sleep(500);
                         Log.i("deviceMac", "-->" + macAddress);
                         mqService.getData(topicName, 0x11);
                     }

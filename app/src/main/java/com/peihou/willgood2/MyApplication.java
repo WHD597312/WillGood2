@@ -8,17 +8,17 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 //import com.baidu.mapapi.CoordType;
 //import com.baidu.mapapi.SDKInitializer;
+import androidx.fragment.app.Fragment;
+
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.bumptech.glide.Glide;
 import com.mob.MobSDK;
 import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.service.MQService;
-import com.pgyersdk.crash.PgyCrashManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -50,7 +50,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        PgyCrashManager.register(); //推荐使用
+//        PgyCrashManager.register(); //推荐使用
 //        createNotificationChannel();
 //        DaemonHolder.init(this, MQService.class);
 

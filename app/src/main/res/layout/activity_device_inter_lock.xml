@@ -34,7 +34,7 @@
             android:layout_centerVertical="true"
             />
     </RelativeLayout>
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_marginTop="@dimen/dp_10"
         android:layout_below="@+id/rl_head"
         android:id="@+id/list_inter_lock"

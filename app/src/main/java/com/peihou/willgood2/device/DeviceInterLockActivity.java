@@ -11,11 +11,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -23,6 +19,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
@@ -53,7 +53,8 @@ import butterknife.OnClick;
 public class DeviceInterLockActivity extends BaseActivity {
 
 
-    @BindView(R.id.list_inter_lock) RecyclerView listInterLock;//设备互锁列表视图
+    @BindView(R.id.list_inter_lock)
+    RecyclerView listInterLock;//设备互锁列表视图
     InterLockAdapter adapter;//设备互锁适配器
     List<InterLock> list=new ArrayList<>();
     long deviceId;

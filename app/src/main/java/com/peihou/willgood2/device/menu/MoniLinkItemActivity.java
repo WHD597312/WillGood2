@@ -9,9 +9,6 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +17,10 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.peihou.willgood2.BaseActivity;
 import com.peihou.willgood2.R;
@@ -39,7 +40,8 @@ import butterknife.OnClick;
 public class MoniLinkItemActivity extends BaseActivity {
 
 
-    @BindView(R.id.list_linked) RecyclerView listLinked;
+    @BindView(R.id.list_linked)
+    RecyclerView listLinked;
     private List<MoniLink> list=new ArrayList<>();
     private MoniLinkAdapter adapter;
     private DeviceMoniLinkDaoDaoImpl deviceMoniLinkDaoDao;

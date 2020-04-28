@@ -3,9 +3,10 @@ package com.peihou.willgood2.custom;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.peihou.willgood2.R;
 import com.wang.avi.AVLoadingIndicatorView;

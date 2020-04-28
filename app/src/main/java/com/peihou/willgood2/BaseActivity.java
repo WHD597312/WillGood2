@@ -10,7 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v7.app.AppCompatActivity;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +19,12 @@ import android.view.Window;
 import android.view.WindowManager;
 
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.peihou.willgood2.daemon.DaemonHolder;
 import com.peihou.willgood2.utils.LogUtil;
 import com.peihou.willgood2.utils.RomUtil;
-import com.pgyersdk.crash.PgyCrashManager;
+
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -54,7 +56,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (getSupportActionBar() != null){
             getSupportActionBar().hide();
         }
-        PgyCrashManager.register(); //推荐使用
+//        PgyCrashManager.register(); //推荐使用
         CrashHandler crashHandler = CrashHandler.getInstance();
         crashHandler.init(getApplicationContext());
 

@@ -5,11 +5,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -48,7 +48,8 @@ public class OperateDeviceFragment extends Fragment {
 
     int userId;
     private Unbinder unbinder;
-    @BindView(R.id.rl_operate) RecyclerView rl_operate;
+    @BindView(R.id.rl_operate)
+    RecyclerView rl_operate;
     private List<OperatorLog> logs = new ArrayList<>();//操作日志列表
     private OperaterLogAdapter logAdapter;
     @BindView(R.id.refersh_operate)

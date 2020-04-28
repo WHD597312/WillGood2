@@ -13,7 +13,6 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.pgyersdk.crash.PgyCrashManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -122,7 +121,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler{
 
         Exception exception=new Exception();
         exception.addSuppressed(ex);
-        PgyCrashManager.reportCaughtException(exception);
+//        PgyCrashManager.reportCaughtException(exception);
         //收集设备参数信息
         collectDeviceInfo(mContext);
         //保存日志文件

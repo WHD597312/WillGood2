@@ -50,7 +50,7 @@
             android:scaleType="centerInside"
           />
     </RelativeLayout>
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_timer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

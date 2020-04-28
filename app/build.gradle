@@ -8,7 +8,12 @@ MobSDK {
     appKey "2a28ae3592ef8"
     appSecret "b875cf43521ed4503a8a6dfc993b7011"
 
-    SMSSDK {}
+    SMSSDK {
+        //默认使用GUI，若不使用GUI，通过以下开关关闭
+        //gui false
+        //若使用GUI的自动填充验证码功能，需打开此设置
+        //autoSMS true
+    }
 }
 greendao {
     schemaVersion 35
@@ -19,9 +24,9 @@ android {
 
     signingConfigs {
         release {
-            keyAlias 'key0'
+            keyAlias 'mobile'
             keyPassword '123456'
-            storeFile file('F:/android/willgood2.jks')
+            storeFile file('./mobile.jks')
             storePassword '123456'
         }
     }
@@ -30,16 +35,14 @@ android {
             jniLibs.srcDirs = ["libs"]
         }
     }
-    compileSdkVersion 27
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.peihou.willgood2"
         minSdkVersion 21
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 9
         versionName "7.4"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
-        renderscriptSupportModeEnabled true
+
 
         ndk {
             //选择要添加的对应cpu类型的.so库。
@@ -69,22 +72,20 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
-    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.0.0-beta01'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'org.greenrobot:greendao:3.1.0'
-    implementation 'org.greenrobot:greendao-generator:3.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    implementation 'org.greenrobot:greendao:3.2.0'
+    implementation 'org.greenrobot:greendao-generator:3.2.0'
     implementation 'com.squareup.okhttp3:okhttp:3.4.1'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'org.jsoup:jsoup:1.11.2'
     implementation 'com.squareup.retrofit2:retrofit:2.1.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
-    implementation 'com.jakewharton:butterknife:8.8.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation 'com.jakewharton:butterknife:10.2.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
     implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.1'
     implementation 'com.github.bumptech.glide:glide:3.7.0'
     implementation 'com.weigan:loopView:0.1.2'
@@ -101,5 +102,5 @@ dependencies {
     implementation 'com.jwenfeng.pulltorefresh:library:1.0.3'
     implementation 'com.wang.avi:library:2.1.3'
     implementation project(':DaemonService')
-    implementation 'com.pgyersdk:sdk:3.0.5'
+
 }

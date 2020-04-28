@@ -3,13 +3,14 @@ package com.peihou.willgood2.device.menu;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.jwenfeng.library.pulltorefresh.BaseRefreshListener;
@@ -40,7 +41,8 @@ import butterknife.OnClick;
  */
 public class AlermLogActivity extends BaseActivity {
 
-    @BindView(R.id.list_log) RecyclerView list_log;
+    @BindView(R.id.list_log)
+    RecyclerView list_log;
     private List<OperatorLog> list=new ArrayList<>();
     @BindView(R.id.refersh_operate) PullToRefreshLayout refersh_operate;
     MyAdapter adapter;
